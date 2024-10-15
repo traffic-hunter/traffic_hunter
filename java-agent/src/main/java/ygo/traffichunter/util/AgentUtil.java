@@ -1,7 +1,9 @@
 package ygo.traffichunter.util;
 
 public enum AgentUtil {
-    URL("ws://%s/traffic-hunter");
+    WEBSOCKET_URL("ws://%s/traffic-hunter"),
+    HTTP_URL("http://%s/traffic-hunter"),
+    ;
 
     private static final String pattern = "^(localhost|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):\\d{1,5}$";
 

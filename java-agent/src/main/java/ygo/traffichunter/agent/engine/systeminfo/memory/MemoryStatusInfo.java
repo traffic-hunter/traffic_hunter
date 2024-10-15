@@ -1,4 +1,4 @@
-package ygo.traffichunter.engine.systeminfo.memory;
+package ygo.traffichunter.agent.engine.systeminfo.memory;
 
 public record MemoryStatusInfo(MemoryUsage heapMemoryUsage, MemoryUsage nonHeapMemoryUsage) {
 
