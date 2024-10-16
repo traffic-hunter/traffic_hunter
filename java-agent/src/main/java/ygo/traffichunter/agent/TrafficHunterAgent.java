@@ -22,6 +22,7 @@ public class TrafficHunterAgent {
         return new TrafficHunterAgent(URI.create(serverUrl));
     }
 
+    @Deprecated(since = "1.0")
     public FaultTolerantTrafficHunterAgent faultTolerant() {
         return new FaultTolerantTrafficHunterAgent(uri);
     }
