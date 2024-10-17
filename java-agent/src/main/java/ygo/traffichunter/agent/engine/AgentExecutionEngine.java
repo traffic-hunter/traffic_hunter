@@ -3,6 +3,7 @@ package ygo.traffichunter.agent.engine;
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
@@ -24,6 +25,7 @@ import ygo.traffichunter.agent.engine.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.thread.ThreadStatusInfo;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.http.HttpBuilder;
+import ygo.traffichunter.retry.RetryHelper;
 
 /**
  * After selecting a JVM, this agent execution engine collects the metrics of the JVM at regular intervals and transmits them to the server.
@@ -49,13 +51,23 @@ public final class AgentExecutionEngine {
         es.scheduleAtFixedRate(() -> {
             final SystemInfo systemInfo = execute(property.targetJVMPath());
 
-            final HttpResponse<String> httpResponse = HttpBuilder.newBuilder(property.uri())
-                    .header("Content-Type", "application/json")
-                    .timeOut(Duration.ofSeconds(10))
-                    .request(systemInfo)
-                    .build();
+                final HttpResponse<String> httpResponse = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
+                        .failAfterMaxAttempts(true)
+                        .retryName("httpResponse")
+                        .throwable(throwable -> throwable instanceof RuntimeException)
+                        .retrySupplier(() -> {
+                            try {
+                                return HttpBuilder.newBuilder(property.uri())
+                                        .header("Content-Type", "application/json")
+                                        .timeOut(Duration.ofSeconds(10))
+                                        .request(systemInfo)
+                                        .build();
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
 
-            log.info("http status code : " + httpResponse.statusCode());
+                log.info("httpResponse status : " + httpResponse.statusCode());
 
         }, 0, property.scheduleInterval(), property.timeUnit());
     }

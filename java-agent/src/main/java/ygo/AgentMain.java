@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.TrafficHunterAgent;
 import ygo.traffichunter.agent.engine.AgentExecutionEngine;
+import ygo.traffichunter.agent.engine.jvm.JVMSelector;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.banner.AsciiBanner;
+import ygo.traffichunter.retry.backoff.policy.ExponentialBackOffPolicy;
 import ygo.traffichunter.util.AgentUtil;
 
 public class AgentMain {
@@ -73,7 +75,10 @@ public class AgentMain {
         final TrafficHunterAgentProperty property = TrafficHunterAgent.connect(AgentUtil.HTTP_URL.getUrl(serverAddr))
                 .scheduleInterval(interval)
                 .scheduleTimeUnit(TimeUnit.SECONDS)
-                .targetJVM(VirtualMachine.list().get(jvm - 1).displayName())
+                .faultTolerant()
+                .retry(10)
+                .backOffPolicy(ExponentialBackOffPolicy.DEFAULT)
+                .targetJVM(JVMSelector.displayName(jvm))
                 .complete();
 
         AgentExecutionEngine.run(property);

@@ -11,8 +11,15 @@ public class TrafficHunterAgent {
     private static final Logger log = Logger.getLogger(TrafficHunterAgent.class.getName());
     protected int scheduleInterval;
     protected String targetJVMPath;
-    private final URI uri;
+    protected final URI uri;
     protected TimeUnit timeUnit;
+
+    protected TrafficHunterAgent(final TrafficHunterAgent trafficHunterAgent) {
+        this.scheduleInterval = trafficHunterAgent.scheduleInterval;
+        this.targetJVMPath = trafficHunterAgent.targetJVMPath;
+        this.uri = trafficHunterAgent.uri;
+        this.timeUnit = trafficHunterAgent.timeUnit;
+    }
 
     protected TrafficHunterAgent(final URI uri) {
         this.uri = uri;
@@ -22,9 +29,8 @@ public class TrafficHunterAgent {
         return new TrafficHunterAgent(URI.create(serverUrl));
     }
 
-    @Deprecated(since = "1.0")
     public FaultTolerantTrafficHunterAgent faultTolerant() {
-        return new FaultTolerantTrafficHunterAgent(uri);
+        return new FaultTolerantTrafficHunterAgent(this);
     }
 
     public TrafficHunterAgent targetJVM(final String targetJVMPath) {

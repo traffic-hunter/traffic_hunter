@@ -11,11 +11,9 @@ public class FaultTolerantTrafficHunterAgent extends TrafficHunterAgent {
     private static final Logger log = Logger.getLogger(FaultTolerantTrafficHunterAgent.class.getName());
     private BackOffPolicy backOffPolicy;
     private int maxAttempt;
-    private final URI uri;
 
-    public FaultTolerantTrafficHunterAgent(final URI uri) {
-        super(uri);
-        this.uri = uri;
+    public FaultTolerantTrafficHunterAgent(final TrafficHunterAgent trafficHunterAgent) {
+        super(trafficHunterAgent);
     }
 
     public FaultTolerantTrafficHunterAgent retry(final int maxAttempt) {
@@ -31,10 +29,10 @@ public class FaultTolerantTrafficHunterAgent extends TrafficHunterAgent {
     @Override
     public TrafficHunterAgentProperty complete() {
         return new TrafficHunterAgentProperty(
-                super.targetJVMPath,
-                super.scheduleInterval,
-                uri,
-                super.timeUnit,
+                this.targetJVMPath,
+                this.scheduleInterval,
+                this.uri,
+                this.timeUnit,
                 maxAttempt,
                 backOffPolicy
         );
