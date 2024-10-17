@@ -30,4 +30,12 @@ public class JVMSelector {
             throw new RuntimeException(e);
         }
     }
+
+    public static String displayName(final int selectNumber) {
+        return VirtualMachine.list().get(selectNumber - 1).displayName();
+    }
+
+    public static String JvmId(final int selectNumber) {
+        return VirtualMachine.list().get(selectNumber - 1).id();
+    }
 }
