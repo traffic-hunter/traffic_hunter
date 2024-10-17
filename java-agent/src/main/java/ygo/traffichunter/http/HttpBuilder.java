@@ -46,7 +46,7 @@ public class HttpBuilder {
         return this;
     }
 
-    public HttpResponse<String> build() {
+    public HttpResponse<String> build() throws Exception {
         try (final HttpClient client = HttpClient.newBuilder()
                 .version(Version.HTTP_1_1)
                 .connectTimeout(timeout)
@@ -61,8 +61,6 @@ public class HttpBuilder {
                     .build();
 
             return client.send(request, BodyHandlers.ofString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 }

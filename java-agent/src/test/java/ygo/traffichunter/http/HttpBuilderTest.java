@@ -18,7 +18,7 @@ import ygo.traffichunter.agent.engine.systeminfo.thread.ThreadStatusInfo;
 class HttpBuilderTest {
 
     @Test
-    void 서버로_잘_송신이_되는지_확인한다() {
+    void 서버로_잘_송신이_되는지_확인한다() throws Exception {
         // given
         SystemInfo systemInfo = new SystemInfo(
                 new MemoryStatusInfo(new MemoryUsage(1, 1, 1, 1), new MemoryUsage(1,1, 1, 1)),
