@@ -54,10 +54,12 @@ public class RetryHelper {
                 .intervalFunction(IntervalFunction.ofExponentialRandomBackoff(
                         backOffPolicy.getIntervalMillis(),
                         backOffPolicy.getMultiplier())
-                )
-                .build();
+                ).build();
 
         final Retry retry = Retry.of(retryName, retryConfig);
+
+        retry.getEventPublisher()
+                .onRetry(event -> log.info("retry " + event.getNumberOfRetryAttempts() + " attempts..."));
 
         return Retry.decorateSupplier(retry, supplier).get();
 
