@@ -13,6 +13,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
 import ygo.traffichunter.retry.backoff.BackOffPolicy;
 
+@Deprecated(since = "1.0", forRemoval = true)
 public class MetricWebSocketClient extends WebSocketClient {
 
     private static final Logger log = Logger.getLogger(MetricWebSocketClient.class.getName());
