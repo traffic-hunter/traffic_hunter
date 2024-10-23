@@ -3,6 +3,8 @@ package ygo.traffichunter.agent.engine;
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -63,6 +65,7 @@ public final class AgentExecutionEngine {
                                         .request(systemInfo)
                                         .build();
                             } catch (Exception e) {
+                                log.severe("http request error: " + e.getMessage());
                                 throw new RuntimeException(e);
                             }
                         });
@@ -78,7 +81,7 @@ public final class AgentExecutionEngine {
 
             final MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
 
-            return new MetricCollectionSupport(mBeanServerConnection).getSystemInfo();
+            return new MetricCollectionSupport(mBeanServerConnection, targetJVMPath).getSystemInfo();
 
         } catch (IOException e) {
             log.warning("Failed to start local management agent: " + e.getMessage());
@@ -89,18 +92,22 @@ public final class AgentExecutionEngine {
     private static class MetricCollectionSupport {
 
         private final MBeanServerConnection mbsc;
+        private final String targetJVMPath;
         private final MetricCollector<MemoryStatusInfo> collectMemory = new MemoryMetricCollector();
         private final MetricCollector<CpuStatusInfo> collectCpu = new CpuMetricCollector();
         private final MetricCollector<ThreadStatusInfo> collectThread = new ThreadMetricCollector();
         private final MetricCollector<GarbageCollectionStatusInfo> collectorGC = new GarbageCollectionMetricCollector();
         private final MetricCollector<RuntimeStatusInfo> collectorRuntime = new RuntimeMetricCollector();
 
-        private MetricCollectionSupport(final MBeanServerConnection mbsc) {
+        private MetricCollectionSupport(final MBeanServerConnection mbsc, final String targetJVMPath) {
             this.mbsc = mbsc;
+            this.targetJVMPath = targetJVMPath;
         }
 
         public SystemInfo getSystemInfo() {
             return new SystemInfo(
+                    Instant.now(),
+                    targetJVMPath,
                     collectMemory.collect(mbsc),
                     collectThread.collect(mbsc),
                     collectCpu.collect(mbsc),
