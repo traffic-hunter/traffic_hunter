@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.collect.cpu.CpuMetricCollector;
 import ygo.traffichunter.agent.engine.collect.gc.GarbageCollectionMetricCollector;
@@ -44,47 +43,51 @@ import ygo.traffichunter.retry.RetryHelper;
  */
 public final class AgentExecutionEngine {
 
-    private static final Logger log = Logger.getLogger(AgentExecutionEngine.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(AgentExecutionEngine.class);
+
+    private static final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
     public static void run(final TrafficHunterAgentProperty property) {
 
         final ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
 
+        shutdownHook.addRuntimeShutdownHook(es::shutdown);
+
         es.scheduleAtFixedRate(() -> {
             final SystemInfo systemInfo = execute(property.targetJVMPath());
 
-                final HttpResponse<String> httpResponse = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
-                        .failAfterMaxAttempts(true)
-                        .retryName("httpResponse")
-                        .throwable(throwable -> throwable instanceof RuntimeException)
-                        .retrySupplier(() -> {
-                            try {
-                                return HttpBuilder.newBuilder(property.uri())
-                                        .header("Content-Type", "application/json")
-                                        .timeOut(Duration.ofSeconds(10))
-                                        .request(systemInfo)
-                                        .build();
-                            } catch (Exception e) {
-                                log.severe("http request error: " + e.getMessage());
-                                throw new RuntimeException(e);
-                            }
-                        });
+            final HttpResponse<String> httpResponse = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
+                    .failAfterMaxAttempts(true)
+                    .retryName("httpResponse")
+                    .throwable(throwable -> throwable instanceof RuntimeException)
+                    .retrySupplier(() -> {
+                        try {
+                            return HttpBuilder.newBuilder(property.uri())
+                                    .header("Content-Type", "application/json")
+                                    .timeOut(Duration.ofSeconds(10))
+                                    .request(systemInfo)
+                                    .build();
+                        } catch (Exception e) {
+                            log.error("http request error = {}", e.getMessage());
+                            throw new RuntimeException(e);
+                        }
+                    });
 
-                log.info("httpResponse status : " + httpResponse.statusCode());
+            log.info("httpResponse status = {}", httpResponse.statusCode());
 
         }, 0, property.scheduleInterval(), property.timeUnit());
     }
 
     private static SystemInfo execute(final String targetJVMPath) {
 
-        try (final JMXConnector jmxConnector = JMXConnectorFactory.connect(JVMSelector.getVM(targetJVMPath))) {
+        try (final JMXConnector jmxConnector = JMXConnectorFactory.connect(JVMSelector.getVMXServiceUrl(targetJVMPath))) {
 
             final MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
 
             return new MetricCollectionSupport(mBeanServerConnection, targetJVMPath).getSystemInfo();
 
         } catch (IOException e) {
-            log.warning("Failed to start local management agent: " + e.getMessage());
+            log.error("Failed to start local management agent = {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }

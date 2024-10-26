@@ -72,6 +72,8 @@ public class AgentMain {
             System.exit(0);
         }
 
+
+
         final TrafficHunterAgentProperty property = TrafficHunterAgent.connect(AgentUtil.HTTP_URL.getUrl(serverAddr))
                 .scheduleInterval(interval)
                 .scheduleTimeUnit(TimeUnit.SECONDS)
