@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
@@ -21,6 +22,8 @@ class HttpBuilderTest {
     void 서버로_잘_송신이_되는지_확인한다() throws Exception {
         // given
         SystemInfo systemInfo = new SystemInfo(
+                Instant.now(),
+                "testJVM",
                 new MemoryStatusInfo(new MemoryUsage(1, 1, 1, 1), new MemoryUsage(1,1, 1, 1)),
                 new ThreadStatusInfo(1,1, 1),
                 new CpuStatusInfo(1, 1, 1),
