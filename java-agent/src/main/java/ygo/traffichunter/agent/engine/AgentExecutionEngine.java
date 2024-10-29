@@ -91,15 +91,15 @@ public final class AgentExecutionEngine {
 
     public static class MetricCollectSupport {
 
-        private static final MetricCollector<MemoryStatusInfo> collectMemory = new MemoryMetricCollector();
+        private static final MemoryMetricCollector collectMemory = new MemoryMetricCollector();
 
-        private static final MetricCollector<CpuStatusInfo> collectCpu = new CpuMetricCollector();
+        private static final CpuMetricCollector collectCpu = new CpuMetricCollector();
 
-        private static final MetricCollector<ThreadStatusInfo> collectThread = new ThreadMetricCollector();
+        private static final ThreadMetricCollector collectThread = new ThreadMetricCollector();
 
-        private static final MetricCollector<GarbageCollectionStatusInfo> collectorGC = new GarbageCollectionMetricCollector();
+        private static final GarbageCollectionMetricCollector collectorGC = new GarbageCollectionMetricCollector();
 
-        private static final MetricCollector<RuntimeStatusInfo> collectorRuntime = new RuntimeMetricCollector();
+        private static final RuntimeMetricCollector collectorRuntime = new RuntimeMetricCollector();
 
         private MetricCollectSupport() {
         }

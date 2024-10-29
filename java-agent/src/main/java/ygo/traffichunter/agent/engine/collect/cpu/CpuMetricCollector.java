@@ -8,7 +8,7 @@ import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.systeminfo.cpu.CpuStatusInfo;
 
-public class CpuMetricCollector implements MetricCollector<CpuStatusInfo> {
+public class CpuMetricCollector implements MetricCollector<CpuStatusInfo, MBeanServerConnection> {
 
     private static final Logger log = Logger.getLogger(CpuStatusInfo.class.getName());
 
