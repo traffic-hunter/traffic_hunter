@@ -18,6 +18,7 @@ import net.bytebuddy.asm.Advice.Origin;
 import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
 import ygo.traffichunter.agent.engine.instrument.collect.TransactionMetric;
@@ -29,13 +30,17 @@ public class TransactionTracker {
                 .with(RedefinitionStrategy.RETRANSFORMATION)
                 .with(NoOp.INSTANCE)
                 .with(TypeStrategy.Default.REDEFINE)
-                .ignore(ElementMatchers.nameStartsWith("java.")
-                        .or(ElementMatchers.nameStartsWith("sun."))
-                        .or(ElementMatchers.nameStartsWith("jdk.")))
+                .ignore(ignoreMatchPackage())
                 .type(getSpringComponentMatcher())
                 .transform((builder, typeDescription, classLoader, module, protectionDomain) ->
                         builder.visit(Advice.to(TransactionAdvise.class).on(isMethod()))
                 ).installOn(inst);
+    }
+
+    private static Junction<TypeDescription> ignoreMatchPackage() {
+        return ElementMatchers.nameStartsWith("java.")
+                .or(ElementMatchers.nameStartsWith("sun."))
+                .or(ElementMatchers.nameStartsWith("jdk."));
     }
 
     private static ElementMatcher<TypeDescription> getSpringComponentMatcher() {
@@ -52,8 +57,8 @@ public class TransactionTracker {
 
         @OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Origin final String method,
-                                @Enter long startTime,
-                                @Thrown Throwable throwable) {
+                                @Enter final long startTime,
+                                @Thrown final Throwable throwable) {
 
             final long endTime = Instant.now().toEpochMilli();
             final long duration = endTime - startTime;
@@ -66,12 +71,6 @@ public class TransactionTracker {
                     throwable != null ? throwable.getMessage() : "success",
                     throwable != null
             );
-
-            String format = String.format("[Transaction Completed] %s%n - Execution time: %.3f s%n",
-                    method,
-                    duration / 1_000.0);
-
-            System.out.println(format);
         }
     }
 }

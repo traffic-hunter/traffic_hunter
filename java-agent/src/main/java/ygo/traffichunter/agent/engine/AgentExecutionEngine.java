@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -17,16 +19,21 @@ import ygo.traffichunter.agent.engine.collect.gc.GarbageCollectionMetricCollecto
 import ygo.traffichunter.agent.engine.collect.memory.MemoryMetricCollector;
 import ygo.traffichunter.agent.engine.collect.runtime.RuntimeMetricCollector;
 import ygo.traffichunter.agent.engine.collect.thread.ThreadMetricCollector;
+import ygo.traffichunter.agent.engine.instrument.collect.TransactionMetric;
 import ygo.traffichunter.agent.engine.jvm.JVMSelector;
+import ygo.traffichunter.agent.engine.sender.TrafficHunterAgentSender;
 import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
 import ygo.traffichunter.agent.engine.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffichunter.agent.event.consume.EventConsumer;
+import ygo.traffichunter.agent.event.consume.TrafficHunterEventConsumer;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.http.HttpBuilder;
 import ygo.traffichunter.retry.RetryHelper;
+import ygo.traffichunter.websocket.MetricWebSocketClient;
 
 /**
  * After selecting a JVM, this agent execution engine collects the metrics of the JVM at regular intervals and transmits them to the server.
@@ -47,76 +54,134 @@ public final class AgentExecutionEngine {
 
     private static final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
+    private static final Scheduler scheduler = new Scheduler();
+
     public static void run(final TrafficHunterAgentProperty property) {
 
-        final ScheduledExecutorService es = Executors.newSingleThreadScheduledExecutor();
+        scheduler.schedule(
+                property.scheduleInterval(),
+                property.timeUnit(),
+                () -> new AgentSystemMetricSender(property));
 
-        shutdownHook.addRuntimeShutdownHook(es::shutdown);
+        scheduler.exit();
+    }
 
-        es.scheduleAtFixedRate(() -> {
-            final SystemInfo systemInfo = execute(property.targetJVMPath());
+    private static class Scheduler {
+
+        private final ScheduledExecutorService scheduledExecutor =
+                Executors.newSingleThreadScheduledExecutor();
+
+        private void schedule(final int interval, final TimeUnit timeUnit, final Runnable runnable) {
+            scheduledExecutor.scheduleWithFixedDelay(runnable, 0, interval, timeUnit);
+        }
+
+        private void schedule(final Runnable runnable) {
+            scheduledExecutor.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.SECONDS);
+        }
+
+        private void exit() {
+            shutdownHook.addRuntimeShutdownHook(scheduledExecutor::shutdown);
+        }
+    }
+
+    private record AgentSystemMetricSender(TrafficHunterAgentProperty property)
+            implements TrafficHunterAgentSender<SystemInfo, Supplier<HttpResponse<String>>>, Runnable {
+
+        @Override
+        public void run() {
+            final SystemInfo systemInfo = MetricCollectionSupport.collect(property.targetJVMPath());
 
             final HttpResponse<String> httpResponse = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
                     .failAfterMaxAttempts(true)
                     .retryName("httpResponse")
                     .throwable(throwable -> throwable instanceof RuntimeException)
-                    .retrySupplier(() -> {
-                        try {
-                            return HttpBuilder.newBuilder(property.uri())
-                                    .header("Content-Type", "application/json")
-                                    .timeOut(Duration.ofSeconds(10))
-                                    .request(systemInfo)
-                                    .build();
-                        } catch (Exception e) {
-                            log.error("http request error = {}", e.getMessage());
-                            throw new RuntimeException(e);
-                        }
-                    });
+                    .retrySupplier(this.toSend(systemInfo));
 
             log.info("httpResponse status = {}", httpResponse.statusCode());
+        }
 
-        }, 0, property.scheduleInterval(), property.timeUnit());
+        @Override
+        public Supplier<HttpResponse<String>> toSend(final SystemInfo systemInfo) {
+            return () -> {
+                try {
+                    return HttpBuilder.newBuilder(property.uri())
+                            .header("Content-Type", "application/json")
+                            .timeOut(Duration.ofSeconds(3))
+                            .request(systemInfo)
+                            .build();
+                } catch (Exception e) {
+                    log.error("http request error = {}", e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            };
+        }
     }
 
-    private static SystemInfo execute(final String targetJVMPath) {
+    /**
+     * web socket
+     * @param property
+     * @param client
+     */
+    private record AgentTransactionMetricSender(TrafficHunterAgentProperty property, MetricWebSocketClient<TransactionMetric> client)
+            implements TrafficHunterAgentSender<TransactionMetric, Void> {
 
-        try (final JMXConnector jmxConnector = JMXConnectorFactory.connect(JVMSelector.getVMXServiceUrl(targetJVMPath))) {
+        @Override
+        public Void toSend(final TransactionMetric input) {
+            RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
+                    .failAfterMaxAttempts(true)
+                    .retryName("websocket")
+                    .throwable(throwable -> throwable instanceof RuntimeException)
+                    .retrySupplier(() -> {
+                        try {
+                            if(client.connect(3, TimeUnit.SECONDS)) {
+                                client.toSend(input);
+                            }
+                        } catch (InterruptedException e) {
+                            throw new IllegalStateException(e);
+                        }
 
-            final MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+                        return null;
+                    });
 
-            return new MetricCollectionSupport(mBeanServerConnection, targetJVMPath).getSystemInfo();
-
-        } catch (IOException e) {
-            log.error("Failed to start local management agent = {}", e.getMessage());
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
     private static class MetricCollectionSupport {
 
-        private final MBeanServerConnection mbsc;
-        private final String targetJVMPath;
-        private final MetricCollector<MemoryStatusInfo> collectMemory = new MemoryMetricCollector();
-        private final MetricCollector<CpuStatusInfo> collectCpu = new CpuMetricCollector();
-        private final MetricCollector<ThreadStatusInfo> collectThread = new ThreadMetricCollector();
-        private final MetricCollector<GarbageCollectionStatusInfo> collectorGC = new GarbageCollectionMetricCollector();
-        private final MetricCollector<RuntimeStatusInfo> collectorRuntime = new RuntimeMetricCollector();
+        private static final MetricCollector<MemoryStatusInfo> collectMemory = new MemoryMetricCollector();
 
-        private MetricCollectionSupport(final MBeanServerConnection mbsc, final String targetJVMPath) {
-            this.mbsc = mbsc;
-            this.targetJVMPath = targetJVMPath;
+        private static final MetricCollector<CpuStatusInfo> collectCpu = new CpuMetricCollector();
+
+        private static final MetricCollector<ThreadStatusInfo> collectThread = new ThreadMetricCollector();
+
+        private static final MetricCollector<GarbageCollectionStatusInfo> collectorGC = new GarbageCollectionMetricCollector();
+
+        private static final MetricCollector<RuntimeStatusInfo> collectorRuntime = new RuntimeMetricCollector();
+
+        private MetricCollectionSupport() {
         }
 
-        public SystemInfo getSystemInfo() {
-            return new SystemInfo(
-                    Instant.now(),
-                    targetJVMPath,
-                    collectMemory.collect(mbsc),
-                    collectThread.collect(mbsc),
-                    collectCpu.collect(mbsc),
-                    collectorGC.collect(mbsc),
-                    collectorRuntime.collect(mbsc)
-            );
+        private static SystemInfo collect(final String targetJVMPath) {
+
+            try (final JMXConnector jmxConnector = JMXConnectorFactory.connect(JVMSelector.getVMXServiceUrl(targetJVMPath))) {
+
+                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+
+                return new SystemInfo(
+                        Instant.now(),
+                        targetJVMPath,
+                        collectMemory.collect(mbsc),
+                        collectThread.collect(mbsc),
+                        collectCpu.collect(mbsc),
+                        collectorGC.collect(mbsc),
+                        collectorRuntime.collect(mbsc)
+                );
+
+            } catch (IOException e) {
+                log.error("Failed to start local management agent = {}", e.getMessage());
+                throw new RuntimeException(e);
+            }
         }
     }
 }
