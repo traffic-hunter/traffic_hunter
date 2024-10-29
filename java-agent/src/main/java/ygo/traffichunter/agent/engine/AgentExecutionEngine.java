@@ -28,8 +28,6 @@ import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.thread.ThreadStatusInfo;
-import ygo.traffichunter.agent.event.consume.EventConsumer;
-import ygo.traffichunter.agent.event.consume.TrafficHunterEventConsumer;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.http.HttpBuilder;
 import ygo.traffichunter.retry.RetryHelper;
