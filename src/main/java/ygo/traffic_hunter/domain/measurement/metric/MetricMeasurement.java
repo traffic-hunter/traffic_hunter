@@ -1,9 +1,8 @@
 package ygo.traffic_hunter.domain.measurement.metric;
 
+import com.influxdb.annotations.Column;
+import com.influxdb.annotations.Measurement;
 import java.time.Instant;
-import org.influxdb.annotation.Column;
-import org.influxdb.annotation.Measurement;
-import org.influxdb.annotation.TimeColumn;
 import ygo.traffic_hunter.domain.measurement.metric.cpu.CpuMetricMeasurement;
 import ygo.traffic_hunter.domain.measurement.metric.gc.GCMetricMeasurement;
 import ygo.traffic_hunter.domain.measurement.metric.memory.MemoryMetricMeasurement;
@@ -13,8 +12,7 @@ import ygo.traffic_hunter.domain.measurement.metric.thread.ThreadMetricMeasureme
 @Measurement(name = "metric")
 public record MetricMeasurement(
 
-        @TimeColumn
-        @Column(name = "time")
+        @Column(name = "time", timestamp = true)
         Instant time,
 
         @Column(name = "client_ip")

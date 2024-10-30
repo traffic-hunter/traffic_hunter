@@ -15,6 +15,6 @@ public class TimeSeriesRepository implements MetricRepository {
 
     @Override
     public void save(final MetricMeasurement metric) {
-        writeApi.writeMeasurement(WritePrecision.NS, metric);
+        writeApi.writeMeasurement(WritePrecision.MS, metric);
     }
 }

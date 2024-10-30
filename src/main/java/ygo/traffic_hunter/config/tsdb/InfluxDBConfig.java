@@ -14,7 +14,12 @@ public class InfluxDBConfig {
 
     @Bean
     public InfluxDBClient influxDB(final InfluxDBProperty property) {
-        return InfluxDBClientFactory.create(property.url());
+        return InfluxDBClientFactory.create(
+                property.url(),
+                property.token().toCharArray(),
+                property.organizationName(),
+                property.bucket()
+        );
     }
 
     @Bean

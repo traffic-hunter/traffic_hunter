@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record InfluxDBProperty(
         String url,
         String organizationName,
-        String bucket
+        String bucket,
+        String token
 ) {
 }
