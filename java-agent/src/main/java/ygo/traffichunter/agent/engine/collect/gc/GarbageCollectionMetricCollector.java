@@ -11,7 +11,7 @@ import ygo.traffichunter.agent.engine.collect.memory.MemoryMetricCollector;
 import ygo.traffichunter.agent.engine.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.gc.collections.GarbageCollectionTime;
 
-public class GarbageCollectionMetricCollector implements MetricCollector<GarbageCollectionStatusInfo, MBeanServerConnection> {
+public class GarbageCollectionMetricCollector implements MetricCollector<GarbageCollectionStatusInfo> {
 
     private static final Logger log = Logger.getLogger(MemoryMetricCollector.class.getName());
 

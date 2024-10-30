@@ -9,7 +9,7 @@ import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
 
-public class MemoryMetricCollector implements MetricCollector<MemoryStatusInfo, MBeanServerConnection> {
+public class MemoryMetricCollector implements MetricCollector<MemoryStatusInfo> {
 
     private static final Logger log = Logger.getLogger(MemoryMetricCollector.class.getName());
 
