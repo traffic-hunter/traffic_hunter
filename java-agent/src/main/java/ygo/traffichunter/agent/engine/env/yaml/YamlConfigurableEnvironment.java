@@ -37,6 +37,14 @@ public class YamlConfigurableEnvironment implements ConfigurableEnvironment {
         return YamlParser.parse(root);
     }
 
+    @Override
+    public TrafficHunterAgentProperty load(final InputStream is) {
+
+        final RootYamlProperty root = yaml.load(is);
+
+        return YamlParser.parse(root);
+    }
+
     static class YamlParser {
 
         private static TrafficHunterAgentProperty parse(final RootYamlProperty root){
