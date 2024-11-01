@@ -17,4 +17,12 @@ public abstract class BackOffPolicy {
     public int getMultiplier() {
         return multiplier;
     }
+
+    @Override
+    public String toString() {
+        return "BackOffPolicy{" +
+                "intervalMillis=" + intervalMillis +
+                ", multiplier=" + multiplier +
+                '}';
+    }
 }
