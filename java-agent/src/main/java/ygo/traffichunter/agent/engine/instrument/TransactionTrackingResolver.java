@@ -21,9 +21,13 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
-import ygo.traffichunter.agent.engine.instrument.collect.TransactionMetric;
+import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
+import ygo.traffichunter.event.publisher.EventPublisher;
+import ygo.traffichunter.event.publisher.TransactionEventPublisher;
 
-public class TransactionTracker {
+public class TransactionTrackingResolver {
+
+    private static final EventPublisher<TransactionInfo> eventPublisher = new TransactionEventPublisher();
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
         new Default()
@@ -63,14 +67,15 @@ public class TransactionTracker {
             final long endTime = Instant.now().toEpochMilli();
             final long duration = endTime - startTime;
 
-            final TransactionMetric metric = new TransactionMetric(
-                    method,
+            final TransactionInfo txInfo = TransactionInfo.create(method,
                     Instant.ofEpochMilli(startTime),
                     Instant.ofEpochMilli(endTime),
                     duration,
-                    throwable != null ? throwable.getMessage() : "success",
+                    throwable == null ? "No Error Message" : throwable.getMessage(),
                     throwable != null
             );
+
+            eventPublisher.publish(txInfo);
         }
     }
 }
