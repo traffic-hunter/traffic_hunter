@@ -5,7 +5,7 @@ import java.time.Duration;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ygo.traffichunter.agent.engine.AgentExecutionEngine.MetricCollectSupport;
+import ygo.traffichunter.agent.engine.collect.MetricCollectSupport;
 import ygo.traffichunter.agent.engine.sender.TrafficHunterAgentSender;
 import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;

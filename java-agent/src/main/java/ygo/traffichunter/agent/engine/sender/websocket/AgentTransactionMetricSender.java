@@ -1,48 +1,51 @@
 package ygo.traffichunter.agent.engine.sender.websocket;
 
-import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import net.bytebuddy.asm.Advice.Enter;
-import net.bytebuddy.asm.Advice.OnMethodEnter;
-import net.bytebuddy.asm.Advice.OnMethodExit;
-import net.bytebuddy.asm.Advice.Origin;
-import net.bytebuddy.asm.Advice.Thrown;
-import ygo.traffichunter.agent.engine.instrument.collect.TransactionMetric;
+import java.util.function.Supplier;
+import ygo.traffichunter.agent.engine.collect.MetricCollectSupport;
 import ygo.traffichunter.agent.engine.sender.TrafficHunterAgentSender;
+import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.retry.RetryHelper;
 import ygo.traffichunter.websocket.MetricWebSocketClient;
 
-public class AgentTransactionMetricSender implements TrafficHunterAgentSender<TransactionMetric, Void> {
+public class AgentTransactionMetricSender implements TrafficHunterAgentSender<List<TransactionInfo>, Supplier<Void>>, Runnable {
 
     private final TrafficHunterAgentProperty property;
 
-    private final MetricWebSocketClient<TransactionMetric> client;
+    private final MetricWebSocketClient<TransactionInfo> client;
 
-    public AgentTransactionMetricSender(final TrafficHunterAgentProperty property,
-                                        final MetricWebSocketClient<TransactionMetric> client) {
+    public AgentTransactionMetricSender(final TrafficHunterAgentProperty property) {
         this.property = property;
-        this.client = client;
+        this.client = new MetricWebSocketClient<>(property.uri());
     }
 
     @Override
-    public Void toSend(final TransactionMetric input) {
+    public void run() {
+
+        final List<TransactionInfo> txInfoList = MetricCollectSupport.collect();
+
         RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
                 .failAfterMaxAttempts(true)
                 .retryName("websocket")
                 .throwable(throwable -> throwable instanceof RuntimeException)
-                .retrySupplier(() -> {
-                    try {
-                        if(client.isConnected(3, TimeUnit.SECONDS)) {
-                            client.toSend(input);
-                        }
-                    } catch (InterruptedException e) {
-                        throw new IllegalStateException(e);
-                    }
+                .retrySupplier(this.toSend(txInfoList));
 
-                    return null;
-                });
+    }
 
-        return null;
+    @Override
+    public Supplier<Void> toSend(final List<TransactionInfo> input) {
+        return () -> {
+            try {
+                if (client.isConnected(3, TimeUnit.SECONDS)) {
+                    client.toSend(input);
+                }
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+
+            return null;
+        };
     }
 }
