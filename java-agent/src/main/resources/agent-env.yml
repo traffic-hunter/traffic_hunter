@@ -1,0 +1,9 @@
+agent:
+  server-uri: localhost:9100
+  target: ygo.testapp.TestAppApplication
+  interval: 5
+  retry:
+    max-attempt: 10
+    backoff:
+      interval-millis: 1000
+      multiplier: 2
