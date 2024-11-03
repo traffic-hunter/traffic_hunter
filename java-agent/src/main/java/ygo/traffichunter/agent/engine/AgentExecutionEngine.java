@@ -1,43 +1,17 @@
 package ygo.traffichunter.agent.engine;
 
-import java.io.IOException;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import net.bytebuddy.asm.Advice.Enter;
-import net.bytebuddy.asm.Advice.OnMethodEnter;
-import net.bytebuddy.asm.Advice.OnMethodExit;
-import net.bytebuddy.asm.Advice.Origin;
-import net.bytebuddy.asm.Advice.Thrown;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ygo.traffichunter.agent.engine.collect.MetricCollector;
-import ygo.traffichunter.agent.engine.collect.cpu.CpuMetricCollector;
-import ygo.traffichunter.agent.engine.collect.gc.GarbageCollectionMetricCollector;
-import ygo.traffichunter.agent.engine.collect.memory.MemoryMetricCollector;
-import ygo.traffichunter.agent.engine.collect.runtime.RuntimeMetricCollector;
-import ygo.traffichunter.agent.engine.collect.thread.ThreadMetricCollector;
-import ygo.traffichunter.agent.engine.instrument.collect.TransactionMetric;
-import ygo.traffichunter.agent.engine.jvm.JVMSelector;
-import ygo.traffichunter.agent.engine.sender.TrafficHunterAgentSender;
-import ygo.traffichunter.agent.engine.sender.http.AgentSystemMetricSender;
-import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
-import ygo.traffichunter.agent.engine.systeminfo.gc.GarbageCollectionStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.cpu.CpuStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.runtime.RuntimeStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffichunter.agent.banner.AsciiBanner;
+import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
+import ygo.traffichunter.agent.engine.context.configuration.ConfigurableContextInitializer;
+import ygo.traffichunter.agent.engine.context.execute.TrafficHunterAgentExecutableContext;
+import ygo.traffichunter.agent.engine.env.Environment;
+import ygo.traffichunter.agent.engine.env.yaml.YamlConfigurableEnvironment;
+import ygo.traffichunter.agent.engine.sender.manager.MetricSendSessionManager;
+import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
+import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
-import ygo.traffichunter.http.HttpBuilder;
-import ygo.traffichunter.retry.RetryHelper;
-import ygo.traffichunter.websocket.MetricWebSocketClient;
+import ygo.traffichunter.event.handler.TrafficHunterEventHandler;
 
 /**
  * After selecting a JVM, this agent execution engine collects the metrics of the JVM at regular intervals and transmits them to the server.
@@ -49,81 +23,68 @@ import ygo.traffichunter.websocket.MetricWebSocketClient;
  * what metric is it?
  * <br/>
  * <br/>
- * garbage collection (GC), thread, tomcat, memory heap, cpu usage
+ * garbage collection (GC), thread, tomcat, memory heap, cpu usage, transaction
  * <br/>
  */
 public final class AgentExecutionEngine {
 
-    private static final Logger log = LoggerFactory.getLogger(AgentExecutionEngine.class);
-
     private static final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
-    private static final Scheduler scheduler = new Scheduler();
+    private final MetricSendSessionManager sessionManager;
+
+    private static final TrafficHunterEventHandler<TransactionInfo> eventHandler = new TrafficHunterEventHandler<>();
+
+    private final AgentExecutableContext context;
+
+    private final AsciiBanner asciiBanner = new AsciiBanner();
+
+    private AgentExecutionEngine(final TrafficHunterAgentProperty property) {
+
+        this.sessionManager = new MetricSendSessionManager(property);
+
+        this.context = new TrafficHunterAgentExecutableContext(
+                new YamlConfigurableEnvironment(),
+                this.sessionManager
+        );
+    }
+
+    private void run() {
+
+        StartUp startUp = StartUp.create();
+        ConfigurableContextInitializer configurableContextInitializer = context.configureEnv();
+        TrafficHunterAgentProperty initialize = configurableContextInitializer.initialize(Environment.DEFAULT_PATH.path());
+        configurableContextInitializer.attach(initialize);
+        AgentMetadata metadata = configurableContextInitializer.getAgentMetadata(Environment.DEFAULT_PATH.path());
+        asciiBanner.print(metadata);
+
+
+
+        sessionManager.start();
+
+        shutdown();
+    }
 
     public static void run(final TrafficHunterAgentProperty property) {
-
-        scheduler.schedule(
-                property.scheduleInterval(),
-                property.timeUnit(),
-                () -> new AgentSystemMetricSender(property)
-        );
-
-        scheduler.exit();
+        new AgentExecutionEngine(property).run();
     }
 
-    private static class Scheduler {
-
-        private final ScheduledExecutorService scheduledExecutor =
-                Executors.newSingleThreadScheduledExecutor();
-
-        private void schedule(final int interval, final TimeUnit timeUnit, final Runnable runnable) {
-            scheduledExecutor.scheduleWithFixedDelay(runnable, 0, interval, timeUnit);
-        }
-
-        private void schedule(final Runnable runnable) {
-            scheduledExecutor.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.SECONDS);
-        }
-
-        private void exit() {
-            shutdownHook.addRuntimeShutdownHook(scheduledExecutor::shutdown);
-        }
+    private void shutdown() {
+        shutdownHook.addRuntimeShutdownHook(eventHandler::close);
+        shutdownHook.addRuntimeShutdownHook(sessionManager::close);
     }
 
-    public static class MetricCollectSupport {
+    private record StartUp(long startTime) {
 
-        private static final MemoryMetricCollector collectMemory = new MemoryMetricCollector();
-
-        private static final CpuMetricCollector collectCpu = new CpuMetricCollector();
-
-        private static final ThreadMetricCollector collectThread = new ThreadMetricCollector();
-
-        private static final GarbageCollectionMetricCollector collectorGC = new GarbageCollectionMetricCollector();
-
-        private static final RuntimeMetricCollector collectorRuntime = new RuntimeMetricCollector();
-
-        private MetricCollectSupport() {
+        private static StartUp create() {
+            return new StartUp(Instant.now().toEpochMilli());
         }
 
-        public static SystemInfo collect(final String targetJVMPath) {
+        private long startupTime() {
+            return this.startTime;
+        }
 
-            try (final JMXConnector jmxConnector = JMXConnectorFactory.connect(JVMSelector.getVMXServiceUrl(targetJVMPath))) {
-
-                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-
-                return new SystemInfo(
-                        Instant.now(),
-                        targetJVMPath,
-                        collectMemory.collect(mbsc),
-                        collectThread.collect(mbsc),
-                        collectCpu.collect(mbsc),
-                        collectorGC.collect(mbsc),
-                        collectorRuntime.collect(mbsc)
-                );
-
-            } catch (IOException e) {
-                log.error("Failed to start local management agent = {}", e.getMessage());
-                throw new RuntimeException(e);
-            }
+        private long endTime() {
+            return Instant.now().toEpochMilli() - startTime;
         }
     }
 }

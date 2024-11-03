@@ -8,21 +8,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 
 public class AsciiBanner {
 
     private static final String BANNER_NAME = "banner.txt";
 
-    private static final String VERSION = "1.0.0";
-
-    public void print() {
+    public void print(final AgentMetadata metadata) {
         try (final InputStream in = getClass().getClassLoader().getResourceAsStream(BANNER_NAME)) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(in)));
 
             String banner = reader.lines()
                     .map(line -> line
-                            .replace("${version}", VERSION)
+                            .replace("${version}", metadata.getAgentVersion())
                             .replace("${java.version}", System.getProperty("java.version"))
                             .replace("${java.specification}", System.getProperty("java.specification.version"))
                             .replace("${jdk}", System.getProperty("java.vendor"))

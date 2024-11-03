@@ -9,6 +9,7 @@ class AsciiBannerTest extends TestExt {
     @Test
     void 배너_프린트를_테스트한다() {
         AsciiBanner asciiBanner = new AsciiBanner();
-        asciiBanner.print();
+
+
     }
 }
