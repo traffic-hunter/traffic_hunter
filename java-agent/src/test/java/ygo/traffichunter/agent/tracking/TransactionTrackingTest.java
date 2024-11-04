@@ -3,10 +3,10 @@ package ygo.traffichunter.agent.tracking;
 import com.sun.tools.attach.VirtualMachine;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
-import ygo.TestExt;
+import ygo.AbstractTest;
 import ygo.traffichunter.agent.engine.jvm.JVMSelector;
 
-class TransactionTrackingTest extends TestExt {
+class TransactionTrackingTest extends AbstractTest {
 
     @Test
     void 타겟_JVM의_트랜잭션을_확인한다() throws Exception {

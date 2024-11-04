@@ -1,16 +1,14 @@
 package ygo.traffichunter.websocket;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.net.URI;
 import java.time.Instant;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ygo.TestExt;
+import ygo.AbstractTest;
 import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
 import ygo.traffichunter.util.AgentUtil;
 
-class MetricWebSocketClientTest extends TestExt {
+class MetricWebSocketClientTest extends AbstractTest {
 
     @Test
     void 웹소켓_통신_할_때_서버가_끊긴경우_예외_발생() {

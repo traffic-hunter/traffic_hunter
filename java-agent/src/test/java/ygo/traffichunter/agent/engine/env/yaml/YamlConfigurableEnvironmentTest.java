@@ -1,19 +1,13 @@
 package ygo.traffichunter.agent.engine.env.yaml;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import ygo.TestExt;
+import ygo.AbstractTest;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
-class YamlConfigurableEnvironmentTest extends TestExt {
+class YamlConfigurableEnvironmentTest extends AbstractTest {
 
     @Test
     void yaml_파일을_제대로_파싱하는지_확인한다() {
