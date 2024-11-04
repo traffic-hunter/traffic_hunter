@@ -12,13 +12,10 @@ public class JVMSelector {
 
     private static final Logger log = Logger.getLogger(JVMSelector.class.getName());
 
-    public static JMXServiceURL getVM(final String targetJVMPath) {
+    public static JMXServiceURL getVMXServiceUrl(final String targetJVMPath) {
 
         try {
-            final VirtualMachineDescriptor vmDescriptor = VirtualMachine.list().stream()
-                    .filter(vm -> Objects.equals(vm.displayName(), targetJVMPath))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("No virtual machine found"));
+            final VirtualMachineDescriptor vmDescriptor = getVirtualMachineDescriptor(targetJVMPath);
 
             final VirtualMachine vm = VirtualMachine.attach(vmDescriptor.id().trim());
 
@@ -29,6 +26,27 @@ public class JVMSelector {
             log.warning("Not found jvm service url : " + e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    public static VirtualMachine getVM(final String targetJVMPath) {
+
+        try {
+            final VirtualMachineDescriptor vmDescriptor = getVirtualMachineDescriptor(targetJVMPath);
+
+            return VirtualMachine.attach(vmDescriptor.id().trim());
+
+        } catch (AttachNotSupportedException | IOException e) {
+            log.warning("Not found jvm service url : " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static VirtualMachineDescriptor getVirtualMachineDescriptor(final String targetJVMPath) {
+
+        return VirtualMachine.list().stream()
+                .filter(vm -> Objects.equals(vm.displayName(), targetJVMPath))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No virtual machine found"));
     }
 
     public static String displayName(final int selectNumber) {
