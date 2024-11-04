@@ -45,7 +45,7 @@ public class AgentTransactionMetricSender implements MetricSender<Supplier<Metad
     }
 
     @Override
-    public Supplier<MetadataWrapper<List<TransactionInfo>>> toSend() throws RuntimeException {
+    public Supplier<MetadataWrapper<List<TransactionInfo>>> toSend() {
         return () -> {
 
             final List<TransactionInfo> txInfoList = MetricCollectSupport.collect();
@@ -61,5 +61,9 @@ public class AgentTransactionMetricSender implements MetricSender<Supplier<Metad
 
             return metadataWrapper;
         };
+    }
+
+    public void close() {
+        client.close();
     }
 }
