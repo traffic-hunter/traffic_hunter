@@ -2,21 +2,18 @@ package ygo.traffichunter.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.resilience4j.core.IntervalFunction;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import java.net.URI;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
-import ygo.traffichunter.retry.backoff.BackOffPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Deprecated(since = "1.0", forRemoval = true)
-public class MetricWebSocketClient extends WebSocketClient {
+public class MetricWebSocketClient<M> extends WebSocketClient {
 
-    private static final Logger log = Logger.getLogger(MetricWebSocketClient.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MetricWebSocketClient(final URI serverUri) {
@@ -27,13 +24,14 @@ public class MetricWebSocketClient extends WebSocketClient {
     public void onOpen(final ServerHandshake serverHandshake) {
         final String httpStatusMessage = serverHandshake.getHttpStatusMessage();
 
-        log.info("websocket client opened " + httpStatusMessage);
+        log.info("websocket client opened = {}", httpStatusMessage);
     }
 
     @Override
     public void onMessage(final String s) {
-        log.info("websocket client received: " + s);
+        log.info("websocket client received = {}", s);
     }
+
 
     @Override
     public void onClose(final int i, final String s, final boolean b) {
@@ -42,50 +40,66 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     @Override
     public void onError(final Exception e) {
-        log.severe("websocket client error: " + e.getMessage());
+        log.error("websocket client error = {}", e.getMessage());
     }
 
-    public void retry(final int maxAttempt, final BackOffPolicy backOffPolicy) {
+    public boolean isConnected() throws InterruptedException {
+        if(isOpen()) {
+            return true;
+        }
 
-        final RetryConfig retryConfig = RetryConfig.custom()
-                .maxAttempts(maxAttempt)
-                .retryOnException(e -> e instanceof IllegalStateException)
-                .failAfterMaxAttempts(true)
-                .intervalFunction(IntervalFunction.ofExponentialRandomBackoff(
-                        backOffPolicy.getIntervalMillis(),
-                        backOffPolicy.getMultiplier())
-                )
-                .build();
+        try {
+            return this.connectBlocking();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
-        final Retry retry = Retry.of("websocket", retryConfig);
+        return false;
+    }
 
-        final Supplier<MetricWebSocketClient> websocketClientIsNotOpen = retryWebSocketConnection(retry);
+    public boolean isConnected(final long timeOut, final TimeUnit timeUnit) {
+        if(isOpen()) {
+            return true;
+        }
 
-        if(websocketClientIsNotOpen.get().isOpen()) {
-            log.info("connected to websocket client");
-        } else {
-            log.info("disconnected from websocket client");
+        try {
+            return this.connectBlocking(timeOut, timeUnit);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        return false;
+    }
+
+    public void close() {
+        try {
+            this.closeBlocking();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
-    private Supplier<MetricWebSocketClient> retryWebSocketConnection(final Retry retry) {
-
-        return Retry.decorateSupplier(retry, () -> {
-            log.info("Attempting to connect to websocket");
-            if (!this.isOpen()) {
-                this.connect();
-                if (!this.isOpen()) {
-                    throw new IllegalStateException("Websocket client is not open");
-                }
+    public void toSend(final M metric) throws RuntimeException {
+        try {
+            if(isOpen()) {
+                final String s = objectMapper.writeValueAsString(metric);
+                this.send(s);
+            } else {
+                throw new RuntimeException("WebSocket client is closed");
             }
-            return this;
-        });
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void toSend(final SystemInfo systemInfo) {
+    public void toSend(final List<M> metrics) {
         try {
-            final String s = objectMapper.writeValueAsString(systemInfo);
-            this.send(s);
+            if(isOpen()) {
+                final String s = objectMapper.writeValueAsString(metrics);
+                this.send(s);
+            } else {
+                throw new RuntimeException("WebSocket client is closed");
+            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
