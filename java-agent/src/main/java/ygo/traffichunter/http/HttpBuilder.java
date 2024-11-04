@@ -12,10 +12,15 @@ import java.time.Duration;
 public class HttpBuilder {
 
     private final URI uri;
+
     private final ObjectMapper objectMapper;
+
     private Object obj;
+
     private String headerKey;
+
     private String headerValue;
+
     private Duration timeout = Duration.ofSeconds(10);
 
     private HttpBuilder(final URI uri) {
