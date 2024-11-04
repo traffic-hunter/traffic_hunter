@@ -9,14 +9,13 @@ class TrafficHunterAgentShutdownHook {
 
     private volatile boolean enabledShutdownHook = false;
 
-    public synchronized void addRuntimeShutdownHook(final Runnable runnable) {
-
-        if(enabledShutdownHook) {
-            return;
-        }
-
+    public void enableShutdownHook() {
         enabledShutdownHook = true;
+    }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(runnable, "TrafficHunterShutdownHook"));
+    public synchronized void addRuntimeShutdownHook(final Runnable runnable) {
+        if(enabledShutdownHook) {
+            Runtime.getRuntime().addShutdownHook(new Thread(runnable, "TrafficHunterShutdownHook"));
+        }
     }
 }

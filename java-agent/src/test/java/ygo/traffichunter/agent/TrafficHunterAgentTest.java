@@ -1,9 +1,6 @@
 package ygo.traffichunter.agent;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -17,7 +14,7 @@ class TrafficHunterAgentTest extends TestExt {
     @Test
     void 타겟_jvm_actuator를_에이전트_jmx로_연결하여_메트릭을_수집한다() throws Exception {
         // given
-        JMXServiceURL jmxUrl = JVMSelector.getVM("ygo.testapp.TestAppApplication");
+        JMXServiceURL jmxUrl = JVMSelector.getVMXServiceUrl("ygo.testapp.TestAppApplication");
 
         // when
         JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxUrl);

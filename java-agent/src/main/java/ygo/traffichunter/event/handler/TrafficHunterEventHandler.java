@@ -1,5 +1,7 @@
 package ygo.traffichunter.event.handler;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -7,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TrafficHunterEventHandler<M> implements Runnable {
+public class TrafficHunterEventHandler<M> implements Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(TrafficHunterEventHandler.class);
 
@@ -48,8 +50,7 @@ public class TrafficHunterEventHandler<M> implements Runnable {
     }
 
     @Override
-    public void run() {
-        log.info("shut down event handler");
+    public void close() {
         eventQ.clear();
     }
 }

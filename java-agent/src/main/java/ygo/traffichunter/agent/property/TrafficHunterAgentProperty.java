@@ -35,4 +35,16 @@ public record TrafficHunterAgentProperty(
 
         this(targetJVMPath, scheduleInterval, uri, timeUnit, 0, null);
     }
+
+    @Override
+    public String toString() {
+        return "TrafficHunterAgentProperty{" +
+                "targetJVMPath='" + targetJVMPath + '\'' +
+                ", scheduleInterval=" + scheduleInterval +
+                ", uri=" + uri +
+                ", timeUnit=" + timeUnit +
+                ", maxAttempt=" + maxAttempt +
+                ", backOffPolicy=" + backOffPolicy.toString() +
+                '}';
+    }
 }
