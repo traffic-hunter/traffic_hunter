@@ -43,7 +43,7 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         log.error("websocket client error = {}", e.getMessage());
     }
 
-    public boolean isConnected() throws InterruptedException {
+    public boolean isConnected() {
         if(isOpen()) {
             return true;
         }
@@ -72,6 +72,10 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
     }
 
     public void close() {
+        if(isClosed() || isClosing()) {
+            return;
+        }
+
         try {
             this.closeBlocking();
         } catch (InterruptedException e) {
@@ -79,27 +83,25 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         }
     }
 
-    public void toSend(final M metric) throws RuntimeException {
+    public void toSend(final M metric) {
+        if(!isOpen()) {
+            throw new IllegalStateException("WebSocket client is closed");
+        }
+
         try {
-            if(isOpen()) {
-                final String s = objectMapper.writeValueAsString(metric);
-                this.send(s);
-            } else {
-                throw new RuntimeException("WebSocket client is closed");
-            }
+            this.send(objectMapper.writeValueAsString(metric));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void toSend(final List<M> metrics) {
+        if(!isOpen()) {
+            throw new IllegalStateException("WebSocket client is closed");
+        }
+
         try {
-            if(isOpen()) {
-                final String s = objectMapper.writeValueAsString(metrics);
-                this.send(s);
-            } else {
-                throw new RuntimeException("WebSocket client is closed");
-            }
+            this.send(objectMapper.writeValueAsString(metrics));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

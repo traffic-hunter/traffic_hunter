@@ -12,7 +12,7 @@ import ygo.traffichunter.agent.engine.sender.http.AgentSystemMetricSender;
 import ygo.traffichunter.agent.engine.sender.websocket.AgentTransactionMetricSender;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
-public class MetricSendSessionManager implements Closeable {
+public class MetricSendSessionManager {
 
     private static final Logger log = LoggerFactory.getLogger(MetricSendSessionManager.class);
 
@@ -36,38 +36,60 @@ public class MetricSendSessionManager implements Closeable {
         this.transactionMetricSender = new AgentTransactionMetricSender(property, context);
         this.systemMetricSender = new AgentSystemMetricSender(property, context);
         this.schedule = Executors.newSingleThreadScheduledExecutor();
-        this.executor = Executors.newFixedThreadPool(4);
+        this.executor = Executors.newFixedThreadPool(3);
     }
 
-    public void start() {
-        if(!context.setStatus(AgentStatus.RUNNING)) {
-            log.warn("MetricSendSessionManager not started");
+    public void run() {
+        if(context.isRunning()) {
+            log.error("MetricSendSessionManager already started!!");
             return;
         }
 
-        log.info("starting MetricSendSessionManager...");
+        log.info("start Metric send...");
 
         executor.submit(() -> {
+            Thread.currentThread().setName("transaction-send-thread");
             try {
+                if(!context.setStatus(AgentStatus.RUNNING)) {
+                    log.warn("Failed to set agent transaction sender status to RUNNING");
+                    return;
+                }
+
+                log.info("sending transaction metric");
                 transactionMetricSender.run();
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 context.setStatus(AgentStatus.ERROR);
-                log.error("MetricSendSessionManager failed", e);
+                log.error("MetricSendSessionManager transaction tracker failed = {}", e.getMessage());
             }
         });
 
         schedule.scheduleWithFixedDelay(
-                systemMetricSender,
+                () -> {
+                    Thread.currentThread().setName("system-metric-send-thread");
+                    try {
+                        if(!context.setStatus(AgentStatus.RUNNING)) {
+                            log.warn("Failed to set agent system metric sender status to RUNNING");
+                            return;
+                        }
+
+                        log.info("metric send");
+                        while (!context.isStopped()) {
+                            systemMetricSender.run();
+                        }
+                    } catch (Exception e) {
+                        context.setStatus(AgentStatus.ERROR);
+                        log.error("MetricSendSessionManager system metric failed = {}", e.getMessage());
+                    }
+                },
                 0,
                 property.scheduleInterval(),
                 property.timeUnit()
         );
     }
 
-    @Override
     public void close() {
         log.info("closing MetricSendSessionManager...");
-
+        transactionMetricSender.close();
         schedule.shutdown();
         executor.shutdown();
     }

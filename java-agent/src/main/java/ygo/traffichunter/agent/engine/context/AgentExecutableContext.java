@@ -14,6 +14,8 @@ public interface AgentExecutableContext {
 
     AgentStatus getStatus();
 
+    boolean isInit();
+
     boolean isRunning();
 
     boolean isStopped();

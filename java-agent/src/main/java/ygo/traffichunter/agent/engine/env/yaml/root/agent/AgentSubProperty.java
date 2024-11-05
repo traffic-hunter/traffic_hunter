@@ -5,6 +5,7 @@ import ygo.traffichunter.agent.engine.env.yaml.root.agent.retry.RetrySubProperty
 public class AgentSubProperty {
 
     private String name;
+    private String jar;
     private String serverUri;
     private String target;
     private int interval;
@@ -13,10 +14,11 @@ public class AgentSubProperty {
     public AgentSubProperty() {
     }
 
-    public AgentSubProperty(final String name, final String serverUri, final String target, final int interval,
+    public AgentSubProperty(final String name, final String jar, final String serverUri, final String target,
+                            final int interval,
                             final RetrySubProperty retry) {
-
         this.name = name;
+        this.jar = jar;
         this.serverUri = serverUri;
         this.target = target;
         this.interval = interval;
@@ -61,5 +63,13 @@ public class AgentSubProperty {
 
     public void setName(final String name) {
         this.name = name;
+    }
+
+    public String getJar() {
+        return jar;
+    }
+
+    public void setJar(final String jar) {
+        this.jar = jar;
     }
 }

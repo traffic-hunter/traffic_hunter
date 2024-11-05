@@ -6,6 +6,7 @@ import ygo.traffichunter.retry.backoff.BackOffPolicy;
 
 public record TrafficHunterAgentProperty(
         String targetJVMPath,
+        String jar,
         int scheduleInterval,
         URI uri,
         TimeUnit timeUnit,
@@ -14,6 +15,7 @@ public record TrafficHunterAgentProperty(
 ) {
 
     public TrafficHunterAgentProperty(final String targetJVMPath,
+                                      final String jar,
                                       final int scheduleInterval,
                                       final URI uri,
                                       final TimeUnit timeUnit,
@@ -21,6 +23,7 @@ public record TrafficHunterAgentProperty(
                                       final BackOffPolicy backOffPolicy) {
 
         this.targetJVMPath = targetJVMPath;
+        this.jar = jar;
         this.scheduleInterval = scheduleInterval;
         this.uri = uri;
         this.timeUnit = timeUnit;
@@ -29,17 +32,19 @@ public record TrafficHunterAgentProperty(
     }
 
     public TrafficHunterAgentProperty(final String targetJVMPath,
+                                      final String jar,
                                       final int scheduleInterval,
                                       final URI uri,
                                       final TimeUnit timeUnit) {
 
-        this(targetJVMPath, scheduleInterval, uri, timeUnit, 0, null);
+        this(targetJVMPath, jar, scheduleInterval, uri, timeUnit, 0, null);
     }
 
     @Override
     public String toString() {
         return "TrafficHunterAgentProperty{" +
                 "targetJVMPath='" + targetJVMPath + '\'' +
+                ", jar=" + jar +
                 ", scheduleInterval=" + scheduleInterval +
                 ", uri=" + uri +
                 ", timeUnit=" + timeUnit +

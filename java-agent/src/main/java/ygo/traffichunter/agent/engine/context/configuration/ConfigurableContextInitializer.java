@@ -5,6 +5,8 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +19,6 @@ import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
 public class ConfigurableContextInitializer {
-
-    private static final String jarPath = "build/libs/java-agent-0.0.1-SNAPSHOT-all.jar";
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurableContextInitializer.class);
 
@@ -48,9 +48,10 @@ public class ConfigurableContextInitializer {
 
     public void attach(final TrafficHunterAgentProperty property) {
         try {
-            final VirtualMachine vm = JVMSelector.getVM(property.targetJVMPath());
 
-            vm.loadAgent(jarPath);
+            VirtualMachine vm = JVMSelector.getVM(property.targetJVMPath());
+
+            vm.loadAgent(property.jar());
         } catch (IOException | AgentLoadException | AgentInitializationException e) {
             log.error("Failed to load agent = {}", e.getMessage());
             throw new RuntimeException(e);

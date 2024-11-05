@@ -14,7 +14,7 @@ import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.retry.RetryHelper;
 import ygo.traffichunter.websocket.MetricWebSocketClient;
 
-public class AgentTransactionMetricSender implements MetricSender<Supplier<MetadataWrapper<List<TransactionInfo>>>>, Runnable {
+public class AgentTransactionMetricSender implements MetricSender<Supplier<MetadataWrapper<List<TransactionInfo>>>> {
 
     private static final Logger log = LoggerFactory.getLogger(AgentTransactionMetricSender.class);
 
@@ -32,13 +32,12 @@ public class AgentTransactionMetricSender implements MetricSender<Supplier<Metad
         this.client = new MetricWebSocketClient<>(property.uri());
     }
 
-    @Override
     public void run()  {
 
         final MetadataWrapper<List<TransactionInfo>> response = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
                 .failAfterMaxAttempts(true)
                 .retryName("websocket")
-                .throwable(throwable -> throwable instanceof RuntimeException)
+                .throwable(throwable -> throwable instanceof IllegalStateException)
                 .retrySupplier(this.toSend());
 
         log.info("Websocket response: {}", response);
@@ -55,9 +54,11 @@ public class AgentTransactionMetricSender implements MetricSender<Supplier<Metad
                     txInfoList
             );
 
-            if (client.isConnected(3, TimeUnit.SECONDS)) {
-                client.toSend(metadataWrapper);
+            if (!client.isConnected(3, TimeUnit.SECONDS)) {
+                client.reconnect();
             }
+
+            client.toSend(metadataWrapper);
 
             return metadataWrapper;
         };

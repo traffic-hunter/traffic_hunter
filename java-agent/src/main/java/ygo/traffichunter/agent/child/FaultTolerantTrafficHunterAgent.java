@@ -30,6 +30,7 @@ public class FaultTolerantTrafficHunterAgent extends TrafficHunterAgent {
     public TrafficHunterAgentProperty complete() {
         return new TrafficHunterAgentProperty(
                 this.targetJVMPath,
+                this.jar,
                 this.scheduleInterval,
                 this.uri,
                 this.timeUnit,

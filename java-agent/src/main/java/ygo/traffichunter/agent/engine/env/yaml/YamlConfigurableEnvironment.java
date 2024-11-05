@@ -94,6 +94,7 @@ public class YamlConfigurableEnvironment implements ConfigurableEnvironment {
 
             return TrafficHunterAgent.connect(root.getAgent().getServerUri())
                     .targetJVM(root.getAgent().getTarget())
+                    .locationJar(root.getAgent().getJar())
                     .scheduleInterval(root.getAgent().getInterval())
                     .scheduleTimeUnit(TimeUnit.SECONDS)
                     .faultTolerant()

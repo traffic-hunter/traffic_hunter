@@ -11,7 +11,7 @@ class YamlConfigurableEnvironmentTest extends AbstractTest {
 
     @Test
     void yaml_파일을_제대로_파싱하는지_확인한다() {
-        YamlConfigurableEnvironment environment = new YamlConfigurableEnvironment("agent-env.yml");
+        YamlConfigurableEnvironment environment = new YamlConfigurableEnvironment("/Users/yungwang-o/Documents/agent-env.yml");
 
         TrafficHunterAgentProperty load = environment.load();
 

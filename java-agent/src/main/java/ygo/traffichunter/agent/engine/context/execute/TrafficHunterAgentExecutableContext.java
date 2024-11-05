@@ -13,7 +13,7 @@ public class TrafficHunterAgentExecutableContext implements AgentExecutableConte
 
     private final ConfigurableEnvironment environment;
 
-    private final AtomicReference<AgentStatus> status = new AtomicReference<>();
+    private final AtomicReference<AgentStatus> status = new AtomicReference<>(AgentStatus.INITIALIZED);
 
     private final TrafficHunterAgentShutdownHook shutdownHook;
 
@@ -46,6 +46,8 @@ public class TrafficHunterAgentExecutableContext implements AgentExecutableConte
             try {
                 shutdownHookThread = new Thread(this.shutdownHook);
                 shutdownHookThread.start();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             } finally {
                 shutdownLock.unlock();
             }
@@ -63,13 +65,18 @@ public class TrafficHunterAgentExecutableContext implements AgentExecutableConte
     }
 
     @Override
+    public boolean isInit() {
+        return status.get() == AgentStatus.INITIALIZED;
+    }
+
+    @Override
     public boolean isRunning() {
-        return status.get().equals(AgentStatus.RUNNING);
+        return status.get() == AgentStatus.RUNNING;
     }
 
     @Override
     public boolean isStopped() {
-        return status.get().equals(AgentStatus.EXIT);
+        return status.get() == AgentStatus.EXIT;
     }
 
     @Override

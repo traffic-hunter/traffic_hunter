@@ -101,7 +101,7 @@ public final class AgentExecutionEngine {
         }
 
         public void run() {
-            sessionManager.start();
+            sessionManager.run();
         }
 
         public void close() {

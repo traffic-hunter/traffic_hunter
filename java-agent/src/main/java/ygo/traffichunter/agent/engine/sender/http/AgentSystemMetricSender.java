@@ -14,7 +14,7 @@ import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.http.HttpBuilder;
 import ygo.traffichunter.retry.RetryHelper;
 
-public class AgentSystemMetricSender implements MetricSender<Supplier<HttpResponse<String>>>, Runnable {
+public class AgentSystemMetricSender implements MetricSender<Supplier<HttpResponse<String>>> {
 
     private static final Logger log = LoggerFactory.getLogger(AgentSystemMetricSender.class);
 
@@ -28,7 +28,6 @@ public class AgentSystemMetricSender implements MetricSender<Supplier<HttpRespon
         this.context = context;
     }
 
-    @Override
     public void run() {
 
         final HttpResponse<String> httpResponse = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())

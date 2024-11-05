@@ -11,6 +11,7 @@ public class TrafficHunterAgent {
     private static final Logger log = Logger.getLogger(TrafficHunterAgent.class.getName());
     protected int scheduleInterval;
     protected String targetJVMPath;
+    protected String jar;
     protected final URI uri;
     protected TimeUnit timeUnit;
 
@@ -19,6 +20,7 @@ public class TrafficHunterAgent {
         this.targetJVMPath = trafficHunterAgent.targetJVMPath;
         this.uri = trafficHunterAgent.uri;
         this.timeUnit = trafficHunterAgent.timeUnit;
+        this.jar = trafficHunterAgent.jar;
     }
 
     protected TrafficHunterAgent(final URI uri) {
@@ -38,6 +40,11 @@ public class TrafficHunterAgent {
         return this;
     }
 
+    public TrafficHunterAgent locationJar(final String jar) {
+        this.jar = jar;
+        return this;
+    }
+
     public TrafficHunterAgent scheduleInterval(final int scheduleInterval) {
         this.scheduleInterval = scheduleInterval;
         return this;
@@ -49,6 +56,6 @@ public class TrafficHunterAgent {
     }
 
     public TrafficHunterAgentProperty complete() {
-        return new TrafficHunterAgentProperty(targetJVMPath, scheduleInterval, uri, timeUnit);
+        return new TrafficHunterAgentProperty(targetJVMPath, jar, scheduleInterval, uri, timeUnit);
     }
 }
