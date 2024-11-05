@@ -1,5 +1,6 @@
 package ygo.traffichunter.agent.engine.sender.http;
 
+import java.net.URI;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.function.Supplier;
@@ -13,6 +14,7 @@ import ygo.traffichunter.agent.engine.systeminfo.metadata.MetadataWrapper;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.http.HttpBuilder;
 import ygo.traffichunter.retry.RetryHelper;
+import ygo.traffichunter.util.AgentUtil;
 
 public class AgentSystemMetricSender implements MetricSender<Supplier<HttpResponse<String>>> {
 
@@ -51,7 +53,7 @@ public class AgentSystemMetricSender implements MetricSender<Supplier<HttpRespon
             );
 
             try {
-                return HttpBuilder.newBuilder(property.uri())
+                return HttpBuilder.newBuilder(URI.create(AgentUtil.HTTP_URL.getUrl(property.uri())))
                         .header("Content-Type", "application/json")
                         .timeOut(Duration.ofSeconds(3))
                         .request(metadataWrapper)

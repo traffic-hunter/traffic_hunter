@@ -1,5 +1,6 @@
 package ygo.traffichunter.agent.engine.sender.websocket;
 
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -12,6 +13,7 @@ import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
 import ygo.traffichunter.agent.engine.systeminfo.metadata.MetadataWrapper;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.retry.RetryHelper;
+import ygo.traffichunter.util.AgentUtil;
 import ygo.traffichunter.websocket.MetricWebSocketClient;
 
 public class AgentTransactionMetricSender implements MetricSender<Supplier<MetadataWrapper<List<TransactionInfo>>>> {
@@ -29,7 +31,7 @@ public class AgentTransactionMetricSender implements MetricSender<Supplier<Metad
 
         this.context = context;
         this.property = property;
-        this.client = new MetricWebSocketClient<>(property.uri());
+        this.client = new MetricWebSocketClient<>(URI.create(AgentUtil.WEBSOCKET_URL.getUrl(property.uri())));
     }
 
     public void run()  {
