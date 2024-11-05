@@ -1,6 +1,5 @@
 package ygo.traffichunter.agent.property;
 
-import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import ygo.traffichunter.retry.backoff.BackOffPolicy;
 
@@ -8,7 +7,7 @@ public record TrafficHunterAgentProperty(
         String targetJVMPath,
         String jar,
         int scheduleInterval,
-        URI uri,
+        String uri,
         TimeUnit timeUnit,
         int maxAttempt,
         BackOffPolicy backOffPolicy
@@ -17,7 +16,7 @@ public record TrafficHunterAgentProperty(
     public TrafficHunterAgentProperty(final String targetJVMPath,
                                       final String jar,
                                       final int scheduleInterval,
-                                      final URI uri,
+                                      final String uri,
                                       final TimeUnit timeUnit,
                                       final int maxAttempt,
                                       final BackOffPolicy backOffPolicy) {
@@ -34,7 +33,7 @@ public record TrafficHunterAgentProperty(
     public TrafficHunterAgentProperty(final String targetJVMPath,
                                       final String jar,
                                       final int scheduleInterval,
-                                      final URI uri,
+                                      final String uri,
                                       final TimeUnit timeUnit) {
 
         this(targetJVMPath, jar, scheduleInterval, uri, timeUnit, 0, null);

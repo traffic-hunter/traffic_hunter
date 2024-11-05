@@ -1,6 +1,5 @@
 package ygo.traffichunter.agent;
 
-import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import ygo.traffichunter.agent.child.FaultTolerantTrafficHunterAgent;
@@ -9,10 +8,15 @@ import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 public class TrafficHunterAgent {
 
     private static final Logger log = Logger.getLogger(TrafficHunterAgent.class.getName());
+
     protected int scheduleInterval;
+
     protected String targetJVMPath;
+
     protected String jar;
-    protected final URI uri;
+
+    protected final String uri;
+
     protected TimeUnit timeUnit;
 
     protected TrafficHunterAgent(final TrafficHunterAgent trafficHunterAgent) {
@@ -23,12 +27,12 @@ public class TrafficHunterAgent {
         this.jar = trafficHunterAgent.jar;
     }
 
-    protected TrafficHunterAgent(final URI uri) {
+    protected TrafficHunterAgent(final String uri) {
         this.uri = uri;
     }
 
     public static TrafficHunterAgent connect(final String serverUrl) {
-        return new TrafficHunterAgent(URI.create(serverUrl));
+        return new TrafficHunterAgent(serverUrl);
     }
 
     public FaultTolerantTrafficHunterAgent faultTolerant() {
