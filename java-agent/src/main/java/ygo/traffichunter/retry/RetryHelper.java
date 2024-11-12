@@ -45,16 +45,21 @@ public class RetryHelper {
         return this;
     }
 
+    public Runnable retryRunner(final Runnable runnable) {
+
+        final RetryConfig retryConfig = configureRetry();
+
+        final Retry retry = Retry.of(retryName, retryConfig);
+
+        retry.getEventPublisher()
+                .onRetry(event -> log.info(event.getName() + " " + "retry " + event.getNumberOfRetryAttempts() + " attempts..."));
+
+        return Retry.decorateRunnable(retry, runnable);
+    }
+
     public <T> T retrySupplier(final Supplier<T> supplier) {
 
-        final RetryConfig retryConfig = RetryConfig.custom()
-                .maxAttempts(maxAttempts)
-                .retryOnException(retryPredicate)
-                .failAfterMaxAttempts(isCheck)
-                .intervalFunction(IntervalFunction.ofExponentialRandomBackoff(
-                        backOffPolicy.getIntervalMillis(),
-                        backOffPolicy.getMultiplier())
-                ).build();
+        final RetryConfig retryConfig = configureRetry();
 
         final Retry retry = Retry.of(retryName, retryConfig);
 
@@ -63,5 +68,16 @@ public class RetryHelper {
 
         return Retry.decorateSupplier(retry, supplier).get();
 
+    }
+
+    private RetryConfig configureRetry() {
+        return RetryConfig.custom()
+                .maxAttempts(maxAttempts)
+                .retryOnException(retryPredicate)
+                .failAfterMaxAttempts(isCheck)
+                .intervalFunction(IntervalFunction.ofExponentialRandomBackoff(
+                        backOffPolicy.getIntervalMillis(),
+                        backOffPolicy.getMultiplier()
+                )).build();
     }
 }

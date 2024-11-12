@@ -1,6 +1,5 @@
 package ygo.traffichunter.agent.engine.sender.manager;
 
-import java.io.Closeable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,19 +23,25 @@ public class MetricSendSessionManager {
 
     private final ScheduledExecutorService schedule;
 
-    private final ExecutorService executor;
-
     private final AgentExecutableContext context;
+
+    private final ExecutorService executor;
 
     public MetricSendSessionManager(final TrafficHunterAgentProperty property,
                                     final AgentExecutableContext context) {
 
         this.context = context;
         this.property = property;
-        this.transactionMetricSender = new AgentTransactionMetricSender(property, context);
-        this.systemMetricSender = new AgentSystemMetricSender(property, context);
+        this.transactionMetricSender = new AgentTransactionMetricSender(
+                property,
+                this.context.configureEnv().getAgentMetadata()
+        );
+        this.systemMetricSender = new AgentSystemMetricSender(
+                property,
+                this.context.configureEnv().getAgentMetadata()
+        );
         this.schedule = Executors.newSingleThreadScheduledExecutor();
-        this.executor = Executors.newFixedThreadPool(3);
+        this.executor = Executors.newSingleThreadExecutor();
     }
 
     public void run() {
@@ -47,35 +52,14 @@ public class MetricSendSessionManager {
 
         log.info("start Metric send...");
 
-        executor.submit(() -> {
-            Thread.currentThread().setName("transaction-send-thread");
-            try {
-                if(!context.setStatus(AgentStatus.RUNNING)) {
-                    log.warn("Failed to set agent transaction sender status to RUNNING");
-                    return;
-                }
-
-                log.info("sending transaction metric");
-                transactionMetricSender.run();
-            } catch (Exception e) {
-                context.setStatus(AgentStatus.ERROR);
-                log.error("MetricSendSessionManager transaction tracker failed = {}", e.getMessage());
-            }
-        });
+        executor.execute(transactionMetricSender);
 
         schedule.scheduleWithFixedDelay(
                 () -> {
                     Thread.currentThread().setName("system-metric-send-thread");
                     try {
-                        if(!context.setStatus(AgentStatus.RUNNING)) {
-                            log.warn("Failed to set agent system metric sender status to RUNNING");
-                            return;
-                        }
 
-                        log.info("metric send");
-                        while (!context.isStopped()) {
-                            systemMetricSender.run();
-                        }
+                        systemMetricSender.run();
                     } catch (Exception e) {
                         context.setStatus(AgentStatus.ERROR);
                         log.error("MetricSendSessionManager system metric failed = {}", e.getMessage());
@@ -91,7 +75,6 @@ public class MetricSendSessionManager {
         log.info("closing MetricSendSessionManager...");
         transactionMetricSender.close();
         schedule.shutdown();
-        executor.shutdown();
     }
 
     public AgentStatus getStatus() {

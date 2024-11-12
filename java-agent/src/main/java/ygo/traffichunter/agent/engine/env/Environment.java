@@ -4,6 +4,7 @@ public enum Environment {
 
     DEFAULT_PATH("/env/agent-env.yml"),
     VERSION("1.0.0"),
+    SYSTEM_PROFILE("traffichunter.config"),
     ;
 
     private final String env;
@@ -17,6 +18,10 @@ public enum Environment {
     }
 
     public String version() {
+        return env;
+    }
+
+    public String systemProfile() {
         return env;
     }
 }

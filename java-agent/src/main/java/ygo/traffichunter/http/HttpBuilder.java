@@ -1,6 +1,7 @@
 package ygo.traffichunter.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
@@ -26,6 +27,7 @@ public class HttpBuilder {
     private HttpBuilder(final URI uri) {
         this.uri = uri;
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     public static HttpBuilder newBuilder(final URI uri) {

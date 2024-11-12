@@ -2,7 +2,6 @@ package ygo.traffichunter.agent.engine.collect;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -13,10 +12,8 @@ import ygo.traffichunter.agent.engine.collect.gc.GarbageCollectionMetricCollecto
 import ygo.traffichunter.agent.engine.collect.memory.MemoryMetricCollector;
 import ygo.traffichunter.agent.engine.collect.runtime.RuntimeMetricCollector;
 import ygo.traffichunter.agent.engine.collect.thread.ThreadMetricCollector;
-import ygo.traffichunter.agent.engine.collect.transaction.TransactionMetricCollector;
 import ygo.traffichunter.agent.engine.jvm.JVMSelector;
 import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
-import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
 
 public class MetricCollectSupport {
 
@@ -32,13 +29,7 @@ public class MetricCollectSupport {
 
     private static final RuntimeMetricCollector collectorRuntime = new RuntimeMetricCollector();
 
-    private static final TransactionMetricCollector collectorTransaction = new TransactionMetricCollector();
-
     private MetricCollectSupport() {
-    }
-
-    public static List<TransactionInfo> collect() {
-        return collectorTransaction.collect();
     }
 
     public static SystemInfo collect(final String targetJVMPath) {

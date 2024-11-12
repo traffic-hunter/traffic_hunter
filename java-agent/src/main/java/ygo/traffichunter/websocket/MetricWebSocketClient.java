@@ -2,6 +2,7 @@ package ygo.traffichunter.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -18,13 +19,12 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
 
     public MetricWebSocketClient(final URI serverUri) {
         super(serverUri);
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override
     public void onOpen(final ServerHandshake serverHandshake) {
-        final String httpStatusMessage = serverHandshake.getHttpStatusMessage();
-
-        log.info("websocket client opened = {}", httpStatusMessage);
+        log.info("websocket client opened");
     }
 
     @Override
@@ -89,7 +89,9 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         }
 
         try {
-            this.send(objectMapper.writeValueAsString(metric));
+            String s = objectMapper.writeValueAsString(metric);
+            log.info("websocket client sent = {}", s);
+            this.send(s);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -41,7 +41,6 @@ public class AgentMetadata {
         return agentName;
     }
 
-
     public AgentStatus getStatus() {
         return status;
     }

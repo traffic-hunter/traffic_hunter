@@ -10,6 +10,7 @@ import ygo.traffichunter.agent.engine.collect.MetricCollectSupport;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
 import ygo.traffichunter.agent.engine.sender.MetricSender;
 import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
+import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 import ygo.traffichunter.agent.engine.systeminfo.metadata.MetadataWrapper;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.http.HttpBuilder;
@@ -22,12 +23,12 @@ public class AgentSystemMetricSender implements MetricSender<Supplier<HttpRespon
 
     private final TrafficHunterAgentProperty property;
 
-    private final AgentExecutableContext context;
+    private final AgentMetadata metadata;
 
     public AgentSystemMetricSender(final TrafficHunterAgentProperty property,
-                                   final AgentExecutableContext context) {
+                                   final AgentMetadata metadata) {
         this.property = property;
-        this.context = context;
+        this.metadata = metadata;
     }
 
     public void run() {
@@ -48,7 +49,7 @@ public class AgentSystemMetricSender implements MetricSender<Supplier<HttpRespon
             final SystemInfo systemInfo = MetricCollectSupport.collect(property.targetJVMPath());
 
             final MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(
-                    context.configureEnv().getAgentMetadata(),
+                    metadata,
                     systemInfo
             );
 

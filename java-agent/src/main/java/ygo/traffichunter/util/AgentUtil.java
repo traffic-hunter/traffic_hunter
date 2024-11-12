@@ -1,7 +1,7 @@
 package ygo.traffichunter.util;
 
 public enum AgentUtil {
-    WEBSOCKET_URL("ws://%s/traffic-hunter"),
+    WEBSOCKET_URL("ws://%s/traffic-hunter/tx"),
     HTTP_URL("http://%s/traffic-hunter"),
     ;
 

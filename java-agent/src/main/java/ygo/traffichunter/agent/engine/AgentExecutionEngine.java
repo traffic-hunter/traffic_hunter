@@ -1,7 +1,9 @@
 package ygo.traffichunter.agent.engine;
 
+import java.lang.instrument.Instrumentation;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import ygo.traffichunter.agent.banner.AsciiBanner;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
 import ygo.traffichunter.agent.engine.context.configuration.ConfigurableContextInitializer;
@@ -10,10 +12,8 @@ import ygo.traffichunter.agent.engine.env.ConfigurableEnvironment;
 import ygo.traffichunter.agent.engine.env.yaml.YamlConfigurableEnvironment;
 import ygo.traffichunter.agent.engine.lifecycle.LifeCycle;
 import ygo.traffichunter.agent.engine.sender.manager.MetricSendSessionManager;
-import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
 import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
-import ygo.traffichunter.event.handler.TrafficHunterEventHandler;
 
 /**
  * After selecting a JVM, this agent execution engine collects the metrics of the JVM at regular intervals and transmits them to the server.
@@ -32,14 +32,12 @@ public final class AgentExecutionEngine {
 
     private static final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
-    private static final TrafficHunterEventHandler<TransactionInfo> eventHandler = new TrafficHunterEventHandler<>();
-
     private final AsciiBanner asciiBanner = new AsciiBanner();
 
     private final ConfigurableEnvironment environment;
 
-    private AgentExecutionEngine(final String[] args) {
-        this.environment = new YamlConfigurableEnvironment(findEnvPath(args));
+    private AgentExecutionEngine(final String args) {
+        this.environment = new YamlConfigurableEnvironment(args);
     }
 
     private void run() {
@@ -50,23 +48,22 @@ public final class AgentExecutionEngine {
         }
         ConfigurableContextInitializer configurableContextInitializer = context.configureEnv();
         TrafficHunterAgentProperty property = configurableContextInitializer.property();
-        configurableContextInitializer.attach(property);
+        //configurableContextInitializer.attach(property);
         AgentMetadata metadata = configurableContextInitializer.getAgentMetadata();
         metadata.setStartTime(startUp.getStartTime());
         asciiBanner.print(metadata);
         AgentRunner runner = new AgentRunner(property, context);
         runner.run();
         shutdownHook.addRuntimeShutdownHook(runner::close);
-        shutdownHook.addRuntimeShutdownHook(eventHandler::close);
         context.close();
     }
 
-    public static void run(final String[] args) {
-        new AgentExecutionEngine(args).run();
+    public static void run(final String args) {
+        new AgentExecutionEngine(System.getProperty(args)).run();
     }
 
     /**
-     * agent's start and end time is measure
+     * agent's start and end time measure
      */
     static class StartUp extends LifeCycle {
 
@@ -107,16 +104,5 @@ public final class AgentExecutionEngine {
         public void close() {
             sessionManager.close();
         }
-    }
-
-    private String findEnvPath(String[] args) {
-
-        for(String arg : args) {
-            if(arg.startsWith("--config")) {
-                return arg.split("=")[1];
-            }
-        }
-
-        throw new IllegalArgumentException("No config found!!");
     }
 }

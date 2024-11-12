@@ -1,6 +1,10 @@
 package ygo.traffichunter.agent.engine.sender;
 
+import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
+
 public interface MetricSender<O> {
 
-    O toSend();
+    default O toSend() { return null; };
+
+    default O toSend(TransactionInfo input) { return null; }
 }

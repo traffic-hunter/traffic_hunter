@@ -7,9 +7,7 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
-import net.bytebuddy.agent.builder.AgentBuilder.InitializationStrategy.NoOp;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
-import net.bytebuddy.agent.builder.AgentBuilder.TypeStrategy;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -20,20 +18,28 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ygo.traffichunter.agent.engine.AgentExecutionEngine;
+import ygo.traffichunter.agent.engine.env.Environment;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
+import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
-import ygo.traffichunter.event.publisher.EventPublisher;
-import ygo.traffichunter.event.publisher.TransactionEventPublisher;
 
-public class TransactionTrackingResolver {
+public class JavaInstrumentAgentMain {
 
-    private static final EventPublisher<TransactionInfo> eventPublisher = new TransactionEventPublisher();
+    public static final Logger log = LoggerFactory.getLogger(JavaInstrumentAgentMain.class);
 
-    public static void agentmain(String agentArgs, Instrumentation inst) {
+    public static void premain(String agentArgs, Instrumentation inst) {
+        reTransform(inst);
+
+        AgentExecutionEngine.run(Environment.SYSTEM_PROFILE.systemProfile());
+    }
+
+    private static void reTransform(final Instrumentation inst) {
         new Default()
                 .with(RedefinitionStrategy.RETRANSFORMATION)
-                .with(NoOp.INSTANCE)
-                .with(TypeStrategy.Default.REDEFINE)
+                .disableClassFormatChanges()
                 .ignore(ignoreMatchPackage())
                 .type(getSpringComponentMatcher())
                 .transform((builder, typeDescription, classLoader, module, protectionDomain) ->
@@ -72,10 +78,10 @@ public class TransactionTrackingResolver {
                     Instant.ofEpochMilli(endTime),
                     duration,
                     throwable == null ? "No Error Message" : throwable.getMessage(),
-                    throwable != null
+                    throwable == null
             );
 
-            eventPublisher.publish(txInfo);
+            SyncQueue.INSTANCE.add(txInfo);
         }
     }
 }

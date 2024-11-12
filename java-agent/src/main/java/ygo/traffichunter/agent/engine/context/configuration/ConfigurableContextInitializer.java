@@ -25,8 +25,6 @@ public class ConfigurableContextInitializer {
     private final ConfigurableEnvironment env;
 
     public ConfigurableContextInitializer(final ConfigurableEnvironment env) {
-
-        log.info("Traffic Hunter Initializer!!");
         this.env = env;
     }
 
