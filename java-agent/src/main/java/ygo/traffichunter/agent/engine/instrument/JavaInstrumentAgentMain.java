@@ -4,6 +4,8 @@ import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
+import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.VirtualMachineDescriptor;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
@@ -23,14 +25,24 @@ import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.engine.AgentExecutionEngine;
 import ygo.traffichunter.agent.engine.env.Environment;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
+import ygo.traffichunter.agent.engine.instrument.bootstrap.BootState;
 import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
 
 public class JavaInstrumentAgentMain {
 
-    public static final Logger log = LoggerFactory.getLogger(JavaInstrumentAgentMain.class);
+    private static final Logger log = LoggerFactory.getLogger(JavaInstrumentAgentMain.class);
+
+    private static final BootState STATE = new BootState();
 
     public static void premain(String agentArgs, Instrumentation inst) {
+
+        final boolean success = STATE.start();
+        if(!success) {
+            log.error("traffic-hunter-agent-bootstrap already started. skipping agent loading.");
+            return;
+        }
+
         reTransform(inst);
 
         AgentExecutionEngine.run(Environment.SYSTEM_PROFILE.systemProfile());

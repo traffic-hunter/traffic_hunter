@@ -32,4 +32,16 @@ public class RuntimeMetricCollector implements MetricCollector<RuntimeStatusInfo
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public RuntimeStatusInfo collect() {
+        final RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+
+        return new RuntimeStatusInfo(
+                runtimeMXBean.getStartTime(),
+                runtimeMXBean.getUptime(),
+                runtimeMXBean.getVmName(),
+                runtimeMXBean.getVmVersion()
+        );
+    }
 }

@@ -44,4 +44,27 @@ public class MemoryMetricCollector implements MetricCollector<MemoryStatusInfo> 
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public MemoryStatusInfo collect() {
+        final MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+
+        final java.lang.management.MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
+        final java.lang.management.MemoryUsage nonHeapMemoryUsage = memoryMXBean.getNonHeapMemoryUsage();
+
+        return new MemoryStatusInfo(
+                new MemoryUsage(
+                        heapMemoryUsage.getInit(),
+                        heapMemoryUsage.getUsed(),
+                        heapMemoryUsage.getCommitted(),
+                        heapMemoryUsage.getMax()
+                ),
+                new MemoryUsage(
+                        nonHeapMemoryUsage.getInit(),
+                        nonHeapMemoryUsage.getUsed(),
+                        nonHeapMemoryUsage.getCommitted(),
+                        nonHeapMemoryUsage.getMax()
+                )
+        );
+    }
 }

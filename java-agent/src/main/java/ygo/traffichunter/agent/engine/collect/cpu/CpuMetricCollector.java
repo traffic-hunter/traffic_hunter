@@ -31,4 +31,15 @@ public class CpuMetricCollector implements MetricCollector<CpuStatusInfo> {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public CpuStatusInfo collect() {
+        final OperatingSystemMXBean osMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
+        return new CpuStatusInfo(
+                osMXBean.getCpuLoad(),
+                osMXBean.getProcessCpuLoad(),
+                osMXBean.getAvailableProcessors()
+        );
+    }
 }

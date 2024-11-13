@@ -23,7 +23,6 @@ class HttpBuilderTest {
         // given
         SystemInfo systemInfo = new SystemInfo(
                 Instant.now(),
-                "testJVM",
                 new MemoryStatusInfo(new MemoryUsage(1, 1, 1, 1), new MemoryUsage(1,1, 1, 1)),
                 new ThreadStatusInfo(1,1, 1),
                 new CpuStatusInfo(1, 1, 1),

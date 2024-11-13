@@ -31,4 +31,15 @@ public class ThreadMetricCollector implements MetricCollector<ThreadStatusInfo> 
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public ThreadStatusInfo collect() {
+        final ThreadMXBean threadMXBean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
+
+        return new ThreadStatusInfo(
+                threadMXBean.getThreadCount(),
+                threadMXBean.getPeakThreadCount(),
+                threadMXBean.getTotalStartedThreadCount()
+        );
+    }
 }

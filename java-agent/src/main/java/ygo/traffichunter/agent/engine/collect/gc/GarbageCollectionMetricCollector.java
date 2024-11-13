@@ -32,4 +32,16 @@ public class GarbageCollectionMetricCollector implements MetricCollector<Garbage
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public GarbageCollectionStatusInfo collect() {
+        final List<GarbageCollectorMXBean> mxBeans = ManagementFactory.getGarbageCollectorMXBeans();
+
+        final List<GarbageCollectionTime> garbageCollectionTimes = mxBeans
+                .stream()
+                .map(GarbageCollectionTime::new)
+                .toList();
+
+        return new GarbageCollectionStatusInfo(garbageCollectionTimes);
+    }
 }

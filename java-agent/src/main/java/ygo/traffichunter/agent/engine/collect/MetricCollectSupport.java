@@ -1,6 +1,7 @@
 package ygo.traffichunter.agent.engine.collect;
 
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
 import java.time.Instant;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
@@ -40,7 +41,6 @@ public class MetricCollectSupport {
 
             return new SystemInfo(
                     Instant.now(),
-                    targetJVMPath,
                     collectMemory.collect(mbsc),
                     collectThread.collect(mbsc),
                     collectCpu.collect(mbsc),
@@ -52,5 +52,16 @@ public class MetricCollectSupport {
             log.error("Failed to start local management agent = {}", e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    public static SystemInfo collect() {
+        return new SystemInfo(
+                Instant.now(),
+                collectMemory.collect(),
+                collectThread.collect(),
+                collectCpu.collect(),
+                collectorGC.collect(),
+                collectorRuntime.collect()
+        );
     }
 }

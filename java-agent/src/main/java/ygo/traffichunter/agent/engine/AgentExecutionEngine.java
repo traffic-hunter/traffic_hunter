@@ -48,7 +48,6 @@ public final class AgentExecutionEngine {
         }
         ConfigurableContextInitializer configurableContextInitializer = context.configureEnv();
         TrafficHunterAgentProperty property = configurableContextInitializer.property();
-        //configurableContextInitializer.attach(property);
         AgentMetadata metadata = configurableContextInitializer.getAgentMetadata();
         metadata.setStartTime(startUp.getStartTime());
         asciiBanner.print(metadata);

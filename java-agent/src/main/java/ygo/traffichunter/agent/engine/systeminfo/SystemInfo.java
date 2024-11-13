@@ -10,7 +10,6 @@ import ygo.traffichunter.agent.engine.systeminfo.thread.ThreadStatusInfo;
 
 public record SystemInfo(
         Instant time,
-        String targetJVM,
         MemoryStatusInfo memoryStatusInfo,
         ThreadStatusInfo threadStatusInfo,
         CpuStatusInfo cpuStatusInfo,
