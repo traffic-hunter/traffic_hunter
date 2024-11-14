@@ -1,9 +1,8 @@
 package ygo.traffichunter.agent.engine;
 
-import java.lang.instrument.Instrumentation;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
+import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.banner.AsciiBanner;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
 import ygo.traffichunter.agent.engine.context.configuration.ConfigurableContextInitializer;
@@ -46,12 +45,15 @@ public final class AgentExecutionEngine {
         if(!shutdownHook.isEnabledShutdownHook()) {
             shutdownHook.enableShutdownHook();
         }
-        ConfigurableContextInitializer configurableContextInitializer = context.configureEnv();
+        ConfigurableContextInitializer configurableContextInitializer = context.init();
         TrafficHunterAgentProperty property = configurableContextInitializer.property();
-        AgentMetadata metadata = configurableContextInitializer.getAgentMetadata();
-        metadata.setStartTime(startUp.getStartTime());
+        AgentMetadata metadata = configurableContextInitializer.setAgentMetadata(
+                startUp.getStartTime(),
+                AgentStatus.INITIALIZED
+        );
+        context.addAgentStateEventListener(metadata);
         asciiBanner.print(metadata);
-        AgentRunner runner = new AgentRunner(property, context);
+        AgentRunner runner = new AgentRunner(property, context, metadata);
         runner.run();
         shutdownHook.addRuntimeShutdownHook(runner::close);
         context.close();
@@ -86,14 +88,15 @@ public final class AgentExecutionEngine {
     /**
      * Responsible for executing the agent.
      */
-    static class AgentRunner {
+    static final class AgentRunner {
 
         private final MetricSendSessionManager sessionManager;
 
         public AgentRunner(final TrafficHunterAgentProperty property,
-                           final AgentExecutableContext context) {
+                           final AgentExecutableContext context,
+                           final AgentMetadata metadata) {
 
-            this.sessionManager = new MetricSendSessionManager(property, context);
+            this.sessionManager = new MetricSendSessionManager(property, context, metadata);
         }
 
         public void run() {

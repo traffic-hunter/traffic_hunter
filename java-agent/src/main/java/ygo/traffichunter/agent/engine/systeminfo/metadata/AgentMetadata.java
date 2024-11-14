@@ -1,10 +1,12 @@
 package ygo.traffichunter.agent.engine.systeminfo.metadata;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 import ygo.traffichunter.agent.AgentStatus;
+import ygo.traffichunter.agent.event.listener.AgentStateEventListener;
+import ygo.traffichunter.agent.event.object.AgentStateEvent;
 
-public class AgentMetadata {
+public class AgentMetadata implements AgentStateEventListener {
 
     private final String agentId;
 
@@ -12,21 +14,22 @@ public class AgentMetadata {
 
     private final String agentName;
 
-    private Instant startTime;
+    private final Instant startTime;
 
-    private AgentStatus status;
+    private final AtomicReference<AgentStatus> status;
 
-    public AgentMetadata(final String agentId,
-                         final String agentVersion,
-                         final String agentName,
-                         final Instant startTime,
-                         final AgentStatus status) {
-
+    public AgentMetadata(final String agentId, final String agentVersion, final String agentName,
+                         final Instant startTime, final AgentStatus status) {
         this.agentId = agentId;
         this.agentVersion = agentVersion;
         this.agentName = agentName;
         this.startTime = startTime;
-        this.status = status;
+        this.status = new AtomicReference<>(status);
+    }
+
+    @Override
+    public void onEvent(final AgentStateEvent event) {
+        this.setStatus(event.getAfterStatus());
     }
 
     public String getAgentId() {
@@ -41,19 +44,15 @@ public class AgentMetadata {
         return agentName;
     }
 
-    public AgentStatus getStatus() {
-        return status;
-    }
-
     public Instant getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(final Instant startTime) {
-        this.startTime = startTime;
+    public AgentStatus getStatus() {
+        return status.get();
     }
 
-    public void setStatus(final AgentStatus status) {
-        this.status = status;
+    private void setStatus(final AgentStatus status) {
+        this.status.set(status);
     }
 }
