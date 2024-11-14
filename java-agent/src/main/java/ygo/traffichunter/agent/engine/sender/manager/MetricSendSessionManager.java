@@ -40,8 +40,8 @@ public class MetricSendSessionManager {
         this.property = property;
         this.transactionMetricSender = new AgentTransactionMetricSender(property);
         this.systemMetricSender = new AgentSystemMetricSender(property);
-        this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("system-metric-sender"));
-        this.executor = Executors.newSingleThreadExecutor(getThreadFactory("transaction-metric-sender"));
+        this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("TransactionSystemInfoMetricSender"));
+        this.executor = Executors.newVirtualThreadPerTaskExecutor();
     }
 
     public void run() {
