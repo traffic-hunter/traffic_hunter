@@ -3,6 +3,8 @@ package ygo.traffichunter.agent.engine;
 import java.lang.instrument.Instrumentation;
 import java.time.Duration;
 import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.banner.AsciiBanner;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
@@ -30,7 +32,9 @@ import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
  */
 public final class AgentExecutionEngine {
 
-    private static final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
+    private static final Logger log = LoggerFactory.getLogger(AgentExecutionEngine.class);
+
+    private final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
     private final AsciiBanner asciiBanner = new AsciiBanner();
 
@@ -45,6 +49,7 @@ public final class AgentExecutionEngine {
 
     private void run() {
         StartUp startUp = new StartUp();
+        Instant startTime = startUp.getStartTime();
         final AgentExecutableContext context = new TrafficHunterAgentExecutableContext(environment, shutdownHook);
         if(!shutdownHook.isEnabledShutdownHook()) {
             shutdownHook.enableShutdownHook();
@@ -53,15 +58,20 @@ public final class AgentExecutionEngine {
         configurableContextInitializer.retransform(inst);
         TrafficHunterAgentProperty property = configurableContextInitializer.property();
         AgentMetadata metadata = configurableContextInitializer.setAgentMetadata(
-                startUp.getStartTime(),
+                startTime,
                 AgentStatus.INITIALIZED
         );
         context.addAgentStateEventListener(metadata);
         asciiBanner.print(metadata);
-        AgentRunner runner = new AgentRunner(property, context, metadata);
-        runner.run();
-        shutdownHook.addRuntimeShutdownHook(runner::close);
-        context.close();
+        if(context.isInit()) {
+            AgentRunner runner = new AgentRunner(property, context, metadata);
+            runner.run();
+            shutdownHook.addRuntimeShutdownHook(context::removeAllAgentStateEventListeners);
+            shutdownHook.addRuntimeShutdownHook(runner::close);
+            context.close();
+        }
+
+        log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime().getSeconds());
     }
 
     public static void run(final String args, final Instrumentation inst) {
@@ -73,6 +83,10 @@ public final class AgentExecutionEngine {
      */
     static class StartUp extends LifeCycle {
 
+        public StartUp() {
+            super();
+        }
+
         @Override
         public Instant getStartTime() {
             return this.startTime;
@@ -80,13 +94,15 @@ public final class AgentExecutionEngine {
 
         @Override
         public Instant getEndTime() {
-            this.endTime = Instant.now();
+            if(endTime == null) {
+                this.endTime = Instant.now();
+            }
             return endTime;
         }
 
         @Override
         public Duration getUpTime() {
-            return Duration.between(startTime, endTime);
+            return Duration.between(this.startTime, getEndTime());
         }
     }
 
