@@ -7,7 +7,7 @@ public abstract class LifeCycle {
 
     protected final Instant startTime;
 
-    protected volatile Instant endTime;
+    protected Instant endTime;
 
     protected LifeCycle() {
         this.startTime = Instant.now();
