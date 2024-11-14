@@ -17,52 +17,41 @@ import ygo.traffichunter.http.HttpBuilder;
 import ygo.traffichunter.retry.RetryHelper;
 import ygo.traffichunter.util.AgentUtil;
 
-public class AgentSystemMetricSender implements MetricSender<Supplier<HttpResponse<String>>> {
+public class AgentSystemMetricSender implements MetricSender {
 
     private static final Logger log = LoggerFactory.getLogger(AgentSystemMetricSender.class);
 
     private final TrafficHunterAgentProperty property;
 
-    private final AgentMetadata metadata;
-
-    public AgentSystemMetricSender(final TrafficHunterAgentProperty property,
-                                   final AgentMetadata metadata) {
+    public AgentSystemMetricSender(final TrafficHunterAgentProperty property) {
         this.property = property;
-        this.metadata = metadata;
     }
 
-    public void run() {
+    @Override
+    public void toSend(final AgentMetadata metadata) {
 
         final HttpResponse<String> httpResponse = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
                 .failAfterMaxAttempts(true)
                 .retryName("httpResponse")
                 .throwable(throwable -> throwable instanceof RuntimeException)
-                .retrySupplier(this.toSend());
+                .retrySupplier(() -> this.send(metadata));
 
         log.info("httpResponse status = {}", httpResponse.statusCode());
     }
 
-    @Override
-    public Supplier<HttpResponse<String>> toSend() {
-        return () -> {
+    public HttpResponse<String> send(final AgentMetadata metadata) {
 
-            final SystemInfo systemInfo = MetricCollectSupport.collect(property.targetJVMPath());
+        final SystemInfo systemInfo = MetricCollectSupport.collect();
 
-            final MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(
-                    metadata,
-                    systemInfo
-            );
-
-            try {
-                return HttpBuilder.newBuilder(URI.create(AgentUtil.HTTP_URL.getUrl(property.uri())))
-                        .header("Content-Type", "application/json")
-                        .timeOut(Duration.ofSeconds(3))
-                        .request(metadataWrapper)
-                        .build();
-            } catch (Exception e) {
-                log.error("http request error = {}", e.getMessage());
-                throw new RuntimeException(e);
-            }
-        };
+        try {
+            return HttpBuilder.newBuilder(URI.create(AgentUtil.HTTP_URL.getUrl(property.uri())))
+                    .header("Content-Type", "application/json")
+                    .timeOut(Duration.ofSeconds(3))
+                    .request(MetadataWrapper.create(metadata, systemInfo))
+                    .build();
+        } catch (Exception e) {
+            log.error("http request error = {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
