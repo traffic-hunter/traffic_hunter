@@ -19,7 +19,10 @@ public class TrafficHunterAgent {
 
     protected TimeUnit timeUnit;
 
+    protected String name;
+
     protected TrafficHunterAgent(final TrafficHunterAgent trafficHunterAgent) {
+        this.name = trafficHunterAgent.name;
         this.scheduleInterval = trafficHunterAgent.scheduleInterval;
         this.targetJVMPath = trafficHunterAgent.targetJVMPath;
         this.uri = trafficHunterAgent.uri;
@@ -37,6 +40,11 @@ public class TrafficHunterAgent {
 
     public FaultTolerantTrafficHunterAgent faultTolerant() {
         return new FaultTolerantTrafficHunterAgent(this);
+    }
+
+    public TrafficHunterAgent name(final String name) {
+        this.name = name;
+        return this;
     }
 
     public TrafficHunterAgent targetJVM(final String targetJVMPath) {
@@ -60,6 +68,6 @@ public class TrafficHunterAgent {
     }
 
     public TrafficHunterAgentProperty complete() {
-        return new TrafficHunterAgentProperty(targetJVMPath, jar, scheduleInterval, uri, timeUnit);
+        return new TrafficHunterAgentProperty(name, targetJVMPath, jar, scheduleInterval, uri, timeUnit);
     }
 }

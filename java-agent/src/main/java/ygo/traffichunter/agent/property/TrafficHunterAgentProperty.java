@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 import ygo.traffichunter.retry.backoff.BackOffPolicy;
 
 public record TrafficHunterAgentProperty(
+        String name,
         String targetJVMPath,
         String jar,
         int scheduleInterval,
@@ -13,7 +14,8 @@ public record TrafficHunterAgentProperty(
         BackOffPolicy backOffPolicy
 ) {
 
-    public TrafficHunterAgentProperty(final String targetJVMPath,
+    public TrafficHunterAgentProperty(final String name,
+                                      final String targetJVMPath,
                                       final String jar,
                                       final int scheduleInterval,
                                       final String uri,
@@ -21,6 +23,7 @@ public record TrafficHunterAgentProperty(
                                       final int maxAttempt,
                                       final BackOffPolicy backOffPolicy) {
 
+        this.name = name;
         this.targetJVMPath = targetJVMPath;
         this.jar = jar;
         this.scheduleInterval = scheduleInterval;
@@ -30,19 +33,21 @@ public record TrafficHunterAgentProperty(
         this.backOffPolicy = backOffPolicy;
     }
 
-    public TrafficHunterAgentProperty(final String targetJVMPath,
+    public TrafficHunterAgentProperty(final String name,
+                                      final String targetJVMPath,
                                       final String jar,
                                       final int scheduleInterval,
                                       final String uri,
                                       final TimeUnit timeUnit) {
 
-        this(targetJVMPath, jar, scheduleInterval, uri, timeUnit, 0, null);
+        this(name, targetJVMPath, jar, scheduleInterval, uri, timeUnit, 0, null);
     }
 
     @Override
     public String toString() {
         return "TrafficHunterAgentProperty{" +
-                "targetJVMPath='" + targetJVMPath + '\'' +
+                "name='" + name + '\'' +
+                ", targetJVMPath='" + targetJVMPath + '\'' +
                 ", jar=" + jar +
                 ", scheduleInterval=" + scheduleInterval +
                 ", uri=" + uri +

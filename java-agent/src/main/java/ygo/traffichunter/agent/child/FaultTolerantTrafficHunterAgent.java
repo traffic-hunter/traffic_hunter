@@ -29,6 +29,7 @@ public class FaultTolerantTrafficHunterAgent extends TrafficHunterAgent {
     @Override
     public TrafficHunterAgentProperty complete() {
         return new TrafficHunterAgentProperty(
+                this.name,
                 this.targetJVMPath,
                 this.jar,
                 this.scheduleInterval,
