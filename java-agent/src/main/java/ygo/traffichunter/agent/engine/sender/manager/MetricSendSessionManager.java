@@ -3,12 +3,14 @@ package ygo.traffichunter.agent.engine.sender.manager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
 import ygo.traffichunter.agent.engine.sender.http.AgentSystemMetricSender;
 import ygo.traffichunter.agent.engine.sender.websocket.AgentTransactionMetricSender;
+import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
 public class MetricSendSessionManager {
@@ -23,48 +25,44 @@ public class MetricSendSessionManager {
 
     private final ScheduledExecutorService schedule;
 
-    private final AgentExecutableContext context;
-
     private final ExecutorService executor;
 
-    public MetricSendSessionManager(final TrafficHunterAgentProperty property,
-                                    final AgentExecutableContext context) {
+    private final AgentExecutableContext context;
 
+    private final AgentMetadata metadata;
+
+    public MetricSendSessionManager(final TrafficHunterAgentProperty property,
+                                    final AgentExecutableContext context,
+                                    final AgentMetadata metadata) {
+
+        this.metadata = metadata;
         this.context = context;
         this.property = property;
-        this.transactionMetricSender = new AgentTransactionMetricSender(
-                property,
-                this.context.configureEnv().getAgentMetadata()
-        );
-        this.systemMetricSender = new AgentSystemMetricSender(
-                property,
-                this.context.configureEnv().getAgentMetadata()
-        );
-        this.schedule = Executors.newSingleThreadScheduledExecutor();
-        this.executor = Executors.newSingleThreadExecutor();
+        this.transactionMetricSender = new AgentTransactionMetricSender(property);
+        this.systemMetricSender = new AgentSystemMetricSender(property);
+        this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("system-metric-sender"));
+        this.executor = Executors.newSingleThreadExecutor(getThreadFactory("transaction-metric-sender"));
     }
 
     public void run() {
+
+        if(context.isStopped()) {
+            log.error("MetricSendSessionManager is stopped");
+            return;
+        }
+
         if(context.isRunning()) {
-            log.error("MetricSendSessionManager already started!!");
+            log.error("MetricSendSessionManager is already running");
             return;
         }
 
         log.info("start Metric send...");
 
-        executor.execute(transactionMetricSender);
+        context.setStatus(AgentStatus.RUNNING);
 
-        schedule.scheduleWithFixedDelay(
-                () -> {
-                    Thread.currentThread().setName("system-metric-send-thread");
-                    try {
+        executor.execute(() -> transactionMetricSender.toSend(metadata));
 
-                        systemMetricSender.run();
-                    } catch (Exception e) {
-                        context.setStatus(AgentStatus.ERROR);
-                        log.error("MetricSendSessionManager system metric failed = {}", e.getMessage());
-                    }
-                },
+        schedule.scheduleWithFixedDelay(() -> systemMetricSender.toSend(metadata),
                 0,
                 property.scheduleInterval(),
                 property.timeUnit()
@@ -73,11 +71,19 @@ public class MetricSendSessionManager {
 
     public void close() {
         log.info("closing MetricSendSessionManager...");
+        context.setStatus(AgentStatus.EXIT);
         transactionMetricSender.close();
+        executor.shutdown();
         schedule.shutdown();
     }
 
-    public AgentStatus getStatus() {
-        return context.getStatus();
+    private ThreadFactory getThreadFactory(final String threadName) {
+        return r -> {
+            Thread thread = new Thread(r);
+            thread.setDaemon(true);
+            thread.setName(threadName);
+
+            return thread;
+        };
     }
 }
