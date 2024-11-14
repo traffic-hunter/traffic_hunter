@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final AtomicBoolean isClosed =  new AtomicBoolean(false);
 
     public MetricWebSocketClient(final URI serverUri) {
         super(serverUri);
@@ -71,15 +74,18 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         return false;
     }
 
+    /**
+     * recursive close thread safe CAS
+     */
     public void close() {
-        if(isClosed() || isClosing()) {
-            return;
-        }
-
-        try {
-            this.closeBlocking();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        if(isClosed.compareAndSet(false, true)) {
+            try {
+                if(isOpen()) {
+                    this.closeBlocking();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -90,7 +96,6 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
 
         try {
             String s = objectMapper.writeValueAsString(metric);
-            log.info("websocket client sent = {}", s);
             this.send(s);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
