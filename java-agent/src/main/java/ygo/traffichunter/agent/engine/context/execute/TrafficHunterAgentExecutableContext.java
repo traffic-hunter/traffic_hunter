@@ -8,8 +8,11 @@ import ygo.traffichunter.agent.engine.TrafficHunterAgentShutdownHook;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
 import ygo.traffichunter.agent.engine.context.configuration.ConfigurableContextInitializer;
 import ygo.traffichunter.agent.engine.env.ConfigurableEnvironment;
+import ygo.traffichunter.agent.event.listener.AgentStateEventListener;
+import ygo.traffichunter.agent.event.object.AgentStateEvent;
+import ygo.traffichunter.agent.event.store.AgentStateEventStore;
 
-public class TrafficHunterAgentExecutableContext implements AgentExecutableContext {
+public class TrafficHunterAgentExecutableContext extends AgentStateEventStore implements AgentExecutableContext {
 
     private final ConfigurableEnvironment environment;
 
@@ -28,7 +31,22 @@ public class TrafficHunterAgentExecutableContext implements AgentExecutableConte
     }
 
     @Override
-    public ConfigurableContextInitializer configureEnv() {
+    public void addAgentStateEventListener(final AgentStateEventListener listener) {
+        super.addAgentStateEventListener(listener);
+    }
+
+    @Override
+    public void removeAgentStateEventListener(final AgentStateEventListener listener) {
+        super.removeAgentStateEventListener(listener);
+    }
+
+    @Override
+    public void removeAllAgentStateEventListeners() {
+        super.removeAll();
+    }
+
+    @Override
+    public ConfigurableContextInitializer init() {
         return new ConfigurableContextInitializer(environment);
     }
 
@@ -40,7 +58,6 @@ public class TrafficHunterAgentExecutableContext implements AgentExecutableConte
         }
 
         if(this.shutdownHook.isEnabledShutdownHook() && this.isShutdown.compareAndSet(false, true)) {
-            setStatus(AgentStatus.EXIT);
             Thread shutdownHookThread;
             shutdownLock.lock();
             try {
@@ -80,16 +97,21 @@ public class TrafficHunterAgentExecutableContext implements AgentExecutableConte
     }
 
     @Override
-    public boolean setStatus(final AgentStatus newStatus) {
-        AgentStatus agentStatus = status.get();
+    public void setStatus(final AgentStatus newStatus) {
+        AgentStatus agentStatus;
+
         do {
-
-            if(agentStatus.equals(AgentStatus.EXIT)) {
-                return false;
-            }
-
+            agentStatus = status.get();
         } while (!status.compareAndSet(agentStatus, newStatus));
 
-        return true;
+        AgentStateEvent event = new AgentStateEvent(this, agentStatus, newStatus);
+
+        notifyAgentStateChange(event);
+    }
+
+    private void notifyAgentStateChange(final AgentStateEvent event) {
+        for(AgentStateEventListener listener : super.getListeners()) {
+            listener.onEvent(event);
+        }
     }
 }
