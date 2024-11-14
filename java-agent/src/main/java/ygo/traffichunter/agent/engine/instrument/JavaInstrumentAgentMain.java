@@ -43,57 +43,6 @@ public class JavaInstrumentAgentMain {
             return;
         }
 
-        reTransform(inst);
-
-        AgentExecutionEngine.run(Environment.SYSTEM_PROFILE.systemProfile());
-    }
-
-    private static void reTransform(final Instrumentation inst) {
-        new Default()
-                .with(RedefinitionStrategy.RETRANSFORMATION)
-                .disableClassFormatChanges()
-                .ignore(ignoreMatchPackage())
-                .type(getSpringComponentMatcher())
-                .transform((builder, typeDescription, classLoader, module, protectionDomain) ->
-                        builder.visit(Advice.to(TransactionAdvise.class).on(isMethod()))
-                ).installOn(inst);
-    }
-
-    private static Junction<TypeDescription> ignoreMatchPackage() {
-        return ElementMatchers.nameStartsWith("java.")
-                .or(ElementMatchers.nameStartsWith("sun."))
-                .or(ElementMatchers.nameStartsWith("jdk."));
-    }
-
-    private static ElementMatcher<TypeDescription> getSpringComponentMatcher() {
-        return isAnnotatedWith(named(AnnotationPath.SERVICE.getPath()))
-                .or(isAnnotatedWith(named(AnnotationPath.REPOSITORY.getPath())));
-    }
-
-    private static class TransactionAdvise {
-
-        @OnMethodEnter
-        public static long enter() {
-            return Instant.now().toEpochMilli();
-        }
-
-        @OnMethodExit(onThrowable = Throwable.class)
-        public static void exit(@Origin final String method,
-                                @Enter final long startTime,
-                                @Thrown final Throwable throwable) {
-
-            final long endTime = Instant.now().toEpochMilli();
-            final long duration = endTime - startTime;
-
-            final TransactionInfo txInfo = TransactionInfo.create(method,
-                    Instant.ofEpochMilli(startTime),
-                    Instant.ofEpochMilli(endTime),
-                    duration,
-                    throwable == null ? "No Error Message" : throwable.getMessage(),
-                    throwable == null
-            );
-
-            SyncQueue.INSTANCE.add(txInfo);
-        }
+        AgentExecutionEngine.run(Environment.SYSTEM_PROFILE.systemProfile(), inst);
     }
 }

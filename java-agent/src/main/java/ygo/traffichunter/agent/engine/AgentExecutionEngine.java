@@ -1,5 +1,6 @@
 package ygo.traffichunter.agent.engine;
 
+import java.lang.instrument.Instrumentation;
 import java.time.Duration;
 import java.time.Instant;
 import ygo.traffichunter.agent.AgentStatus;
@@ -35,17 +36,21 @@ public final class AgentExecutionEngine {
 
     private final ConfigurableEnvironment environment;
 
-    private AgentExecutionEngine(final String args) {
+    private final Instrumentation inst;
+
+    private AgentExecutionEngine(final String args, final Instrumentation inst) {
+        this.inst = inst;
         this.environment = new YamlConfigurableEnvironment(args);
     }
 
     private void run() {
         StartUp startUp = new StartUp();
-        AgentExecutableContext context = new TrafficHunterAgentExecutableContext(environment, shutdownHook);
+        final AgentExecutableContext context = new TrafficHunterAgentExecutableContext(environment, shutdownHook);
         if(!shutdownHook.isEnabledShutdownHook()) {
             shutdownHook.enableShutdownHook();
         }
         ConfigurableContextInitializer configurableContextInitializer = context.init();
+        configurableContextInitializer.retransform(inst);
         TrafficHunterAgentProperty property = configurableContextInitializer.property();
         AgentMetadata metadata = configurableContextInitializer.setAgentMetadata(
                 startUp.getStartTime(),
@@ -59,8 +64,8 @@ public final class AgentExecutionEngine {
         context.close();
     }
 
-    public static void run(final String args) {
-        new AgentExecutionEngine(System.getProperty(args)).run();
+    public static void run(final String args, final Instrumentation inst) {
+        new AgentExecutionEngine(System.getProperty(args), inst).run();
     }
 
     /**
