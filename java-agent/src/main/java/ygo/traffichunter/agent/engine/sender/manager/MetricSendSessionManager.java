@@ -1,17 +1,24 @@
 package ygo.traffichunter.agent.engine.sender.manager;
 
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
+import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import org.java_websocket.client.WebSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
-import ygo.traffichunter.agent.engine.sender.http.AgentSystemMetricSender;
+import ygo.traffichunter.agent.engine.sender.websocket.AgentSystemMetricSender;
 import ygo.traffichunter.agent.engine.sender.websocket.AgentTransactionMetricSender;
 import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
+import ygo.traffichunter.retry.RetryHelper;
+import ygo.traffichunter.util.AgentUtil;
+import ygo.traffichunter.websocket.MetricWebSocketClient;
 
 public class MetricSendSessionManager {
 
@@ -31,15 +38,19 @@ public class MetricSendSessionManager {
 
     private final AgentMetadata metadata;
 
+    private final MetricWebSocketClient client;
+
     public MetricSendSessionManager(final TrafficHunterAgentProperty property,
                                     final AgentExecutableContext context,
                                     final AgentMetadata metadata) {
 
+        this.client = new MetricWebSocketClient(URI.create(AgentUtil.WEBSOCKET_URL.getUrl(property.uri())));
+        this.client.connect();
         this.metadata = metadata;
         this.context = context;
         this.property = property;
-        this.transactionMetricSender = new AgentTransactionMetricSender(property);
-        this.systemMetricSender = new AgentSystemMetricSender(property);
+        this.transactionMetricSender = new AgentTransactionMetricSender(client);
+        this.systemMetricSender = new AgentSystemMetricSender(client);
         this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("TransactionSystemInfoMetricSender"));
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
     }
@@ -58,11 +69,33 @@ public class MetricSendSessionManager {
 
         log.info("start Metric send...");
 
+        final RetryHelper retryHelper = RetryHelper.builder()
+                .backOffPolicy(property.backOffPolicy())
+                .isCheck(true)
+                .retryName("websocket retry")
+                .maxAttempts(property.maxAttempt())
+                .retryPredicate(throwable -> throwable instanceof RuntimeException)
+                .build();
+
+        RetryConfig retryConfig = retryHelper.configureRetry();
+
+        Retry retry = Retry.of(retryHelper.getRetryName(), retryConfig);
+
         context.setStatus(AgentStatus.RUNNING);
 
-        executor.execute(() -> transactionMetricSender.toSend(metadata));
+        retry.getEventPublisher()
+                        .onRetry(event -> {
+                            client.reconnect();
+                            log.info("{} retry {} attempts...", event.getName(), event.getNumberOfRetryAttempts());
+                        });
 
-        schedule.scheduleWithFixedDelay(() -> systemMetricSender.toSend(metadata),
+        executor.execute(Retry.decorateRunnable(retry, () ->
+                transactionMetricSender.toSend(metadata)
+        ));
+
+        schedule.scheduleWithFixedDelay(Retry.decorateRunnable(retry, () ->
+                        systemMetricSender.toSend(metadata)
+                ),
                 0,
                 property.scheduleInterval(),
                 property.timeUnit()
@@ -72,7 +105,7 @@ public class MetricSendSessionManager {
     public void close() {
         log.info("closing MetricSendSessionManager...");
         context.setStatus(AgentStatus.EXIT);
-        transactionMetricSender.close();
+        client.close();
         executor.shutdown();
         schedule.shutdown();
     }

@@ -12,7 +12,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MetricWebSocketClient<M> extends WebSocketClient {
+public class MetricWebSocketClient extends WebSocketClient {
 
     private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);
 
@@ -72,7 +72,7 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         return false;
     }
 
-    public void toSend(final M metric) {
+    public <M> void toSend(final M metric) {
         if(!isOpen()) {
             throw new IllegalStateException("WebSocket client is closed");
         }
@@ -85,7 +85,7 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         }
     }
 
-    public void toSend(final List<M> metrics) {
+    public <M> void toSend(final List<M> metrics) {
         if(!isOpen()) {
             throw new IllegalStateException("WebSocket client is closed");
         }
