@@ -13,6 +13,7 @@ import ygo.traffichunter.agent.engine.context.execute.TrafficHunterAgentExecutab
 import ygo.traffichunter.agent.engine.env.ConfigurableEnvironment;
 import ygo.traffichunter.agent.engine.env.yaml.YamlConfigurableEnvironment;
 import ygo.traffichunter.agent.engine.lifecycle.LifeCycle;
+import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.engine.sender.manager.MetricSendSessionManager;
 import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
@@ -66,12 +67,17 @@ public final class AgentExecutionEngine {
         if(context.isInit()) {
             AgentRunner runner = new AgentRunner(property, context, metadata);
             runner.run();
-            shutdownHook.addRuntimeShutdownHook(context::removeAllAgentStateEventListeners);
-            shutdownHook.addRuntimeShutdownHook(runner::close);
+            registryShutdownHook(context, runner);
             context.close();
         }
 
         log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime().getSeconds());
+    }
+
+    private void registryShutdownHook(final AgentExecutableContext context, final AgentRunner runner) {
+        shutdownHook.addRuntimeShutdownHook(SyncQueue.INSTANCE::removeAll);
+        shutdownHook.addRuntimeShutdownHook(context::removeAllAgentStateEventListeners);
+        shutdownHook.addRuntimeShutdownHook(runner::close);
     }
 
     public static void run(final String args, final Instrumentation inst) {

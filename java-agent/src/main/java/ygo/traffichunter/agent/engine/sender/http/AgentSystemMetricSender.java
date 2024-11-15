@@ -1,5 +1,7 @@
 package ygo.traffichunter.agent.engine.sender.http;
 
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -23,23 +25,35 @@ public class AgentSystemMetricSender implements MetricSender {
 
     private final TrafficHunterAgentProperty property;
 
+    private final RetryHelper retryHelper;
+
     public AgentSystemMetricSender(final TrafficHunterAgentProperty property) {
         this.property = property;
+        this.retryHelper = RetryHelper.builder()
+                .backOffPolicy(property.backOffPolicy())
+                .isCheck(true)
+                .retryName("websocket retry")
+                .maxAttempts(property.maxAttempt())
+                .retryPredicate(throwable -> throwable instanceof RuntimeException)
+                .build();
     }
 
     @Override
     public void toSend(final AgentMetadata metadata) {
 
-        final HttpResponse<String> httpResponse = RetryHelper.start(property.backOffPolicy(), property.maxAttempt())
-                .failAfterMaxAttempts(true)
-                .retryName("httpResponse")
-                .throwable(throwable -> throwable instanceof RuntimeException)
-                .retrySupplier(() -> this.send(metadata));
+        RetryConfig retryConfig = retryHelper.configureRetry();
 
-        log.info("httpResponse status = {}", httpResponse.statusCode());
+        Retry retry = Retry.of(retryHelper.getRetryName(), retryConfig);
+
+        retry.getEventPublisher()
+                .onRetry(event -> log.info("{} retry {} attempts...", event.getName(), event.getNumberOfRetryAttempts()));
+
+        HttpResponse<String> httpResponse = Retry.decorateSupplier(retry, () -> this.send(metadata)).get();
+
+        log.info("system metric send status code: {}", httpResponse.statusCode());
     }
 
-    public HttpResponse<String> send(final AgentMetadata metadata) {
+    private HttpResponse<String> send(final AgentMetadata metadata) {
 
         final SystemInfo systemInfo = MetricCollectSupport.collect();
 

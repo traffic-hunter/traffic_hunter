@@ -18,8 +18,6 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final AtomicBoolean isClosed =  new AtomicBoolean(false);
-
     public MetricWebSocketClient(final URI serverUri) {
         super(serverUri);
         objectMapper.registerModule(new JavaTimeModule());
@@ -52,7 +50,7 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         }
 
         try {
-            return this.connectBlocking();
+            return super.connectBlocking();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -66,27 +64,12 @@ public class MetricWebSocketClient<M> extends WebSocketClient {
         }
 
         try {
-            return this.connectBlocking(timeOut, timeUnit);
+            return super.connectBlocking(timeOut, timeUnit);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
         return false;
-    }
-
-    /**
-     * recursive close thread safe CAS
-     */
-    public void close() {
-        if(isClosed.compareAndSet(false, true)) {
-            try {
-                if(isOpen()) {
-                    this.closeBlocking();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
     }
 
     public void toSend(final M metric) {

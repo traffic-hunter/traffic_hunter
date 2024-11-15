@@ -13,64 +13,93 @@ public class RetryHelper {
     private static final Logger log = Logger.getLogger(RetryHelper.class.getName());
 
     private final BackOffPolicy backOffPolicy;
+
     private final int maxAttempts;
-    private Predicate<Throwable> retryPredicate;
-    private String retryName;
-    private boolean isCheck = false;
 
-    private RetryHelper(final BackOffPolicy backOffPolicy, final int maxAttempts) {
-        this.backOffPolicy = backOffPolicy;
-        this.maxAttempts = maxAttempts;
+    private final Predicate<Throwable> retryPredicate;
+
+    private final String retryName;
+
+    private final boolean isCheck;
+
+    private RetryHelper(final Builder builder) {
+        this.backOffPolicy = builder.backOffPolicy;
+        this.maxAttempts = builder.maxAttempts;
+        this.retryPredicate = builder.retryPredicate;
+        this.retryName = builder.retryName;
+        this.isCheck = builder.isCheck;
     }
 
-    public static RetryHelper start(final BackOffPolicy backOffPolicy, final int maxAttempts) {
-        return new RetryHelper(backOffPolicy, maxAttempts);
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public RetryHelper throwable(final Predicate<Throwable> retryPredicate) {
-        this.retryPredicate = retryPredicate;
+    public static class Builder {
 
-        return this;
+        private BackOffPolicy backOffPolicy;
+
+        private int maxAttempts;
+
+        private Predicate<Throwable> retryPredicate;
+
+        private String retryName;
+
+        private boolean isCheck;
+
+        public Builder() {
+        }
+
+        public Builder backOffPolicy(final BackOffPolicy backOffPolicy) {
+            this.backOffPolicy = backOffPolicy;
+            return this;
+        }
+
+        public Builder maxAttempts(final int maxAttempts) {
+            this.maxAttempts = maxAttempts;
+            return this;
+        }
+
+        public Builder retryPredicate(final Predicate<Throwable> retryPredicate) {
+            this.retryPredicate = retryPredicate;
+            return this;
+        }
+
+        public Builder retryName(final String retryName) {
+            this.retryName = retryName;
+            return this;
+        }
+
+        public Builder isCheck(final boolean isCheck) {
+            this.isCheck = isCheck;
+            return this;
+        }
+
+        public RetryHelper build() {
+            return new RetryHelper(this);
+        }
     }
 
-    public RetryHelper retryName(final String retryName) {
-        this.retryName = retryName;
-
-        return this;
+    public BackOffPolicy getBackOffPolicy() {
+        return backOffPolicy;
     }
 
-    public RetryHelper failAfterMaxAttempts(final boolean isCheck) {
-        this.isCheck = isCheck;
-
-        return this;
+    public int getMaxAttempts() {
+        return maxAttempts;
     }
 
-    public Runnable retryRunner(final Runnable runnable) {
-
-        final RetryConfig retryConfig = configureRetry();
-
-        final Retry retry = Retry.of(retryName, retryConfig);
-
-        retry.getEventPublisher()
-                .onRetry(event -> log.info(event.getName() + " " + "retry " + event.getNumberOfRetryAttempts() + " attempts..."));
-
-        return Retry.decorateRunnable(retry, runnable);
+    public Predicate<Throwable> getRetryPredicate() {
+        return retryPredicate;
     }
 
-    public <T> T retrySupplier(final Supplier<T> supplier) {
-
-        final RetryConfig retryConfig = configureRetry();
-
-        final Retry retry = Retry.of(retryName, retryConfig);
-
-        retry.getEventPublisher()
-                .onRetry(event -> log.info(event.getName() + " " + "retry " + event.getNumberOfRetryAttempts() + " attempts..."));
-
-        return Retry.decorateSupplier(retry, supplier).get();
-
+    public String getRetryName() {
+        return retryName;
     }
 
-    private RetryConfig configureRetry() {
+    public boolean isCheck() {
+        return isCheck;
+    }
+
+    public RetryConfig configureRetry() {
         return RetryConfig.custom()
                 .maxAttempts(maxAttempts)
                 .retryOnException(retryPredicate)
