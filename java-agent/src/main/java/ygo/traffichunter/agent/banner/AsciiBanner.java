@@ -12,10 +12,10 @@ import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
 
 public class AsciiBanner {
 
-    private static final String BANNER_NAME = "banner.txt";
+    private static final String BANNER_NAME = "agent-banner.txt";
 
     public void print(final AgentMetadata metadata) {
-        try (final InputStream in = getClass().getClassLoader().getResourceAsStream(BANNER_NAME)) {
+        try (final InputStream in = AsciiBanner.class.getClassLoader().getResourceAsStream(BANNER_NAME)) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(in)));
 
@@ -28,7 +28,7 @@ public class AsciiBanner {
                             .replace("${time}", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
                     .collect(Collectors.joining(System.lineSeparator()));
 
-            System.out.println(banner);
+            System.out.println(banner + "\n");
 
         } catch (IOException ignored) {
 
