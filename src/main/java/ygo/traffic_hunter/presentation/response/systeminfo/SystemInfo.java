@@ -1,7 +1,6 @@
 package ygo.traffic_hunter.presentation.response.systeminfo;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import ygo.traffic_hunter.presentation.response.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffic_hunter.presentation.response.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffic_hunter.presentation.response.systeminfo.memory.MemoryStatusInfo;
@@ -10,7 +9,6 @@ import ygo.traffic_hunter.presentation.response.systeminfo.thread.ThreadStatusIn
 
 public record SystemInfo(
         Instant time,
-        String targetJVM,
         MemoryStatusInfo memoryStatusInfo,
         ThreadStatusInfo threadStatusInfo,
         CpuStatusInfo cpuStatusInfo,

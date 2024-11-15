@@ -2,9 +2,7 @@ package ygo.traffic_hunter.core.concurrency;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-/**
+import java.util.concurrent.LinkedBlockingQueue;/**
  *
  */
 public class SyncQueueManager<T> {

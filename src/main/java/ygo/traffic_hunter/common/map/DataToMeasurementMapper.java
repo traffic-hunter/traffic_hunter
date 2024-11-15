@@ -1,7 +1,5 @@
 package ygo.traffic_hunter.common.map;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants.ComponentModel;

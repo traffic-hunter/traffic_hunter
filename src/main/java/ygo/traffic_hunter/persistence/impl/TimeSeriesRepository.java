@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.domain.measurement.metric.MetricMeasurement;
+import ygo.traffic_hunter.domain.measurement.metric.TransactionMeasurement;
 
 @Repository
 @RequiredArgsConstructor
@@ -15,6 +16,11 @@ public class TimeSeriesRepository implements MetricRepository {
 
     @Override
     public void save(final MetricMeasurement metric) {
+        writeApi.writeMeasurement(WritePrecision.MS, metric);
+    }
+
+    @Override
+    public void save(final TransactionMeasurement metric) {
         writeApi.writeMeasurement(WritePrecision.MS, metric);
     }
 }
