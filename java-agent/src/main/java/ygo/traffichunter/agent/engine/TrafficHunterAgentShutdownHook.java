@@ -23,7 +23,7 @@ public class TrafficHunterAgentShutdownHook implements Runnable {
 
     @Override
     public void run() {
-        log.info("shutting down agent");
+        log.info("register shutdown hook");
 
         if(!enabledShutdownHook) {
             log.info("shutdown hook not enabled");

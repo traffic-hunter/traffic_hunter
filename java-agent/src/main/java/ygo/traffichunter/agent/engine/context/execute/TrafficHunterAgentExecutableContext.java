@@ -61,7 +61,7 @@ public class TrafficHunterAgentExecutableContext extends AgentStateEventStore im
             Thread shutdownHookThread;
             shutdownLock.lock();
             try {
-                shutdownHookThread = new Thread(this.shutdownHook);
+                shutdownHookThread = new Thread(this.shutdownHook, "TrafficHunterAgentShutdownHook");
                 shutdownHookThread.start();
             } catch (Exception e) {
                 throw new RuntimeException(e);
