@@ -6,11 +6,10 @@ import org.springframework.stereotype.Service;
 import ygo.traffic_hunter.common.map.DataToMeasurementMapper;
 import ygo.traffic_hunter.common.map.TransactionMeasurementMapper;
 import ygo.traffic_hunter.core.repository.MetricRepository;
-import ygo.traffic_hunter.domain.measurement.metric.MetricMeasurement;
-import ygo.traffic_hunter.domain.measurement.metric.TransactionMeasurement;
-import ygo.traffic_hunter.presentation.response.systeminfo.SystemInfo;
-import ygo.traffic_hunter.presentation.response.systeminfo.TransactionInfo;
-import ygo.traffic_hunter.presentation.response.systeminfo.metadata.MetadataWrapper;
+import ygo.traffic_hunter.dto.measurement.metric.TransactionMeasurement;
+import ygo.traffic_hunter.dto.systeminfo.SystemInfo;
+import ygo.traffic_hunter.dto.systeminfo.TransactionInfo;
+import ygo.traffic_hunter.dto.systeminfo.metadata.MetadataWrapper;
 
 @Service
 @Slf4j

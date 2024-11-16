@@ -1,21 +1,19 @@
 package ygo.traffic_hunter.core.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.Instant;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ygo.traffic_hunter.common.map.DataToMeasurementMapper;
-import ygo.traffic_hunter.domain.measurement.metric.MetricMeasurement;
-import ygo.traffic_hunter.presentation.response.systeminfo.SystemInfo;
-import ygo.traffic_hunter.presentation.response.systeminfo.cpu.CpuStatusInfo;
-import ygo.traffic_hunter.presentation.response.systeminfo.gc.GarbageCollectionStatusInfo;
-import ygo.traffic_hunter.presentation.response.systeminfo.gc.collections.GarbageCollectionTime;
-import ygo.traffic_hunter.presentation.response.systeminfo.memory.MemoryStatusInfo;
-import ygo.traffic_hunter.presentation.response.systeminfo.runtime.RuntimeStatusInfo;
-import ygo.traffic_hunter.presentation.response.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffic_hunter.dto.measurement.metric.MetricMeasurement;
+import ygo.traffic_hunter.dto.systeminfo.SystemInfo;
+import ygo.traffic_hunter.dto.systeminfo.cpu.CpuStatusInfo;
+import ygo.traffic_hunter.dto.systeminfo.gc.GarbageCollectionStatusInfo;
+import ygo.traffic_hunter.dto.systeminfo.gc.collections.GarbageCollectionTime;
+import ygo.traffic_hunter.dto.systeminfo.memory.MemoryStatusInfo;
+import ygo.traffic_hunter.dto.systeminfo.runtime.RuntimeStatusInfo;
+import ygo.traffic_hunter.dto.systeminfo.thread.ThreadStatusInfo;
 
 @SpringBootTest
 class MetricRepositoryTest {

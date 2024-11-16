@@ -5,8 +5,8 @@ import com.influxdb.client.domain.WritePrecision;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ygo.traffic_hunter.core.repository.MetricRepository;
-import ygo.traffic_hunter.domain.measurement.metric.MetricMeasurement;
-import ygo.traffic_hunter.domain.measurement.metric.TransactionMeasurement;
+import ygo.traffic_hunter.dto.measurement.metric.MetricMeasurement;
+import ygo.traffic_hunter.dto.measurement.metric.TransactionMeasurement;
 
 @Repository
 @RequiredArgsConstructor
