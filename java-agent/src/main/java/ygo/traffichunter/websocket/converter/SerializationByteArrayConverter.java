@@ -2,16 +2,11 @@ package ygo.traffichunter.websocket.converter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
-import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
 import ygo.traffichunter.agent.engine.systeminfo.metadata.MetadataWrapper;
 
 public class SerializationByteArrayConverter {

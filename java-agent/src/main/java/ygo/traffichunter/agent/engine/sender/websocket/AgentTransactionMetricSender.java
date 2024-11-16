@@ -35,7 +35,7 @@ public class AgentTransactionMetricSender implements MetricSender {
 
                 MetadataWrapper<TransactionInfo> wrapper = MetadataWrapper.create(metadata, txInfo);
 
-                client.toSend(wrapper);
+                client.compressToSend(wrapper, MetricType.TRANSACTION_METRIC);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException(e);

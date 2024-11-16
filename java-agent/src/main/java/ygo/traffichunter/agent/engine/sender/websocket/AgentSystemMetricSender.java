@@ -37,6 +37,6 @@ public class AgentSystemMetricSender implements MetricSender {
 
         final MetadataWrapper<SystemInfo> wrapper = MetadataWrapper.create(metadata, systemInfo);
 
-        client.toSend(wrapper);
+        client.compressToSend(wrapper, MetricType.SYSTEM_METRIC);
     }
 }
