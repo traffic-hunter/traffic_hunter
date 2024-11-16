@@ -1,4 +1,4 @@
-package ygo.traffic_hunter.core.channel.websocket;
+package ygo.traffic_hunter.core.websocket;
 
 import java.nio.ByteBuffer;
 import java.util.Set;
