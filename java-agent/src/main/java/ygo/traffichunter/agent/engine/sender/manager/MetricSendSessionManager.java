@@ -74,20 +74,20 @@ public class MetricSendSessionManager {
                 .isCheck(true)
                 .retryName("websocket retry")
                 .maxAttempts(property.maxAttempt())
-                .retryPredicate(throwable -> throwable instanceof RuntimeException)
+                .retryPredicate(throwable -> throwable instanceof IllegalStateException)
                 .build();
 
         RetryConfig retryConfig = retryHelper.configureRetry();
 
         Retry retry = Retry.of(retryHelper.getRetryName(), retryConfig);
 
-        context.setStatus(AgentStatus.RUNNING);
-
         retry.getEventPublisher()
                         .onRetry(event -> {
                             client.reconnect();
                             log.info("{} retry {} attempts...", event.getName(), event.getNumberOfRetryAttempts());
                         });
+
+        context.setStatus(AgentStatus.RUNNING);
 
         executor.execute(Retry.decorateRunnable(retry, () ->
                 transactionMetricSender.toSend(metadata)

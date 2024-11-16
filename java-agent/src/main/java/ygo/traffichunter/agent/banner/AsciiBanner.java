@@ -21,7 +21,7 @@ public class AsciiBanner {
 
             String banner = reader.lines()
                     .map(line -> line
-                            .replace("${version}", metadata.getAgentVersion())
+                            .replace("${version}", metadata.agentVersion())
                             .replace("${java.version}", System.getProperty("java.version"))
                             .replace("${java.specification}", System.getProperty("java.specification.version"))
                             .replace("${jdk}", System.getProperty("java.vendor"))

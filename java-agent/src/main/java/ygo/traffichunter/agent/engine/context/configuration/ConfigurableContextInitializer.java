@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
 import net.bytebuddy.asm.Advice;
@@ -73,7 +74,7 @@ public class ConfigurableContextInitializer {
                 Environment.VERSION.version(),
                 property().name(),
                 startTime,
-                status
+                new AtomicReference<>(status)
         );
     }
 

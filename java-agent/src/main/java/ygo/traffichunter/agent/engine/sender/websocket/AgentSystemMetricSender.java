@@ -1,5 +1,6 @@
 package ygo.traffichunter.agent.engine.sender.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import java.net.URI;
@@ -17,6 +18,8 @@ import ygo.traffichunter.http.HttpBuilder;
 import ygo.traffichunter.retry.RetryHelper;
 import ygo.traffichunter.util.AgentUtil;
 import ygo.traffichunter.websocket.MetricWebSocketClient;
+import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter;
+import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
 public class AgentSystemMetricSender implements MetricSender {
 

@@ -11,16 +11,21 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter;
+import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
 public class MetricWebSocketClient extends WebSocketClient {
 
     private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);
 
+    private final SerializationByteArrayConverter converter;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MetricWebSocketClient(final URI serverUri) {
         super(serverUri);
-        objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.converter = new SerializationByteArrayConverter(objectMapper);
     }
 
     @Override
@@ -83,6 +88,16 @@ public class MetricWebSocketClient extends WebSocketClient {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public <M> void compressToSend(final M metric, final MetricType metricType) {
+        if(!isOpen()) {
+            throw new IllegalStateException("WebSocket client is closed");
+        }
+
+        byte[] transform = converter.transform(metric, metricType);
+
+        this.send(transform);
     }
 
     public <M> void toSend(final List<M> metrics) {
