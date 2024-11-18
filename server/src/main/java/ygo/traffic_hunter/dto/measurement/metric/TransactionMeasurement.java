@@ -7,6 +7,9 @@ import java.time.Instant;
 @Measurement(name = "txMetric")
 public record TransactionMeasurement(
 
+        @Column(name = "agent_name")
+        String agentName,
+
         @Column(name = "tx_name")
         String txName,
 

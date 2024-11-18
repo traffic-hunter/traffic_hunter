@@ -12,11 +12,11 @@ import ygo.traffic_hunter.dto.measurement.metric.thread.ThreadMetricMeasurement;
 @Measurement(name = "metric")
 public record MetricMeasurement(
 
+        @Column(name = "agent_name")
+        String agentName,
+
         @Column(name = "time", timestamp = true)
         Instant time,
-
-        @Column(name = "client_ip")
-        String clientIp,
 
         @Column(name = "cpu_metric")
         CpuMetricMeasurement cpuMetric,

@@ -16,19 +16,21 @@ import ygo.traffic_hunter.dto.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffic_hunter.dto.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffic_hunter.dto.systeminfo.gc.collections.GarbageCollectionTime;
 import ygo.traffic_hunter.dto.systeminfo.memory.MemoryStatusInfo;
+import ygo.traffic_hunter.dto.systeminfo.metadata.AgentMetadata;
 import ygo.traffic_hunter.dto.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffic_hunter.dto.systeminfo.thread.ThreadStatusInfo;
 
 @Mapper(componentModel = ComponentModel.SPRING)
 public interface DataToMeasurementMapper {
 
+    @Mapping(target = "agentName", source = "metadata.agentName")
     @Mapping(target = "clientIp", ignore = true) // Assuming this is set elsewhere
     @Mapping(source = "cpuStatusInfo", target = "cpuMetric")
     @Mapping(source = "garbageCollectionStatusInfo", target = "gcMetric")
     @Mapping(source = "memoryStatusInfo", target = "memoryMetric")
     @Mapping(source = "runtimeStatusInfo", target = "runtimeMetric")
     @Mapping(source = "threadStatusInfo", target = "threadMetric")
-    MetricMeasurement systemInfoToMetricMeasurement(SystemInfo systemInfo);
+    MetricMeasurement systemInfoToMetricMeasurement(AgentMetadata metadata, SystemInfo systemInfo);
 
     CpuMetricMeasurement cpuStatusInfoToCpuMetricMeasurement(CpuStatusInfo cpuStatusInfo);
 
