@@ -3,6 +3,7 @@ package ygo.traffic_hunter.dto.measurement.metric;
 import com.influxdb.annotations.Column;
 import com.influxdb.annotations.Measurement;
 import java.time.Instant;
+import ygo.traffic_hunter.dto.measurement.metadata.Metadata;
 import ygo.traffic_hunter.dto.measurement.metric.cpu.CpuMetricMeasurement;
 import ygo.traffic_hunter.dto.measurement.metric.gc.GCMetricMeasurement;
 import ygo.traffic_hunter.dto.measurement.metric.memory.MemoryMetricMeasurement;
@@ -12,8 +13,8 @@ import ygo.traffic_hunter.dto.measurement.metric.thread.ThreadMetricMeasurement;
 @Measurement(name = "metric")
 public record MetricMeasurement(
 
-        @Column(name = "agent_name")
-        String agentName,
+        @Column(name = "metadata")
+        Metadata metadata,
 
         @Column(name = "time", timestamp = true)
         Instant time,

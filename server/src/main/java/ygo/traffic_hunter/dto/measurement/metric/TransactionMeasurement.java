@@ -3,12 +3,13 @@ package ygo.traffic_hunter.dto.measurement.metric;
 import com.influxdb.annotations.Column;
 import com.influxdb.annotations.Measurement;
 import java.time.Instant;
+import ygo.traffic_hunter.dto.measurement.metadata.Metadata;
 
 @Measurement(name = "txMetric")
 public record TransactionMeasurement(
 
-        @Column(name = "agent_name")
-        String agentName,
+        @Column(name = "metadata")
+        Metadata metadata,
 
         @Column(name = "tx_name")
         String txName,

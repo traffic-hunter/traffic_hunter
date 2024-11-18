@@ -1,6 +1,7 @@
 package ygo.traffic_hunter.dto.systeminfo;
 
 import java.time.Instant;
+import ygo.traffic_hunter.dto.Metric;
 import ygo.traffic_hunter.dto.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffic_hunter.dto.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffic_hunter.dto.systeminfo.memory.MemoryStatusInfo;
@@ -14,5 +15,4 @@ public record SystemInfo(
         CpuStatusInfo cpuStatusInfo,
         GarbageCollectionStatusInfo garbageCollectionStatusInfo,
         RuntimeStatusInfo runtimeStatusInfo
-) {
-}
+) implements Metric {}
