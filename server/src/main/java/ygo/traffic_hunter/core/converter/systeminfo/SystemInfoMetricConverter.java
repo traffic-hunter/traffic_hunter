@@ -6,22 +6,22 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.converter.ByteArrayMetricConverter;
-import ygo.traffic_hunter.dto.Metric;
 import ygo.traffic_hunter.dto.systeminfo.SystemInfo;
 import ygo.traffic_hunter.dto.systeminfo.metadata.MetadataWrapper;
 
 @Component
 @RequiredArgsConstructor
-public class SystemInfoMetricConverter extends ByteArrayMetricConverter<Metric> {
+public class SystemInfoMetricConverter extends ByteArrayMetricConverter<SystemInfo> {
 
     private final ObjectMapper objectMapper;
 
     @Override
-    public MetadataWrapper<Metric> convert(final byte[] data) {
+    public MetadataWrapper<SystemInfo> convert(final byte[] data) {
         byte[] unzippedData = unzip(data);
 
         try {
-            return objectMapper.readValue(unzippedData, new TypeReference<>() {});
+            return objectMapper.readValue(unzippedData, new TypeReference<>() {
+            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
