@@ -4,14 +4,24 @@ import com.influxdb.annotations.Column;
 import com.influxdb.annotations.Measurement;
 import java.time.Instant;
 import ygo.traffic_hunter.dto.measurement.metadata.Metadata;
+import ygo.traffic_hunter.dto.systeminfo.metadata.AgentStatus;
 
 @Measurement(name = "txMetric")
 public record TransactionMeasurement(
 
-        @Column(name = "metadata")
-        Metadata metadata,
+        @Column(name = "agent_id", tag = true)
+        String agentId,
 
-        @Column(name = "tx_name")
+        @Column(name = "agent_name", tag = true)
+        String agentName,
+
+        @Column(name = "agent_version")
+        String agentVersion,
+
+        @Column(name = "agent_boot_time")
+        Instant agentBootTime,
+
+        @Column(name = "tx_name", tag = true)
         String txName,
 
         @Column(name = "start_time", timestamp = true)

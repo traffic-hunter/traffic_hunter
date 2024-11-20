@@ -12,7 +12,10 @@ import ygo.traffic_hunter.dto.systeminfo.metadata.MetadataWrapper;
 @Mapper(componentModel = ComponentModel.SPRING)
 public interface TransactionMeasurementMapper {
 
-    @Mapping(source = "metadata", target = "metadata")
+    @Mapping(target = "agentBootTime", source = "metadata.startTime")
+    @Mapping(target = "agentVersion", source = "metadata.agentVersion")
+    @Mapping(target = "agentName", source = "metadata.agentName")
+    @Mapping(target = "agentId", source = "metadata.agentId")
     @Mapping(target = "txName", source = "data.txName")
     @Mapping(target = "startTime", source = "data.startTime")
     @Mapping(target = "isSuccess", source = "data.isSuccess")

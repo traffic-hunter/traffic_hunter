@@ -25,7 +25,10 @@ import ygo.traffic_hunter.dto.systeminfo.thread.ThreadStatusInfo;
 @Mapper(componentModel = ComponentModel.SPRING)
 public interface DataToMeasurementMapper {
 
-    @Mapping(source = "metadata", target = "metadata")
+    @Mapping(target = "agentBootTime", source = "metadata.startTime")
+    @Mapping(target = "agentVersion", source = "metadata.agentVersion")
+    @Mapping(target = "agentName", source = "metadata.agentName")
+    @Mapping(target = "agentId", source = "metadata.agentId")
     @Mapping(source = "data.time", target = "time")
     @Mapping(source = "data.cpuStatusInfo", target = "cpuMetric")
     @Mapping(source = "data.garbageCollectionStatusInfo", target = "gcMetric")
