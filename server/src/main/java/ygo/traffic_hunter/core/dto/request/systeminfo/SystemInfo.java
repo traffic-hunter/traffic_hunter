@@ -1,8 +1,8 @@
 package ygo.traffic_hunter.core.dto.request.systeminfo;
 
 import java.time.Instant;
+import ygo.traffic_hunter.core.dto.request.Metric;
 import ygo.traffic_hunter.core.dto.request.systeminfo.gc.GarbageCollectionStatusInfo;
-import ygo.traffic_hunter.dto.Metric;
 import ygo.traffic_hunter.core.dto.request.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.runtime.RuntimeStatusInfo;
