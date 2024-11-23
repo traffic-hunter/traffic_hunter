@@ -1,31 +1,51 @@
 package ygo.traffic_hunter.core.repository;
 
+import com.influxdb.query.FluxRecord;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ygo.traffic_hunter.common.map.DataToMeasurementMapper;
-import ygo.traffic_hunter.dto.measurement.metric.MetricMeasurement;
-import ygo.traffic_hunter.dto.systeminfo.SystemInfo;
-import ygo.traffic_hunter.dto.systeminfo.cpu.CpuStatusInfo;
-import ygo.traffic_hunter.dto.systeminfo.gc.GarbageCollectionStatusInfo;
-import ygo.traffic_hunter.dto.systeminfo.gc.collections.GarbageCollectionTime;
-import ygo.traffic_hunter.dto.systeminfo.memory.MemoryStatusInfo;
-import ygo.traffic_hunter.dto.systeminfo.runtime.RuntimeStatusInfo;
-import ygo.traffic_hunter.dto.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffic_hunter.common.map.SystemInfoMapper;
+import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.cpu.CpuStatusInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.gc.GarbageCollectionStatusInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.gc.collections.GarbageCollectionTime;
+import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo;
+import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
+import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
+import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
+import ygo.traffic_hunter.core.dto.request.systeminfo.runtime.RuntimeStatusInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository;
 
 @SpringBootTest
 class MetricRepositoryTest {
 
     @Autowired
-    private MetricRepository metricRepository;
+    private TimeSeriesRepository timeSeriesRepository;
 
     @Autowired
-    private DataToMeasurementMapper mapper;
+    private SystemInfoMapper mapper;
+
+    @AfterEach
+    void init() {
+        timeSeriesRepository.clear();
+    }
 
     @Test
     void DB에_잘_저장이_되는지_확인한다() {
+        // given
+        AgentMetadata metadata = new AgentMetadata(
+          "test",
+          "test",
+          "test",
+          Instant.now(),
+          AgentStatus.RUNNING
+        );
+
         SystemInfo systemInfo = new SystemInfo(
                 Instant.now(),
                 new MemoryStatusInfo(
@@ -40,9 +60,16 @@ class MetricRepositoryTest {
                 new RuntimeStatusInfo(1000L, 5000L, "TestVM", "1.0")
         );
 
-        // when
-        MetricMeasurement result = mapper.systemInfoToMetricMeasurement(systemInfo);
+        MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(metadata, systemInfo);
 
-        metricRepository.save(result);
+        timeSeriesRepository.save(mapper.map(metadataWrapper));
+        timeSeriesRepository.save(mapper.map(metadataWrapper));
+        timeSeriesRepository.save(mapper.map(metadataWrapper));
+        timeSeriesRepository.save(mapper.map(metadataWrapper));
+        timeSeriesRepository.save(mapper.map(metadataWrapper));
+
+        // when
+
+        // then
     }
 }

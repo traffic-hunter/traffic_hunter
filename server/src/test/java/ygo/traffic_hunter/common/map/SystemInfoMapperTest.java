@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ygo.traffic_hunter.AbstractTestConfiguration;
 
-@SpringBootTest(classes = DataToMeasurementMapperImpl.class)
-class DataToMeasurementMapperTest extends AbstractTestConfiguration {
+@SpringBootTest(classes = SystemInfoMapperTest.class)
+class SystemInfoMapperTest extends AbstractTestConfiguration {
 
     @Autowired
-    private DataToMeasurementMapper mapper;
+    private SystemInfoMapper mapper;
 
     @Test
     void test() {
