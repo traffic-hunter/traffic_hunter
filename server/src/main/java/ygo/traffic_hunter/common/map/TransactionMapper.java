@@ -6,6 +6,7 @@ import org.mapstruct.MappingConstants.ComponentModel;
 import org.mapstruct.Named;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
+import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
@@ -19,6 +20,8 @@ public interface TransactionMapper {
     @Mapping(target = "agentId", source = "metadata.agentId")
     @Mapping(target = "transactionData", source = "data", qualifiedByName = "toTransactionData")
     TransactionMeasurement map(MetadataWrapper<TransactionInfo> wrapper);
+
+    TransactionMetricResponse map(TransactionMeasurement measurement);
 
     @Named("toTransactionData")
     default TransactionData mapTransactionData(TransactionInfo transactionInfo) {

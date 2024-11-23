@@ -12,6 +12,7 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.gc.collections.GarbageColl
 import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.metric.MetricData;
 import ygo.traffic_hunter.domain.metric.cpu.CpuMetricMeasurement;
@@ -32,6 +33,8 @@ public interface SystemInfoMapper {
     @Mapping(target = "agentId", source = "metadata.agentId")
     @Mapping(target = "metricData", source = "data", qualifiedByName = "toMetricData")
     MetricMeasurement map(MetadataWrapper<SystemInfo> wrapper);
+
+    SystemMetricResponse map(MetricMeasurement measurement);
 
     @Named("toMetricData")
     default MetricData mapMetricData(SystemInfo systemInfo) {
