@@ -2,9 +2,9 @@ package ygo.traffic_hunter.core.channel.collector.validator;
 
 import java.util.Objects;
 import ygo.traffic_hunter.core.annotation.Validator;
-import ygo.traffic_hunter.dto.systeminfo.metadata.AgentMetadata;
-import ygo.traffic_hunter.dto.systeminfo.metadata.AgentStatus;
-import ygo.traffic_hunter.dto.systeminfo.metadata.MetadataWrapper;
+import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
+import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
+import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 
 @Validator
 public class MetricValidator {

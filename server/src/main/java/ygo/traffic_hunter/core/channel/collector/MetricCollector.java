@@ -6,10 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.common.map.DataToMeasurementMapperImpl;
-import ygo.traffic_hunter.common.map.TransactionMeasurementMapperImpl;
+import ygo.traffic_hunter.common.map.SystemInfoMapperImpl;
+import ygo.traffic_hunter.common.map.TransactionMapperImpl;
 import ygo.traffic_hunter.core.channel.collector.handler.MetricHandler;
 import ygo.traffic_hunter.core.channel.collector.handler.systeminfo.SysteminfoMetricHandler;
 import ygo.traffic_hunter.core.channel.collector.handler.transaction.TransactionMetricHandler;
@@ -45,12 +43,12 @@ public class MetricCollector {
     public void registerProcessors() {
 
         SysteminfoMetricHandler systeminfoMetricHandler = SysteminfoMetricHandler.builder()
-                .mapper(new DataToMeasurementMapperImpl())
+                .mapper(new SystemInfoMapperImpl())
                 .processor(new MetricProcessor<>(decompressor, mapper))
                 .build();
 
         TransactionMetricHandler transactionMetricHandler = TransactionMetricHandler.builder()
-                .mapper(new TransactionMeasurementMapperImpl())
+                .mapper(new TransactionMapperImpl())
                 .preprocessor(new MetricProcessor<>(decompressor, mapper))
                 .build();
 
