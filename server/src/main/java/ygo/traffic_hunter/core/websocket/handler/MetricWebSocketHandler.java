@@ -1,19 +1,16 @@
 package ygo.traffic_hunter.core.websocket.handler;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
-import ygo.traffic_hunter.core.channel.MetricChannel;
 import ygo.traffic_hunter.core.channel.MetricChannelFactory;
 import ygo.traffic_hunter.core.channel.MetricProcessingChannel;
 
@@ -45,7 +42,7 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(final WebSocketSession session, @NotNull final CloseStatus status) throws Exception {
+    public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) throws Exception {
         log.info("Connection closed = {}", session.getId());
         MetricProcessingChannel remove = channelMap.remove(session);
         remove.close();

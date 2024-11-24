@@ -1,13 +1,15 @@
 package ygo.traffic_hunter.core.repository;
 
-import com.influxdb.query.FluxRecord;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import ygo.traffic_hunter.AbstractTestConfiguration;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.cpu.CpuStatusInfo;
@@ -17,16 +19,20 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
+import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
 import ygo.traffic_hunter.core.dto.request.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffic_hunter.domain.entity.MetricMeasurement;
+import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository;
 
 @SpringBootTest
-class MetricRepositoryTest {
+class MetricRepositoryTest extends AbstractTestConfiguration {
 
     @Autowired
     private TimeSeriesRepository timeSeriesRepository;
 
+    @Qualifier("systemInfoMapperImpl")
     @Autowired
     private SystemInfoMapper mapper;
 
@@ -49,8 +55,8 @@ class MetricRepositoryTest {
         SystemInfo systemInfo = new SystemInfo(
                 Instant.now(),
                 new MemoryStatusInfo(
-                        new MemoryStatusInfo.MemoryUsage(1000L, 500L, 800L, 1024L),
-                        new MemoryStatusInfo.MemoryUsage(500L, 200L, 400L, 512L)
+                        new MemoryUsage(1000L, 500L, 800L, 1024L),
+                        new MemoryUsage(500L, 200L, 400L, 512L)
                 ),
                 new ThreadStatusInfo(10, 15, 100L),
                 new CpuStatusInfo(0.5, 0.3, 4),
@@ -63,13 +69,12 @@ class MetricRepositoryTest {
         MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(metadata, systemInfo);
 
         timeSeriesRepository.save(mapper.map(metadataWrapper));
-        timeSeriesRepository.save(mapper.map(metadataWrapper));
-        timeSeriesRepository.save(mapper.map(metadataWrapper));
-        timeSeriesRepository.save(mapper.map(metadataWrapper));
-        timeSeriesRepository.save(mapper.map(metadataWrapper));
 
         // when
+        List<MetricMeasurement> metrics = timeSeriesRepository.findMetricsByRecentTimeAndAgentName(
+                TimeInterval.TEN_MINUTES, "test");
 
         // then
+        Assertions.assertThat(metrics).hasSize(0);
     }
 }

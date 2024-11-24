@@ -4,6 +4,11 @@ import java.sql.Timestamp;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.DSLContext;
+import org.jooq.JSONB;
+import org.jooq.types.DayToSecond;
+import org.jooq.types.Interval;
+import org.jooq.util.postgres.PostgresDSL;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +42,7 @@ public class TimeSeriesRepository implements MetricRepository {
                 + "agent_version, "
                 + "agent_boot_time, "
                 + "metric_data) "
-                + "values (?, ?, ?, ?, ?, ?)";
+                + "values (?, ?, ?, ?, ?, ?::jsonb)";
 
         jdbcTemplate.update(sql,
                 Timestamp.from(metric.time()),
@@ -59,7 +64,7 @@ public class TimeSeriesRepository implements MetricRepository {
                 + "agent_version, "
                 + "agent_boot_time, "
                 + "transaction_data) "
-                + "values (?, ?, ?, ?, ?, ?)";
+                + "values (?, ?, ?, ?, ?, ?::jsonb)";
 
         jdbcTemplate.update(sql,
                 Timestamp.from(metric.time()),
@@ -76,12 +81,18 @@ public class TimeSeriesRepository implements MetricRepository {
                                                                        final String agentName) {
 
         String sql = "select * from metric_measurement "
-                + "where time > now() - interval ?";
+                + "where time > now() - interval ? "
+                + "and agent_name = ? "
+                + "order by time desc ";
 
-        return jdbcTemplate.query(sql,
-                systemMeasurementRowMapper,
-                interval.getInterval()
-        );
+        String result = PostgresDSL.resultQuery(sql)
+                .bind(1, interval.getInterval())
+                .bind(2, agentName)
+                .getSQL();
+
+        System.out.println(result);
+
+        return List.of();
     }
 
     @Override
@@ -89,7 +100,9 @@ public class TimeSeriesRepository implements MetricRepository {
                                                                               final String agentName) {
 
         String sql = "select * from metric_measurement "
-                + "where time > now() - interval ? "
+                + "where time > now() - interval '5 minutes' "
+                + "and metric_measurement.agent_name = 'test' "
+                + "order by time desc "
                 + "limit 20";
 
         return jdbcTemplate.query(sql,
@@ -98,6 +111,7 @@ public class TimeSeriesRepository implements MetricRepository {
         );
     }
 
+    @Transactional
     public void clear() {
         jdbcTemplate.update("truncate table metric_measurement");
     }
