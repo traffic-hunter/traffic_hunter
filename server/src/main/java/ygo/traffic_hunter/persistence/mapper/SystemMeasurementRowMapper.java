@@ -23,7 +23,7 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
                 rs.getString("agent_name"),
                 rs.getString("agent_version"),
                 rs.getTimestamp("agent_boot_time").toInstant(),
-                deserialize(rs.getString("metrics"), MetricData.class)
+                deserialize(rs.getString("metric_data"), MetricData.class)
         );
     }
 

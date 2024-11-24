@@ -23,7 +23,7 @@ public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionDa
                 rs.getString("agent_name"),
                 rs.getString("agent_version"),
                 rs.getTimestamp("agent_boot_time").toInstant(),
-                deserialize(rs.getString("metrics"), TransactionData.class)
+                deserialize(rs.getString("transaction_data"), TransactionData.class)
         );
     }
 
