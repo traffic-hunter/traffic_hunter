@@ -49,7 +49,7 @@ public class MetricCollector {
 
         TransactionMetricHandler transactionMetricHandler = TransactionMetricHandler.builder()
                 .mapper(new TransactionMapperImpl())
-                .preprocessor(new MetricProcessor<>(decompressor, mapper))
+                .processor(new MetricProcessor<>(decompressor, mapper))
                 .build();
 
         registerProcessor((byte) 1, systeminfoMetricHandler);

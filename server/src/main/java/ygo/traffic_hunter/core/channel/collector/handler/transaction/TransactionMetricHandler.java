@@ -16,9 +16,9 @@ public class TransactionMetricHandler implements MetricHandler {
     private final TransactionMapper mapper;
 
     @Builder
-    public TransactionMetricHandler(final MetricProcessor<TransactionInfo> preprocessor,
+    public TransactionMetricHandler(final MetricProcessor<TransactionInfo> processor,
                                     final TransactionMapper mapper) {
-        this.processor = preprocessor;
+        this.processor = processor;
         this.mapper = mapper;
     }
 
