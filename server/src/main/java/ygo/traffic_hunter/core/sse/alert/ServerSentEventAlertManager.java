@@ -26,6 +26,16 @@ public class ServerSentEventAlertManager implements ServerSentEventManager {
     }
 
     @Override
+    public <T> void asyncSend(final T data) {
+
+    }
+
+    @Override
+    public <T> void asyncSendAll(final List<T> data) {
+
+    }
+
+    @Override
     public int size() {
         return 0;
     }

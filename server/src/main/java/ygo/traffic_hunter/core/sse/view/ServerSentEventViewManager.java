@@ -36,27 +36,55 @@ public class ServerSentEventViewManager implements ServerSentEventManager {
     @Override
     public <T> void send(final T data) {
 
+        for(SseEmitter emitter : emitters) {
+            send(data, emitter);
+        }
     }
 
     @Override
     public <T> void sendAll(final List<T> data) {
 
         for(SseEmitter emitter : emitters) {
-            try {
-
-                SseEventBuilder sseBuilder = SseEmitter.event()
-                        .name(emitter.toString())
-                        .data(data);
-
-                emitter.send(sseBuilder);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            sendAll(data, emitter);
         }
+    }
+
+    @Override
+    public <T> void asyncSend(final T data) {
+
+    }
+
+    @Override
+    public <T> void asyncSendAll(final List<T> data) {
+
     }
 
     @Override
     public int size() {
         return emitters.size();
+    }
+
+    private <T> void sendAll(final List<T> data, final SseEmitter emitter) {
+        SseEventBuilder sseBuilder = SseEmitter.event()
+                .name(emitter.toString())
+                .data(data);
+
+        try {
+            emitter.send(sseBuilder);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private <T> void send(final T data, final SseEmitter emitter) {
+        SseEventBuilder sseBuilder = SseEmitter.event()
+                .name(emitter.toString())
+                .data(data);
+
+        try {
+            emitter.send(sseBuilder);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

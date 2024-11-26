@@ -11,5 +11,9 @@ public interface ServerSentEventManager {
 
     <T> void sendAll(List<T> data);
 
+    <T> void asyncSend(T data);
+
+    <T> void asyncSendAll(List<T> data);
+
     int size();
 }
