@@ -66,6 +66,7 @@ public final class AgentExecutionEngine {
         asciiBanner.print(metadata);
         if(context.isInit()) {
             AgentRunner runner = new AgentRunner(property, context, metadata);
+            runner.init();
             runner.run();
             registryShutdownHook(context, runner);
             context.close();
@@ -124,6 +125,10 @@ public final class AgentExecutionEngine {
                            final AgentMetadata metadata) {
 
             this.sessionManager = new MetricSendSessionManager(property, context, metadata);
+        }
+
+        public void init() {
+            sessionManager.afterConnectionEstablished();
         }
 
         public void run() {

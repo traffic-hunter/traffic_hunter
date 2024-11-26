@@ -1,18 +1,27 @@
 package ygo.traffic_hunter.core.websocket.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 import ygo.traffic_hunter.core.channel.MetricChannelFactory;
 import ygo.traffic_hunter.core.channel.MetricProcessingChannel;
+import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 
 @Slf4j
 @Component
@@ -21,13 +30,34 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
     private final Map<WebSocketSession, MetricProcessingChannel> channelMap = new ConcurrentHashMap<>();
 
+    private final Map<String, AgentMetadata> agentMetadataMap = new ConcurrentHashMap<>();
+
     private final MetricChannelFactory factory;
+
+    private final ObjectMapper objectMapper;
 
     @Override
     public void afterConnectionEstablished(final WebSocketSession session) throws Exception {
+
         log.info("New connection established = {}", session.getId());
+
         channelMap.put(session, factory.createChannel());
+
         session.sendMessage(new TextMessage("New connection established session id: " + session.getId()));
+    }
+
+    @Override
+    protected void handleTextMessage(final WebSocketSession session, final TextMessage message) {
+
+        String payload = message.getPayload();
+
+        try {
+            AgentMetadata agentMetadata = objectMapper.readValue(payload, AgentMetadata.class);
+
+            agentMetadataMap.put(session.getId(), agentMetadata);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -45,8 +75,13 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
     public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) throws Exception {
         log.info("Connection closed = {}", session.getId());
         MetricProcessingChannel remove = channelMap.remove(session);
+        agentMetadataMap.remove(session.getId());
         remove.close();
         session.close();
         session.sendMessage(new TextMessage("Connection closed"));
+    }
+
+    public List<AgentMetadata> getAgents() {
+        return new ArrayList<>(agentMetadataMap.values());
     }
 }
