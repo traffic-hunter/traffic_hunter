@@ -1,5 +1,8 @@
 package ygo.traffichunter.agent.engine.sender.manager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import java.net.URI;
@@ -53,6 +56,18 @@ public class MetricSendSessionManager {
         this.systemMetricSender = new AgentSystemMetricSender(client);
         this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("TransactionSystemInfoMetricSender"));
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
+    }
+
+    public void afterConnectionEstablished() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        mapper.registerModule(new JavaTimeModule());
+
+        try {
+            client.send(mapper.writeValueAsString(metadata));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void run() {
