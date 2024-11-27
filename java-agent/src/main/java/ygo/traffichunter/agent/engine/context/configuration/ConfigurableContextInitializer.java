@@ -78,19 +78,6 @@ public class ConfigurableContextInitializer {
         );
     }
 
-    @Deprecated(since = "1.0")
-    public void attach(final TrafficHunterAgentProperty property) {
-        try {
-
-            VirtualMachine vm = JVMSelector.getVM(property.targetJVMPath());
-
-            vm.loadAgent(property.jar());
-        } catch (IOException | AgentLoadException | AgentInitializationException e) {
-            log.error("Failed to load agent = {}", e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
     private Junction<TypeDescription> ignoreMatchPackage() {
         return ElementMatchers.nameStartsWith("java.")
                 .or(ElementMatchers.nameStartsWith("sun."))

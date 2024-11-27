@@ -5,7 +5,7 @@ import ygo.traffichunter.retry.backoff.BackOffPolicy;
 
 public record TrafficHunterAgentProperty(
         String name,
-        String targetJVMPath,
+        String targetUri,
         String jar,
         int scheduleInterval,
         String uri,
@@ -15,7 +15,7 @@ public record TrafficHunterAgentProperty(
 ) {
 
     public TrafficHunterAgentProperty(final String name,
-                                      final String targetJVMPath,
+                                      final String targetUri,
                                       final String jar,
                                       final int scheduleInterval,
                                       final String uri,
@@ -24,7 +24,7 @@ public record TrafficHunterAgentProperty(
                                       final BackOffPolicy backOffPolicy) {
 
         this.name = name;
-        this.targetJVMPath = targetJVMPath;
+        this.targetUri = targetUri;
         this.jar = jar;
         this.scheduleInterval = scheduleInterval;
         this.uri = uri;
@@ -34,20 +34,20 @@ public record TrafficHunterAgentProperty(
     }
 
     public TrafficHunterAgentProperty(final String name,
-                                      final String targetJVMPath,
+                                      final String targetUri,
                                       final String jar,
                                       final int scheduleInterval,
                                       final String uri,
                                       final TimeUnit timeUnit) {
 
-        this(name, targetJVMPath, jar, scheduleInterval, uri, timeUnit, 0, null);
+        this(name, targetUri, jar, scheduleInterval, uri, timeUnit, 0, null);
     }
 
     @Override
     public String toString() {
         return "TrafficHunterAgentProperty{" +
                 "name='" + name + '\'' +
-                ", targetJVMPath='" + targetJVMPath + '\'' +
+                ", targetUri='" + targetUri + '\'' +
                 ", jar=" + jar +
                 ", scheduleInterval=" + scheduleInterval +
                 ", uri=" + uri +

@@ -42,7 +42,7 @@ class MetricRepositoryTest extends AbstractTestConfiguration {
     }
 
     @Test
-    void DB에_잘_저장이_되는지_확인한다() {
+    void DB에_저장이_되는지_확인한다() {
         // given
         AgentMetadata metadata = new AgentMetadata(
           "test",
@@ -75,6 +75,7 @@ class MetricRepositoryTest extends AbstractTestConfiguration {
                 TimeInterval.TEN_MINUTES, "test");
 
         // then
-        Assertions.assertThat(metrics).hasSize(0);
+        System.out.println(metrics);
+        Assertions.assertThat(metrics).hasSize(1);
     }
 }

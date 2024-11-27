@@ -1,6 +1,5 @@
 package ygo.traffichunter.agent.child;
 
-import java.net.URI;
 import java.util.logging.Logger;
 import ygo.traffichunter.agent.TrafficHunterAgent;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
@@ -30,7 +29,7 @@ public class FaultTolerantTrafficHunterAgent extends TrafficHunterAgent {
     public TrafficHunterAgentProperty complete() {
         return new TrafficHunterAgentProperty(
                 this.name,
-                this.targetJVMPath,
+                this.targetUri,
                 this.jar,
                 this.scheduleInterval,
                 this.uri,

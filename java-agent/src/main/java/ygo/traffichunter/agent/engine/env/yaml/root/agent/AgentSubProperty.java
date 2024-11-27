@@ -7,20 +7,20 @@ public class AgentSubProperty {
     private String name;
     private String jar;
     private String serverUri;
-    private String target;
+    private String targetUri;
     private int interval;
     private RetrySubProperty retry;
 
     public AgentSubProperty() {
     }
 
-    public AgentSubProperty(final String name, final String jar, final String serverUri, final String target,
+    public AgentSubProperty(final String name, final String jar, final String serverUri, final String targetUri,
                             final int interval,
                             final RetrySubProperty retry) {
         this.name = name;
         this.jar = jar;
         this.serverUri = serverUri;
-        this.target = target;
+        this.targetUri = targetUri;
         this.interval = interval;
         this.retry = retry;
     }
@@ -33,12 +33,12 @@ public class AgentSubProperty {
         this.serverUri = serverUri;
     }
 
-    public String getTarget() {
-        return target;
+    public String getTargetUri() {
+        return targetUri;
     }
 
-    public void setTarget(final String target) {
-        this.target = target;
+    public void setTargetUri(final String targetUri) {
+        this.targetUri = targetUri;
     }
 
     public int getInterval() {

@@ -1,7 +1,6 @@
 package ygo.traffichunter.agent.engine.env.yaml;
 
 import java.io.InputStream;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -56,7 +55,7 @@ public class YamlConfigurableEnvironment implements ConfigurableEnvironment {
 
             return TrafficHunterAgent.connect(root.getAgent().getServerUri())
                     .name(root.getAgent().getName())
-                    .targetJVM(root.getAgent().getTarget())
+                    .targetUri(root.getAgent().getTargetUri())
                     .locationJar(root.getAgent().getJar())
                     .scheduleInterval(root.getAgent().getInterval())
                     .scheduleTimeUnit(TimeUnit.SECONDS)
