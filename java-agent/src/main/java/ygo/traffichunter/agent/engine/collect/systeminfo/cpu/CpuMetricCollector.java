@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.collect.cpu;
+package ygo.traffichunter.agent.engine.collect.systeminfo.cpu;
 
 import com.sun.management.OperatingSystemMXBean;
 import java.io.IOException;

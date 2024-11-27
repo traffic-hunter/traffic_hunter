@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.collect.runtime;
+package ygo.traffichunter.agent.engine.collect.systeminfo.runtime;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;

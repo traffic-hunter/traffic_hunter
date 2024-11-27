@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.collect.gc;
+package ygo.traffichunter.agent.engine.collect.systeminfo.gc;
 
 import java.io.IOException;
 import java.lang.management.GarbageCollectorMXBean;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
-import ygo.traffichunter.agent.engine.collect.memory.MemoryMetricCollector;
+import ygo.traffichunter.agent.engine.collect.systeminfo.memory.MemoryMetricCollector;
 import ygo.traffichunter.agent.engine.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffichunter.agent.engine.systeminfo.gc.collections.GarbageCollectionTime;
 

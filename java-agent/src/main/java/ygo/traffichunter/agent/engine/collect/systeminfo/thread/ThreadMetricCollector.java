@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.collect.thread;
+package ygo.traffichunter.agent.engine.collect.systeminfo.thread;
 
 import com.sun.management.ThreadMXBean;
 import java.io.IOException;
