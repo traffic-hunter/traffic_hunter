@@ -1,6 +1,6 @@
 package ygo.traffichunter.agent.engine.sender;
 
-import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
+import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 
 public interface MetricSender {
 
