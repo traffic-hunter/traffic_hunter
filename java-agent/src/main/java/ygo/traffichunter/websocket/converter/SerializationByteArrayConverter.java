@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import ygo.traffichunter.agent.engine.systeminfo.metadata.MetadataWrapper;
+import ygo.traffichunter.agent.engine.metric.metadata.MetadataWrapper;
 
 public class SerializationByteArrayConverter {
 

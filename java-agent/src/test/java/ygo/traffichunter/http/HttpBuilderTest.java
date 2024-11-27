@@ -8,13 +8,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
-import ygo.traffichunter.agent.engine.systeminfo.cpu.CpuStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.gc.GarbageCollectionStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
-import ygo.traffichunter.agent.engine.systeminfo.runtime.RuntimeStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.SystemInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.cpu.CpuStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.gc.GarbageCollectionStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.memory.MemoryStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
+import ygo.traffichunter.agent.engine.metric.systeminfo.runtime.RuntimeStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.thread.ThreadStatusInfo;
 
 class HttpBuilderTest {
 

@@ -33,8 +33,8 @@ import ygo.traffichunter.agent.engine.env.Environment;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
 import ygo.traffichunter.agent.engine.jvm.JVMSelector;
 import ygo.traffichunter.agent.engine.queue.SyncQueue;
-import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
-import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
+import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
+import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
 public class ConfigurableContextInitializer {

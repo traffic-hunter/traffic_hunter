@@ -1,7 +1,5 @@
 package ygo.traffichunter.websocket.converter;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import ygo.AbstractTest;
 import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.engine.collect.MetricCollectSupport;
-import ygo.traffichunter.agent.engine.systeminfo.SystemInfo;
-import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
-import ygo.traffichunter.agent.engine.systeminfo.metadata.MetadataWrapper;
+import ygo.traffichunter.agent.engine.metric.systeminfo.SystemInfo;
+import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
+import ygo.traffichunter.agent.engine.metric.metadata.MetadataWrapper;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
 class SerializationByteArrayConverterTest extends AbstractTest {

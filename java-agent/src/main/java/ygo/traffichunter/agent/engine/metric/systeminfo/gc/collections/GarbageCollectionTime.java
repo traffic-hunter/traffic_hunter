@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.systeminfo.gc.collections;
+package ygo.traffichunter.agent.engine.metric.systeminfo.gc.collections;
 
 import java.lang.management.GarbageCollectorMXBean;
 

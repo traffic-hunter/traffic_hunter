@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.systeminfo.metadata;
+package ygo.traffichunter.agent.engine.metric.metadata;
 
 public record MetadataWrapper<D>(AgentMetadata metadata, D data) {
 

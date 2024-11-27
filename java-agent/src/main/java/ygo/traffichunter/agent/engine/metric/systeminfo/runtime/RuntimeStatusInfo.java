@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.systeminfo.runtime;
+package ygo.traffichunter.agent.engine.metric.systeminfo.runtime;
 
 public record RuntimeStatusInfo(
         long getStartTime,

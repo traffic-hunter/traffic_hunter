@@ -6,8 +6,8 @@ import java.lang.management.MemoryMXBean;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
-import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
+import ygo.traffichunter.agent.engine.metric.systeminfo.memory.MemoryStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
 
 public class MemoryMetricCollector implements MetricCollector<MemoryStatusInfo> {
 

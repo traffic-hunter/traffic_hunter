@@ -2,7 +2,7 @@ package ygo.traffichunter.agent.engine.queue;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
+import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
 
 public enum SyncQueue {
 

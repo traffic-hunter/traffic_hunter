@@ -6,7 +6,7 @@ import java.lang.management.ManagementFactory;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
-import ygo.traffichunter.agent.engine.systeminfo.cpu.CpuStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.cpu.CpuStatusInfo;
 
 public class CpuMetricCollector implements MetricCollector<CpuStatusInfo> {
 

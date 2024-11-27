@@ -6,7 +6,7 @@ import java.lang.management.RuntimeMXBean;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
-import ygo.traffichunter.agent.engine.systeminfo.runtime.RuntimeStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.runtime.RuntimeStatusInfo;
 
 public class RuntimeMetricCollector implements MetricCollector<RuntimeStatusInfo> {
 

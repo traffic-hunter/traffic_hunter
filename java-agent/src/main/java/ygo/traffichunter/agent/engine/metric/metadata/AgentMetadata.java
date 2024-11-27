@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.systeminfo.metadata;
+package ygo.traffichunter.agent.engine.metric.metadata;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;

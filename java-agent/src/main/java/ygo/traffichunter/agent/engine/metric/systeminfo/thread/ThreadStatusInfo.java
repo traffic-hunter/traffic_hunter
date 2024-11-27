@@ -1,4 +1,4 @@
-package ygo.traffichunter.agent.engine.systeminfo.thread;
+package ygo.traffichunter.agent.engine.metric.systeminfo.thread;
 
 import java.lang.management.ThreadInfo;
 

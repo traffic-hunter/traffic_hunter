@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import ygo.traffichunter.agent.engine.systeminfo.metadata.AgentMetadata;
+import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 
 public class AsciiBanner {
 

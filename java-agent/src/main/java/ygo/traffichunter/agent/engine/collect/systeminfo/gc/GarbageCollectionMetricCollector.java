@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.collect.systeminfo.memory.MemoryMetricCollector;
-import ygo.traffichunter.agent.engine.systeminfo.gc.GarbageCollectionStatusInfo;
-import ygo.traffichunter.agent.engine.systeminfo.gc.collections.GarbageCollectionTime;
+import ygo.traffichunter.agent.engine.metric.systeminfo.gc.GarbageCollectionStatusInfo;
+import ygo.traffichunter.agent.engine.metric.systeminfo.gc.collections.GarbageCollectionTime;
 
 public class GarbageCollectionMetricCollector implements MetricCollector<GarbageCollectionStatusInfo> {
 
