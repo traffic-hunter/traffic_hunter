@@ -8,7 +8,7 @@ public record TrafficHunterAgentProperty(
         String targetUri,
         String jar,
         int scheduleInterval,
-        String uri,
+        String serverUri,
         TimeUnit timeUnit,
         int maxAttempt,
         BackOffPolicy backOffPolicy
@@ -18,7 +18,7 @@ public record TrafficHunterAgentProperty(
                                       final String targetUri,
                                       final String jar,
                                       final int scheduleInterval,
-                                      final String uri,
+                                      final String serverUri,
                                       final TimeUnit timeUnit,
                                       final int maxAttempt,
                                       final BackOffPolicy backOffPolicy) {
@@ -27,7 +27,7 @@ public record TrafficHunterAgentProperty(
         this.targetUri = targetUri;
         this.jar = jar;
         this.scheduleInterval = scheduleInterval;
-        this.uri = uri;
+        this.serverUri = serverUri;
         this.timeUnit = timeUnit;
         this.maxAttempt = maxAttempt;
         this.backOffPolicy = backOffPolicy;
@@ -37,10 +37,10 @@ public record TrafficHunterAgentProperty(
                                       final String targetUri,
                                       final String jar,
                                       final int scheduleInterval,
-                                      final String uri,
+                                      final String serverUri,
                                       final TimeUnit timeUnit) {
 
-        this(name, targetUri, jar, scheduleInterval, uri, timeUnit, 0, null);
+        this(name, targetUri, jar, scheduleInterval, serverUri, timeUnit, 0, null);
     }
 
     @Override
@@ -50,7 +50,7 @@ public record TrafficHunterAgentProperty(
                 ", targetUri='" + targetUri + '\'' +
                 ", jar=" + jar +
                 ", scheduleInterval=" + scheduleInterval +
-                ", uri=" + uri +
+                ", serverUri=" + serverUri +
                 ", timeUnit=" + timeUnit +
                 ", maxAttempt=" + maxAttempt +
                 ", backOffPolicy=" + backOffPolicy.toString() +
