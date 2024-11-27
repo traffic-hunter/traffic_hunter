@@ -6,17 +6,16 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.metric.web.tomcat.TomcatWebServerInfo;
 import ygo.traffichunter.agent.engine.metric.web.tomcat.request.TomcatRequestInfo;
 import ygo.traffichunter.agent.engine.metric.web.tomcat.thread.TomcatThreadPoolInfo;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
-public class TomcatMetricCollector implements MetricCollector<TomcatWebServerInfo> {
+public class TomcatMetricCollector extends AbstractMBeanMetricCollector<TomcatWebServerInfo> {
 
     private static final Logger log = LoggerFactory.getLogger(TomcatMetricCollector.class.getName());
-
-    private static final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     private final TrafficHunterAgentProperty property;
 
@@ -31,15 +30,15 @@ public class TomcatMetricCollector implements MetricCollector<TomcatWebServerInf
             ObjectName threadPoolMbean = new ObjectName("Catalina:type=ThreadPool,port=" + getPort());
             ObjectName requestMBean = new ObjectName("Catalina:type=GlobalRequestProcessor,port=" + getPort());
             
-            int maxThreads = (int) mBeanServer.getAttribute(threadPoolMbean, "maxThreads");
-            int currentThreads = (int) mBeanServer.getAttribute(threadPoolMbean, "currentThreads");
-            int currentThreadsBusy = (int) mBeanServer.getAttribute(threadPoolMbean, "currentThreadsBusy");
+            int maxThreads = getAttribute(threadPoolMbean, "maxThreads", Integer.class);
+            int currentThreads = getAttribute(threadPoolMbean, "currentThreads", Integer.class);
+            int currentThreadsBusy = getAttribute(threadPoolMbean, "currentThreadsBusy", Integer.class);
 
-            long requestCount = (long) mBeanServer.getAttribute(requestMBean, "requestCount");
-            long bytesReceived = (long) mBeanServer.getAttribute(requestMBean, "bytesReceived");
-            long bytesSent = (long) mBeanServer.getAttribute(requestMBean, "bytesSent");
-            long processingTime = (long) mBeanServer.getAttribute(requestMBean, "processingTime");
-            long errorCount = (long) mBeanServer.getAttribute(requestMBean, "errorCount");
+            long requestCount = getAttribute(requestMBean, "requestCount", Long.class);
+            long bytesReceived = getAttribute(requestMBean, "bytesReceived", Long.class);
+            long bytesSent = getAttribute(requestMBean, "bytesSent", Long.class);
+            long processingTime = getAttribute(requestMBean, "processingTime", Long.class);
+            long errorCount = getAttribute(requestMBean, "errorCount", Long.class);
 
             return new TomcatWebServerInfo(
                     new TomcatThreadPoolInfo(maxThreads, currentThreads, currentThreadsBusy),

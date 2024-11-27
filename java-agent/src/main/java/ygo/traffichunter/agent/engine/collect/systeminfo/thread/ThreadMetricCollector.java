@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
+import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.metric.systeminfo.thread.ThreadStatusInfo;
 
-public class ThreadMetricCollector implements MetricCollector<ThreadStatusInfo> {
+public class ThreadMetricCollector extends AbstractMBeanMetricCollector<ThreadStatusInfo> {
 
     private static final Logger log = Logger.getLogger(ThreadMetricCollector.class.getName());
 

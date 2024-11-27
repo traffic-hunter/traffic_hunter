@@ -9,7 +9,7 @@ public interface MetricCollector<T> {
         return null;
     }
 
-    default T collect() {return null;}
+    T collect();
 
     default List<T> collectAll() {return null;}
 }

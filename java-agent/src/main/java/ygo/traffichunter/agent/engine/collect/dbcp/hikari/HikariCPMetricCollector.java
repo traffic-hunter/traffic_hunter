@@ -1,14 +1,10 @@
 package ygo.traffichunter.agent.engine.collect.dbcp.hikari;
 
-import java.lang.management.ManagementFactory;
-import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import ygo.traffichunter.agent.engine.collect.MetricCollector;
+import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
 import ygo.traffichunter.agent.engine.metric.dbcp.HikariDbcpInfo;
 
-public class HikariCPMetricCollector implements MetricCollector<HikariDbcpInfo> {
-
-    private static final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+public class HikariCPMetricCollector extends AbstractMBeanMetricCollector<HikariDbcpInfo> {
 
     @Override
     public HikariDbcpInfo collect() {
@@ -17,10 +13,10 @@ public class HikariCPMetricCollector implements MetricCollector<HikariDbcpInfo> 
             //The default name for a Hikari connection pool is "HikariPool-1"
             ObjectName hikariInfo = new ObjectName("com.zaxxer.hikari:type=Pool (HikariPool-1)");
 
-            int activeConnections = (int) mBeanServer.getAttribute(hikariInfo, "ActiveConnections");
-            int idleConnections = (int) mBeanServer.getAttribute(hikariInfo, "IdleConnections");
-            int totalConnections = (int) mBeanServer.getAttribute(hikariInfo, "TotalConnections");
-            int threadsAwaitingConnections = (int) mBeanServer.getAttribute(hikariInfo, "ThreadsAwaitingConnection");
+            int activeConnections = getAttribute(hikariInfo, "ActiveConnections", Integer.class);
+            int idleConnections = getAttribute(hikariInfo, "IdleConnections", Integer.class);
+            int totalConnections = getAttribute(hikariInfo, "TotalConnections", Integer.class);
+            int threadsAwaitingConnections = getAttribute(hikariInfo, "ThreadsAwaitingConnection", Integer.class);
 
             return new HikariDbcpInfo(
                     activeConnections,

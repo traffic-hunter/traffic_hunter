@@ -5,10 +5,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
+import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
 import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.metric.systeminfo.runtime.RuntimeStatusInfo;
 
-public class RuntimeMetricCollector implements MetricCollector<RuntimeStatusInfo> {
+public class RuntimeMetricCollector extends AbstractMBeanMetricCollector<RuntimeStatusInfo> {
 
     private static final Logger log = Logger.getLogger(RuntimeStatusInfo.class.getName());
 
