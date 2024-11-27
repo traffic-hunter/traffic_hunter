@@ -46,7 +46,7 @@ public class MetricSendSessionManager {
                                     final AgentExecutableContext context,
                                     final AgentMetadata metadata) {
 
-        this.client = new MetricWebSocketClient(URI.create(AgentUtil.WEBSOCKET_URL.getUrl(property.serverUri())));
+        this.client = new MetricWebSocketClient(AgentUtil.WEBSOCKET_URL.getUri(property.serverUri()));
         this.client.connect();
         this.metadata = metadata;
         this.context = context;

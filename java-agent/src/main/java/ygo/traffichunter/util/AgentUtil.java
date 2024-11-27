@@ -1,5 +1,7 @@
 package ygo.traffichunter.util;
 
+import java.net.URI;
+
 public enum AgentUtil {
     WEBSOCKET_URL("ws://%s/traffic-hunter/tx"),
     HTTP_URL("http://%s/traffic-hunter"),
@@ -19,5 +21,9 @@ public enum AgentUtil {
 
     public String getUrl(final String serverUrl) {
         return String.format(url, serverUrl);
+    }
+
+    public URI getUri(final String serverUrl) {
+        return URI.create(String.format(url, serverUrl));
     }
 }
