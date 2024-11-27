@@ -5,7 +5,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ygo.AbstractTest;
-import ygo.traffichunter.agent.engine.systeminfo.TransactionInfo;
+import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
 import ygo.traffichunter.util.AgentUtil;
 
 class MetricWebSocketClientTest extends AbstractTest {
