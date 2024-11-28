@@ -1,6 +1,5 @@
 package ygo.traffichunter.agent.engine.collect.web.tomcat;
 
-import java.time.Instant;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
@@ -39,7 +38,6 @@ public class TomcatMetricCollector extends AbstractMBeanMetricCollector<TomcatWe
             long errorCount = getAttribute(requestMBean, "errorCount", Long.class);
 
             return new TomcatWebServerInfo(
-                    Instant.now(),
                     new TomcatThreadPoolInfo(maxThreads, currentThreads, currentThreadsBusy),
                     new TomcatRequestInfo(requestCount, bytesReceived, bytesSent, processingTime, errorCount)
             );
