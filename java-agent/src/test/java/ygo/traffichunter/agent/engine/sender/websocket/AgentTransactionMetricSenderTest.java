@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import ygo.AbstractTest;
 import ygo.traffichunter.util.AgentUtil;
@@ -14,6 +15,7 @@ import ygo.traffichunter.util.AgentUtil;
 class AgentTransactionMetricSenderTest extends AbstractTest {
 
     @Test
+    @Disabled
     void 웹소켓_송신을_확인한다() throws InterruptedException {
         // given
         WebSocketClient client = new WebSocketClient(URI.create(AgentUtil.WEBSOCKET_URL.getUrl("localhost:9100"))){

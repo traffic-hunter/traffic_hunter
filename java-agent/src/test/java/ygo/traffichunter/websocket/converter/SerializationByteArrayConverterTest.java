@@ -7,13 +7,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ygo.AbstractTest;
 import ygo.traffichunter.agent.AgentStatus;
-import ygo.traffichunter.agent.engine.collect.MetricCollectSupport;
-import ygo.traffichunter.agent.engine.metric.systeminfo.SystemInfo;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.agent.engine.metric.metadata.MetadataWrapper;
+import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
 class SerializationByteArrayConverterTest extends AbstractTest {
@@ -39,8 +39,16 @@ class SerializationByteArrayConverterTest extends AbstractTest {
                 new AtomicReference<>(AgentStatus.RUNNING)
         );
 
-        SystemInfo collect = MetricCollectSupport.collect();
-        MetadataWrapper<SystemInfo> metadataWrapper = MetadataWrapper.create(metadata, collect);
+        TransactionInfo txInfo = TransactionInfo.create(
+                "test",
+                Instant.now(),
+                Instant.now(),
+                153,
+                "test",
+                true
+        );
+
+        MetadataWrapper<TransactionInfo> metadataWrapper = MetadataWrapper.create(metadata, txInfo);
 
         // when
         String data = mapper.writeValueAsString(metadataWrapper);
@@ -60,14 +68,24 @@ class SerializationByteArrayConverterTest extends AbstractTest {
                 new AtomicReference<>(AgentStatus.RUNNING)
         );
 
-        SystemInfo collect = MetricCollectSupport.collect();
-        MetadataWrapper<SystemInfo> metadataWrapper = MetadataWrapper.create(metadata, collect);
-        byte[] transform = converter.transform(metadataWrapper, MetricType.SYSTEM_METRIC);
+        TransactionInfo txInfo = TransactionInfo.create(
+                "test",
+                Instant.now(),
+                Instant.now(),
+                153,
+                "test",
+                true
+        );
+
+        MetadataWrapper<TransactionInfo> metadataWrapper = MetadataWrapper.create(metadata, txInfo);
+
+        byte[] transform = converter.transform(metadataWrapper, MetricType.TRANSACTION_METRIC);
 
         // when
-        MetadataWrapper<SystemInfo> systemInfoMetadataWrapper = converter.inverseTransform(transform, new TypeReference<>() {});
+        MetadataWrapper<TransactionInfo> transactionInfoMetadataWrapper = converter.inverseTransform(transform, new TypeReference<>() {});
 
         // then
-        System.out.println(systemInfoMetadataWrapper);
+        Assertions.assertEquals(metadata, transactionInfoMetadataWrapper.metadata());
+        Assertions.assertEquals(txInfo, transactionInfoMetadataWrapper.data());
     }
 }

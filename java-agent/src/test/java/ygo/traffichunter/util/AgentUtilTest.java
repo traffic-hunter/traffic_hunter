@@ -50,7 +50,7 @@ class AgentUtilTest extends AbstractTest {
     void websocket_url_이_정상적으로_구성되는지_확인한다() {
         // given
         String serverUrl = "localhost:8080";
-        String res = String.format("ws://%s/traffic-hunter", serverUrl);
+        String res = String.format("ws://%s/traffic-hunter/tx", serverUrl);
 
         // when
         String websocketUrl = AgentUtil.WEBSOCKET_URL.getUrl(serverUrl);

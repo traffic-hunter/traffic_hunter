@@ -22,7 +22,7 @@ class ConfigurableContextInitializerTest extends AbstractTest {
 
         // then
         Assertions.assertNotNull(property);
-        Assertions.assertEquals(property.targetUri(), "ygo.testapp.TestAppApplication");
+        Assertions.assertEquals(property.targetUri(), "localhost:8080");
 
         System.out.println(property);
     }

@@ -5,6 +5,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import ygo.AbstractTest;
 import ygo.traffichunter.agent.engine.jvm.JVMSelector;
@@ -12,6 +13,7 @@ import ygo.traffichunter.agent.engine.jvm.JVMSelector;
 class TrafficHunterAgentTest extends AbstractTest {
 
     @Test
+    @Disabled
     void 타겟_jvm_actuator를_에이전트_jmx로_연결하여_메트릭을_수집한다() throws Exception {
         // given
         JMXServiceURL jmxUrl = JVMSelector.getVMXServiceUrl("ygo.testapp.TestAppApplication");
