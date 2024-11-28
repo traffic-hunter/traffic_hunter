@@ -81,34 +81,24 @@ public class TimeSeriesRepository implements MetricRepository {
                                                                        final String agentName) {
 
         String sql = "select * from metric_measurement "
-                + "where time > now() - interval ? "
+                + "where time > now() - ?::interval "
                 + "and agent_name = ? "
-                + "order by time desc ";
+                + "order by time desc";
 
-        String result = PostgresDSL.resultQuery(sql)
-                .bind(1, interval.getInterval())
-                .bind(2, agentName)
-                .getSQL();
-
-        System.out.println(result);
-
-        return List.of();
+        return jdbcTemplate.query(sql, systemMeasurementRowMapper, interval.getInterval(), agentName);
     }
 
     @Override
     public List<TransactionMeasurement> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval,
                                                                               final String agentName) {
 
-        String sql = "select * from metric_measurement "
-                + "where time > now() - interval '5 minutes' "
-                + "and metric_measurement.agent_name = 'test' "
+        String sql = "select * from transaction_measurement "
+                + "where time > now() - ?::interval "
+                + "and agent_name = ? "
                 + "order by time desc "
                 + "limit 20";
 
-        return jdbcTemplate.query(sql,
-                txMeasurementRowMapper,
-                interval.getInterval()
-        );
+        return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName);
     }
 
     @Transactional
