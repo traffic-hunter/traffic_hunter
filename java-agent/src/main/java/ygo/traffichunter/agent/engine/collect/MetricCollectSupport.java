@@ -15,9 +15,7 @@ import ygo.traffichunter.agent.engine.collect.systeminfo.runtime.RuntimeMetricCo
 import ygo.traffichunter.agent.engine.collect.systeminfo.thread.ThreadMetricCollector;
 import ygo.traffichunter.agent.engine.collect.web.tomcat.TomcatMetricCollector;
 import ygo.traffichunter.agent.engine.jvm.JVMSelector;
-import ygo.traffichunter.agent.engine.metric.dbcp.HikariDbcpInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.SystemInfo;
-import ygo.traffichunter.agent.engine.metric.web.tomcat.TomcatWebServerInfo;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
 public class MetricCollectSupport {
@@ -60,21 +58,15 @@ public class MetricCollectSupport {
                     collectorThread.collect(mbsc),
                     collectorCpu.collect(mbsc),
                     collectorGC.collect(mbsc),
-                    collectorRuntime.collect(mbsc)
+                    collectorRuntime.collect(mbsc),
+                    collectorTomcat.collect(mbsc),
+                    collectorHikari.collect(mbsc)
             );
 
         } catch (IOException e) {
             log.error("Failed to start local management agent = {}", e.getMessage());
             throw new RuntimeException(e);
         }
-    }
-
-    public TomcatWebServerInfo collectWebServer() {
-        return collectorTomcat.collect();
-    }
-
-    public HikariDbcpInfo collectDbcp() {
-        return collectorHikari.collect();
     }
 
     public SystemInfo collect() {
@@ -84,7 +76,9 @@ public class MetricCollectSupport {
                 collectorThread.collect(),
                 collectorCpu.collect(),
                 collectorGC.collect(),
-                collectorRuntime.collect()
+                collectorRuntime.collect(),
+                collectorTomcat.collect(),
+                collectorHikari.collect()
         );
     }
 }

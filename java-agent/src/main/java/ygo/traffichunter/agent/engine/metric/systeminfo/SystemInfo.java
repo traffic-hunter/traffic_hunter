@@ -1,11 +1,13 @@
 package ygo.traffichunter.agent.engine.metric.systeminfo;
 
 import java.time.Instant;
+import ygo.traffichunter.agent.engine.metric.dbcp.HikariDbcpInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffichunter.agent.engine.metric.web.tomcat.TomcatWebServerInfo;
 
 public record SystemInfo(
         Instant time,
@@ -13,6 +15,8 @@ public record SystemInfo(
         ThreadStatusInfo threadStatusInfo,
         CpuStatusInfo cpuStatusInfo,
         GarbageCollectionStatusInfo garbageCollectionStatusInfo,
-        RuntimeStatusInfo runtimeStatusInfo
+        RuntimeStatusInfo runtimeStatusInfo,
+        TomcatWebServerInfo tomcatWebServerInfo,
+        HikariDbcpInfo hikariDbcpInfo
 ) {
 }
