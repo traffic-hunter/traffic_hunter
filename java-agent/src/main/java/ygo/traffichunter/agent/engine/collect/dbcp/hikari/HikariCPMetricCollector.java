@@ -1,5 +1,6 @@
 package ygo.traffichunter.agent.engine.collect.dbcp.hikari;
 
+import java.time.Instant;
 import javax.management.ObjectName;
 import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
 import ygo.traffichunter.agent.engine.metric.dbcp.HikariDbcpInfo;
@@ -19,6 +20,7 @@ public class HikariCPMetricCollector extends AbstractMBeanMetricCollector<Hikari
             int threadsAwaitingConnections = getAttribute(hikariInfo, "ThreadsAwaitingConnection", Integer.class);
 
             return new HikariDbcpInfo(
+                    Instant.now(),
                     activeConnections,
                     idleConnections,
                     totalConnections,
