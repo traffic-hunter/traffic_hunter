@@ -17,7 +17,7 @@ public abstract class AbstractMBeanMetricCollector<T> implements MetricCollector
         }
     }
 
-    static class MetricCollectionException extends RuntimeException {
+    public static class MetricCollectionException extends RuntimeException {
 
         public MetricCollectionException() {
             super();
