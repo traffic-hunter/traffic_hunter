@@ -65,6 +65,7 @@ public final class AgentExecutionEngine {
         context.addAgentStateEventListener(metadata);
         asciiBanner.print(metadata);
         if(context.isInit()) {
+            log.info("Agent initialization completed.");
             AgentRunner runner = new AgentRunner(property, context, metadata);
             runner.init();
             runner.run();
@@ -72,7 +73,7 @@ public final class AgentExecutionEngine {
             context.close();
         }
 
-        log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime().getSeconds());
+        log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime().getSeconds() / 1000);
     }
 
     private void registryShutdownHook(final AgentExecutableContext context, final AgentRunner runner) {
