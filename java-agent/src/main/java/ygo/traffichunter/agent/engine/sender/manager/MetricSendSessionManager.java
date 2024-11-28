@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.AgentStatus;
+import ygo.traffichunter.agent.engine.collect.MetricCollectSupport;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
 import ygo.traffichunter.agent.engine.sender.websocket.AgentSystemMetricSender;
 import ygo.traffichunter.agent.engine.sender.websocket.AgentTransactionMetricSender;
@@ -52,7 +53,7 @@ public class MetricSendSessionManager {
         this.context = context;
         this.property = property;
         this.transactionMetricSender = new AgentTransactionMetricSender(client);
-        this.systemMetricSender = new AgentSystemMetricSender(client);
+        this.systemMetricSender = new AgentSystemMetricSender(client, property);
         this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("TransactionSystemInfoMetricSender"));
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
     }
