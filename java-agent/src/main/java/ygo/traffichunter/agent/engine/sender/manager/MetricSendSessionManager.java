@@ -1,5 +1,9 @@
 package ygo.traffichunter.agent.engine.sender.manager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import java.util.concurrent.ExecutorService;
@@ -22,8 +26,6 @@ public class MetricSendSessionManager {
 
     private static final Logger log = LoggerFactory.getLogger(MetricSendSessionManager.class);
 
-    private static final int MANAGER_WAITING_TIMEOUT_SECONDS = 10;
-
     private final TrafficHunterAgentProperty property;
 
     private final AgentTransactionMetricSender transactionMetricSender;
@@ -40,12 +42,11 @@ public class MetricSendSessionManager {
 
     private final MetricWebSocketClient client;
 
-
     public MetricSendSessionManager(final TrafficHunterAgentProperty property,
                                     final AgentExecutableContext context,
                                     final AgentMetadata metadata) {
 
-        this.client = new MetricWebSocketClient(AgentUtil.WEBSOCKET_URL.getUri(property.serverUri()));
+        this.client = new MetricWebSocketClient(AgentUtil.WEBSOCKET_URL.getUri(property.serverUri()), metadata);
         this.client.connect();
         this.metadata = metadata;
         this.context = context;
@@ -54,18 +55,6 @@ public class MetricSendSessionManager {
         this.systemMetricSender = new AgentSystemMetricSender(client, property);
         this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("TransactionSystemInfoMetricSender"));
         this.executor = Executors.newVirtualThreadPerTaskExecutor();
-    }
-
-    public void afterConnectionEstablished() {
-//        ObjectMapper mapper = new ObjectMapper();
-//
-//        mapper.registerModule(new JavaTimeModule());
-//
-//        try {
-//            client.send(mapper.writeValueAsString(metadata));
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     public void run() {
@@ -102,13 +91,9 @@ public class MetricSendSessionManager {
 
         context.setStatus(AgentStatus.RUNNING);
 
-        executor.execute(Retry.decorateRunnable(retry, () ->
-                transactionMetricSender.toSend(metadata)
-        ));
+        executor.execute(Retry.decorateRunnable(retry, () -> transactionMetricSender.toSend(metadata)));
 
-        schedule.scheduleWithFixedDelay(Retry.decorateRunnable(retry, () ->
-                        systemMetricSender.toSend(metadata)
-                ),
+        schedule.scheduleWithFixedDelay(Retry.decorateRunnable(retry, () -> systemMetricSender.toSend(metadata)),
                 0,
                 property.scheduleInterval(),
                 property.timeUnit()
@@ -131,17 +116,5 @@ public class MetricSendSessionManager {
 
             return thread;
         };
-    }
-
-    private void waitManager() {
-        for(int i = MANAGER_WAITING_TIMEOUT_SECONDS; i > 0; i--) {
-            try {
-                log.info("Waiting for metrics to send... = {}", i);
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

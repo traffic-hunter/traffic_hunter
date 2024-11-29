@@ -7,11 +7,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
@@ -23,8 +23,11 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MetricWebSocketClient(final URI serverUri) {
+    private final AgentMetadata metadata;
+
+    public MetricWebSocketClient(final URI serverUri, final AgentMetadata metadata) {
         super(serverUri);
+        this.metadata = metadata;
         this.objectMapper
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 .registerModule(new JavaTimeModule());
@@ -34,6 +37,7 @@ public class MetricWebSocketClient extends WebSocketClient {
     @Override
     public void onOpen(final ServerHandshake serverHandshake) {
         log.info("websocket client opened");
+        this.toSend(metadata);
     }
 
     @Override

@@ -25,4 +25,8 @@ public class JavaInstrumentAgentMain {
 
         AgentExecutionEngine.run(Environment.SYSTEM_PROFILE.systemProfile(), inst);
     }
+
+    public static void agentmain(String agentArgs, Instrumentation inst) {
+        premain(agentArgs, inst);
+    }
 }

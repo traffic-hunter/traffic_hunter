@@ -1,6 +1,7 @@
 package ygo.traffichunter.agent.engine.collect.web.tomcat;
 
-import javax.management.ObjectInstance;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,39 +25,37 @@ public class TomcatMetricCollector extends AbstractMBeanMetricCollector<TomcatWe
     public TomcatWebServerInfo collect() {
 
         try {
-            ObjectName threadPoolMbean = new ObjectName("Catalina:type=ThreadPool,port=" + getPort());
-            ObjectName requestMBean = new ObjectName("Catalina:type=GlobalRequestProcessor,port=" + getPort());
-            
+            ObjectName threadPoolMbean = new ObjectName("Tomcat:type=ThreadPool,name=" + getPort());
+            ObjectName requestMBean = new ObjectName("Tomcat:type=GlobalRequestProcessor,name=" + getPort());
+
             int maxThreads = getAttribute(threadPoolMbean, "maxThreads", Integer.class);
-            int currentThreads = getAttribute(threadPoolMbean, "currentThreads", Integer.class);
+            int currentThreads = getAttribute(threadPoolMbean, "currentThreadCount", Integer.class);
             int currentThreadsBusy = getAttribute(threadPoolMbean, "currentThreadsBusy", Integer.class);
 
-            long requestCount = getAttribute(requestMBean, "requestCount", Long.class);
+            int requestCount = getAttribute(requestMBean, "requestCount", Integer.class);
             long bytesReceived = getAttribute(requestMBean, "bytesReceived", Long.class);
             long bytesSent = getAttribute(requestMBean, "bytesSent", Long.class);
             long processingTime = getAttribute(requestMBean, "processingTime", Long.class);
-            long errorCount = getAttribute(requestMBean, "errorCount", Long.class);
+            int errorCount = getAttribute(requestMBean, "errorCount", Integer.class);
 
             return new TomcatWebServerInfo(
                     new TomcatThreadPoolInfo(maxThreads, currentThreads, currentThreadsBusy),
                     new TomcatRequestInfo(requestCount, bytesReceived, bytesSent, processingTime, errorCount)
             );
         } catch (Exception e) {
+            log.error("Failed to collect metrics = {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     /**
      * target uri -> localhost:8080
+     * <br/>
+     * translation -> localhost:8080 -> http-nio-8080
      * @return port
      */
     private String getPort() {
-        return property.targetUri().split(":")[1];
-    }
-
-    private ObjectInstance getObjectInstance(final ObjectName objectName) {
-        return mBeanServer.queryMBeans(objectName, null).stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No thread pool mbean found"));
+        final String port = property.targetUri().split(":")[1];
+        return String.format("\"http-nio-%s\"", port);
     }
 }

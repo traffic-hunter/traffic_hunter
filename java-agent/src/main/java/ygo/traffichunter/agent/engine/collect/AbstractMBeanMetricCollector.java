@@ -1,12 +1,22 @@
 package ygo.traffichunter.agent.engine.collect;
 
 import java.lang.management.ManagementFactory;
+import java.util.Set;
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 public abstract class AbstractMBeanMetricCollector<T> implements MetricCollector<T> {
 
     protected final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+
+    protected Set<ObjectName> findObjectName(final String objectName) {
+        try {
+            return mBeanServer.queryNames(new ObjectName(objectName), null);
+        } catch (MalformedObjectNameException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     protected <A> A getAttribute(final ObjectName name, final String attribute, final Class<A> type) {
         try {

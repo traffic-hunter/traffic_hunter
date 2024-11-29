@@ -65,10 +65,12 @@ public final class AgentExecutionEngine {
         context.addAgentStateEventListener(metadata);
         asciiBanner.print(metadata);
         AgentRunner runner = new AgentRunner(property, context, metadata);
+        Thread runnerThread = new Thread(runner);
+        runnerThread.setName("TrafficHunterAgentRunnerThread");
+        runnerThread.setDaemon(true);
         if(context.isInit()) {
             log.info("Agent initialization completed.");
-            //runner.init();
-            runner.run();
+            runnerThread.start();
             registryShutdownHook(context, runner);
             context.close();
         }
@@ -117,7 +119,7 @@ public final class AgentExecutionEngine {
     /**
      * Responsible for executing the agent.
      */
-    static final class AgentRunner {
+    static final class AgentRunner implements Runnable {
 
         private final MetricSendSessionManager sessionManager;
 
@@ -128,12 +130,17 @@ public final class AgentExecutionEngine {
             this.sessionManager = new MetricSendSessionManager(property, context, metadata);
         }
 
-        public void init() {
-            sessionManager.afterConnectionEstablished();
-        }
-
+        @Override
         public void run() {
-            sessionManager.run();
+            try {
+                // run after loading the target application
+                log.info("Waiting for Agent Runner...");
+                Thread.sleep(5000);
+                sessionManager.run();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
         }
 
         public void close() {
