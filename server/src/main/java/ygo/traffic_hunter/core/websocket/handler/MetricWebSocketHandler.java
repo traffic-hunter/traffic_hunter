@@ -47,7 +47,7 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
         String payload = message.getPayload();
 
-        log.info("payload = {}", payload);
+        log.info("agent info = {}", payload);
 
         try {
             AgentMetadata agentMetadata = objectMapper.readValue(payload, AgentMetadata.class);
@@ -71,12 +71,11 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) throws Exception {
-        log.info("Connection closed = {}", session.getId());
+        log.info("Connection closed = {} {} {}", session.getId(), status.getCode(), status.getReason());
         MetricProcessingChannel remove = channelMap.remove(session);
         agentMetadataMap.remove(session.getId());
         remove.close();
         session.close();
-        session.sendMessage(new TextMessage("Connection closed"));
     }
 
     public List<AgentMetadata> getAgents() {
