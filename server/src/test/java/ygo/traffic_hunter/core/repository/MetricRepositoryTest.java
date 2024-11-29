@@ -13,6 +13,7 @@ import ygo.traffic_hunter.AbstractTestConfiguration;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.cpu.CpuStatusInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.dbcp.HikariDbcpInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.gc.collections.GarbageCollectionTime;
 import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo;
@@ -22,6 +23,9 @@ import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
 import ygo.traffic_hunter.core.dto.request.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServerInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.request.TomcatRequestInfo;
+import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.thread.TomcatThreadPoolInfo;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository;
@@ -63,7 +67,12 @@ class MetricRepositoryTest extends AbstractTestConfiguration {
                 new GarbageCollectionStatusInfo(Collections.singletonList(
                         new GarbageCollectionTime(5L, 100L)
                 )),
-                new RuntimeStatusInfo(1000L, 5000L, "TestVM", "1.0")
+                new RuntimeStatusInfo(1000L, 5000L, "TestVM", "1.0"),
+                new TomcatWebServerInfo(
+                        new TomcatThreadPoolInfo(1, 1, 1),
+                        new TomcatRequestInfo(1,1, 1, 1, 1)
+                ),
+                new HikariDbcpInfo(1,1, 1, 1)
         );
 
         MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(metadata, systemInfo);

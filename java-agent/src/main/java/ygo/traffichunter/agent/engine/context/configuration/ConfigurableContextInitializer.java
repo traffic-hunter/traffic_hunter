@@ -93,21 +93,21 @@ public class ConfigurableContextInitializer {
     private static class TransactionAdvise {
 
         @OnMethodEnter
-        public static long enter() {
-            return Instant.now().toEpochMilli();
+        public static Instant enter() {
+            return Instant.now();
         }
 
         @OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Origin final String method,
-                                @Enter final long startTime,
+                                @Enter final Instant startTime,
                                 @Thrown final Throwable throwable) {
 
-            final long endTime = Instant.now().toEpochMilli();
-            final long duration = endTime - startTime;
+            final Instant endTime = Instant.now();
+            final long duration = endTime.toEpochMilli() - startTime.toEpochMilli();
 
             final TransactionInfo txInfo = TransactionInfo.create(method,
-                    Instant.ofEpochMilli(startTime),
-                    Instant.ofEpochMilli(endTime),
+                    startTime,
+                    endTime,
                     duration,
                     throwable == null ? "No Error Message" : throwable.getMessage(),
                     throwable == null

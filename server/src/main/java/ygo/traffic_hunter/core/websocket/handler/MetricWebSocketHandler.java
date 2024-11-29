@@ -6,16 +6,12 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
@@ -50,6 +46,8 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
     protected void handleTextMessage(final WebSocketSession session, final TextMessage message) {
 
         String payload = message.getPayload();
+
+        log.info("payload = {}", payload);
 
         try {
             AgentMetadata agentMetadata = objectMapper.readValue(payload, AgentMetadata.class);

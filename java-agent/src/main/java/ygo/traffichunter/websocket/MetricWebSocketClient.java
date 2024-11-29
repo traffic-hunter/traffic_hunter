@@ -2,6 +2,7 @@ package ygo.traffichunter.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
 import java.util.List;
@@ -24,7 +25,9 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     public MetricWebSocketClient(final URI serverUri) {
         super(serverUri);
-        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .registerModule(new JavaTimeModule());
         this.converter = new SerializationByteArrayConverter(objectMapper);
     }
 

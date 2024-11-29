@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
-import ygo.traffic_hunter.common.map.SystemInfoMapperImpl;
-import ygo.traffic_hunter.common.map.TransactionMapperImpl;
+import ygo.traffic_hunter.common.map.impl.system.SystemInfoMapperImpl;
+import ygo.traffic_hunter.common.map.impl.transaction.TransactionMapperImpl;
 import ygo.traffic_hunter.core.channel.collector.handler.MetricHandler;
 import ygo.traffic_hunter.core.channel.collector.handler.systeminfo.SysteminfoMetricHandler;
 import ygo.traffic_hunter.core.channel.collector.handler.transaction.TransactionMetricHandler;
@@ -44,12 +44,12 @@ public class MetricCollector {
 
         SysteminfoMetricHandler systeminfoMetricHandler = SysteminfoMetricHandler.builder()
                 .mapper(new SystemInfoMapperImpl())
-                .processor(new MetricProcessor<>(decompressor, mapper))
+                .processor(new MetricProcessor(decompressor, mapper))
                 .build();
 
         TransactionMetricHandler transactionMetricHandler = TransactionMetricHandler.builder()
                 .mapper(new TransactionMapperImpl())
-                .processor(new MetricProcessor<>(decompressor, mapper))
+                .processor(new MetricProcessor(decompressor, mapper))
                 .build();
 
         registerProcessor((byte) 1, systeminfoMetricHandler);

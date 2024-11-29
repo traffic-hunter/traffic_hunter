@@ -64,10 +64,10 @@ public final class AgentExecutionEngine {
         );
         context.addAgentStateEventListener(metadata);
         asciiBanner.print(metadata);
+        AgentRunner runner = new AgentRunner(property, context, metadata);
         if(context.isInit()) {
             log.info("Agent initialization completed.");
-            AgentRunner runner = new AgentRunner(property, context, metadata);
-            runner.init();
+            //runner.init();
             runner.run();
             registryShutdownHook(context, runner);
             context.close();

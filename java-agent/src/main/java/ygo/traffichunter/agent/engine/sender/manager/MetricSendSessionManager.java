@@ -1,11 +1,7 @@
 package ygo.traffichunter.agent.engine.sender.manager;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -13,7 +9,6 @@ import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.AgentStatus;
-import ygo.traffichunter.agent.engine.collect.MetricCollectSupport;
 import ygo.traffichunter.agent.engine.context.AgentExecutableContext;
 import ygo.traffichunter.agent.engine.sender.websocket.AgentSystemMetricSender;
 import ygo.traffichunter.agent.engine.sender.websocket.AgentTransactionMetricSender;
@@ -26,6 +21,8 @@ import ygo.traffichunter.websocket.MetricWebSocketClient;
 public class MetricSendSessionManager {
 
     private static final Logger log = LoggerFactory.getLogger(MetricSendSessionManager.class);
+
+    private static final int MANAGER_WAITING_TIMEOUT_SECONDS = 10;
 
     private final TrafficHunterAgentProperty property;
 
@@ -43,6 +40,7 @@ public class MetricSendSessionManager {
 
     private final MetricWebSocketClient client;
 
+
     public MetricSendSessionManager(final TrafficHunterAgentProperty property,
                                     final AgentExecutableContext context,
                                     final AgentMetadata metadata) {
@@ -59,15 +57,15 @@ public class MetricSendSessionManager {
     }
 
     public void afterConnectionEstablished() {
-        ObjectMapper mapper = new ObjectMapper();
-
-        mapper.registerModule(new JavaTimeModule());
-
-        try {
-            client.send(mapper.writeValueAsString(metadata));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+//        ObjectMapper mapper = new ObjectMapper();
+//
+//        mapper.registerModule(new JavaTimeModule());
+//
+//        try {
+//            client.send(mapper.writeValueAsString(metadata));
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void run() {
@@ -82,7 +80,7 @@ public class MetricSendSessionManager {
             return;
         }
 
-        log.info("start Metric send...");
+        log.info("start Metric send!!");
 
         final RetryHelper retryHelper = RetryHelper.builder()
                 .backOffPolicy(property.backOffPolicy())
@@ -133,5 +131,17 @@ public class MetricSendSessionManager {
 
             return thread;
         };
+    }
+
+    private void waitManager() {
+        for(int i = MANAGER_WAITING_TIMEOUT_SECONDS; i > 0; i--) {
+            try {
+                log.info("Waiting for metrics to send... = {}", i);
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

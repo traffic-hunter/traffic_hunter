@@ -10,4 +10,4 @@ public record TransactionInfo(
         long duration,
         String errorMessage,
         boolean isSuccess
-) implements Metric {}
+) {}
