@@ -19,4 +19,4 @@ public record SystemInfo(
         RuntimeStatusInfo runtimeStatusInfo,
         TomcatWebServerInfo tomcatWebServerInfo,
         HikariDbcpInfo hikariDbcpInfo
-) implements Metric {}
+) {}
