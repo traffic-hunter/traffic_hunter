@@ -21,7 +21,7 @@ public class ServerSentEventAlertManager implements ServerSentEventManager {
     }
 
     @Override
-    public <T> void sendAll(final List<T> data) {
+    public <T> void send(final List<T> data) {
 
     }
 
@@ -31,7 +31,7 @@ public class ServerSentEventAlertManager implements ServerSentEventManager {
     }
 
     @Override
-    public <T> void asyncSendAll(final List<T> data) {
+    public <T> void asyncSend(final List<T> data) {
 
     }
 
