@@ -9,11 +9,11 @@ public interface ServerSentEventManager {
 
     <T> void send(T data);
 
-    <T> void sendAll(List<T> data);
+    <T> void send(List<T> data);
 
     <T> void asyncSend(T data);
 
-    <T> void asyncSendAll(List<T> data);
+    <T> void asyncSend(List<T> data);
 
     int size();
 }

@@ -42,7 +42,7 @@ public class ServerSentEventViewManager implements ServerSentEventManager {
     }
 
     @Override
-    public <T> void sendAll(final List<T> data) {
+    public <T> void send(final List<T> data) {
 
         for(SseEmitter emitter : emitters) {
             sendAll(data, emitter);
@@ -55,7 +55,7 @@ public class ServerSentEventViewManager implements ServerSentEventManager {
     }
 
     @Override
-    public <T> void asyncSendAll(final List<T> data) {
+    public <T> void asyncSend(final List<T> data) {
 
     }
 
