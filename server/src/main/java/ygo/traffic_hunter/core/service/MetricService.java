@@ -85,8 +85,8 @@ public class MetricService {
                     metadata.agentName()
             );
 
-            sseManager.asyncSendAll(metrics);
-            sseManager.asyncSendAll(txMetrics);
+            sseManager.asyncSend(metrics);
+            sseManager.asyncSend(txMetrics);
         }
     }
 }
