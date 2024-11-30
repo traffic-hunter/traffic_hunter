@@ -1,6 +1,10 @@
 package ygo.traffic_hunter.core.service;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,8 @@ public class MetricService {
     private final ServerSentEventManager sseManager;
 
     private final MetricWebSocketHandler webSocketHandler;
+
+    private final ScheduledExecutorService schedule = Executors.newSingleThreadScheduledExecutor();
 
     public MetricService(@Qualifier("serverSentEventViewManager") final ServerSentEventManager sseManager,
                          final MetricWebSocketHandler webSocketHandler,
@@ -71,7 +77,19 @@ public class MetricService {
         return sseManager.register(sseEmitter);
     }
 
-    public void broadcast(final TimeInterval interval) {
+    public void asyncBroadcast(final TimeInterval interval) {
+
+    }
+
+    public void scheduleBroadcast(@NonNull final TimeInterval interval) {
+        schedule.scheduleWithFixedDelay(() -> broadcast(interval),
+                0,
+                interval.getDelayMillis(),
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    private void broadcast(final TimeInterval interval) {
 
         for (AgentMetadata metadata : webSocketHandler.getAgents()) {
 
@@ -85,8 +103,8 @@ public class MetricService {
                     metadata.agentName()
             );
 
-            sseManager.asyncSend(metrics);
-            sseManager.asyncSend(txMetrics);
+            sseManager.send(metrics);
+            sseManager.send(txMetrics);
         }
     }
 }

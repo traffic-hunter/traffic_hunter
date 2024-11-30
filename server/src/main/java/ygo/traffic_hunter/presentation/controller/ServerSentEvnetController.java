@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +24,9 @@ public class ServerSentEvnetController {
         return metricService.register(new SseEmitter());
     }
 
-    @PostMapping("/metrics/broadcast/")
-    public void broadcast(final TimeInterval interval) {
-        metricService.broadcast(interval);
+    @PostMapping("/metrics/broadcast/{interval}")
+    @ResponseStatus(HttpStatus.OK)
+    public void broadcast(@PathVariable(name = "interval") final TimeInterval interval) {
+        metricService.scheduleBroadcast(interval);
     }
 }
