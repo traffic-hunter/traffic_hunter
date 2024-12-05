@@ -4,14 +4,9 @@ import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.VirtualMachine;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
@@ -31,19 +26,17 @@ import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.engine.env.ConfigurableEnvironment;
 import ygo.traffichunter.agent.engine.env.Environment;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
-import ygo.traffichunter.agent.engine.jvm.JVMSelector;
-import ygo.traffichunter.agent.engine.queue.SyncQueue;
-import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
+import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
+import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
+import ygo.traffichunter.util.UUIDGenerator;
 
 public class ConfigurableContextInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurableContextInitializer.class);
 
     private final ConfigurableEnvironment env;
-
-    private final UUID agentId = UUID.randomUUID();
 
     public ConfigurableContextInitializer(final ConfigurableEnvironment env) {
         this.env = env;
@@ -70,7 +63,7 @@ public class ConfigurableContextInitializer {
 
     public AgentMetadata setAgentMetadata(final Instant startTime, final AgentStatus status) {
         return new AgentMetadata(
-                agentId.toString(),
+                UUIDGenerator.generate(),
                 Environment.VERSION.version(),
                 property().name(),
                 startTime,
