@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.config.cache.CacheConfig.CacheType;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
@@ -89,6 +91,7 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheType.AGENT_CACHE_NAME)
     public Agent findById(final Integer id) {
 
         String sql = "select * from agent where id = ?::integer";
@@ -98,6 +101,7 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheType.AGENT_CACHE_NAME)
     public List<Agent> findAll() {
 
         String sql = "select * from agent";
@@ -106,6 +110,7 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheType.AGENT_CACHE_NAME)
     public Agent findByAgentName(final String agentName) {
 
         String sql = "select * from agent where agent_name = ?";
@@ -115,6 +120,7 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheType.AGENT_CACHE_NAME)
     public Agent findByAgentId(final String agentId) {
 
         String sql = "select * from agent where agent_id = ?";
