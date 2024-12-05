@@ -40,19 +40,17 @@ public class TimeSeriesRepository implements MetricRepository {
     public void save(final Agent agent) {
 
         String sql = "insert into agent ("
-                + "id, "
                 + "agent_id, "
                 + "agent_name, "
                 + "agent_version, "
                 + "agent_boot_time) "
-                + "VALUES (?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?)";
 
         jdbcTemplate.update(sql,
-                agent.id(),
                 agent.agentId(),
                 agent.agentName(),
                 agent.agentVersion(),
-                agent.agentBootTime()
+                Timestamp.from(agent.agentBootTime())
         );
     }
 
