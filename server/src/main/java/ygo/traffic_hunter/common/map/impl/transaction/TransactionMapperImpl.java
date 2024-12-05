@@ -43,6 +43,8 @@ public class TransactionMapperImpl implements TransactionMapper {
 
         return new TransactionMetricResponse(
                 agent.agentName(),
+                agent.agentBootTime(),
+                agent.agentVersion(),
                 measurement.transactionData()
         );
     }

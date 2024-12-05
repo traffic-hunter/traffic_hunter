@@ -43,11 +43,11 @@ public class SystemInfoMapperImpl implements SystemInfoMapper {
     @Override
     public MetricMeasurement map(final MetadataWrapper<SystemInfo> wrapper) {
 
-        AgentMetadata metadata = wrapper.metadata();
+        final AgentMetadata metadata = wrapper.metadata();
 
-        SystemInfo data = wrapper.data();
+        final SystemInfo data = wrapper.data();
 
-        Agent agent = agentRepository.findByAgentId(metadata.agentId());
+        final Agent agent = agentRepository.findByAgentId(metadata.agentId());
 
         return new MetricMeasurement(
                 data.time(),
@@ -59,10 +59,13 @@ public class SystemInfoMapperImpl implements SystemInfoMapper {
     @Override
     public SystemMetricResponse map(final MetricMeasurement measurement) {
 
-        Agent agent = agentRepository.findById(measurement.agentId());
+        final Agent agent = agentRepository.findById(measurement.agentId());
 
         return new SystemMetricResponse(
+                measurement.time(),
                 agent.agentName(),
+                agent.agentBootTime(),
+                agent.agentVersion(),
                 measurement.metricData()
         );
     }

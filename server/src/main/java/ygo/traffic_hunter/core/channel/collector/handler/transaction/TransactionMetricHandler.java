@@ -1,7 +1,8 @@
 package ygo.traffic_hunter.core.channel.collector.handler.transaction;
 
-import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.TransactionMapper;
 import ygo.traffic_hunter.core.channel.collector.handler.MetricHandler;
@@ -13,22 +14,26 @@ import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class TransactionMetricHandler implements MetricHandler {
 
     private final MetricProcessor processor;
 
     private final TransactionMapper mapper;
 
-    @Builder
-    public TransactionMetricHandler(final MetricProcessor processor,
-                                    final TransactionMapper mapper) {
-        this.processor = processor;
-        this.mapper = mapper;
+    private final MetricValidator validator;
+
+    private final MetricRepository repository;
+
+    @Override
+    public byte getHeader() {
+        return 2;
     }
 
     @Override
     @Transactional
-    public void handle(final byte[] payload, final MetricValidator validator, final MetricRepository repository) {
+    public void handle(final byte[] payload) {
         MetadataWrapper<TransactionInfo> object = processor.processTransactionInfo(payload);
 
         if(validator.validate(object)) {

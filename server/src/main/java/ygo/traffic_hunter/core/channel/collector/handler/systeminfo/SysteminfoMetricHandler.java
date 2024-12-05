@@ -1,7 +1,8 @@
 package ygo.traffic_hunter.core.channel.collector.handler.systeminfo;
 
-import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.core.channel.collector.handler.MetricHandler;
@@ -12,23 +13,26 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class SysteminfoMetricHandler implements MetricHandler {
 
     private final MetricProcessor processor;
 
     private final SystemInfoMapper mapper;
 
-    @Builder
-    public SysteminfoMetricHandler(final MetricProcessor processor,
-                                   final SystemInfoMapper mapper) {
+    private final MetricValidator validator;
 
-        this.processor = processor;
-        this.mapper = mapper;
+    private final MetricRepository repository;
+
+    @Override
+    public byte getHeader() {
+        return 1;
     }
 
     @Override
     @Transactional
-    public void handle(final byte[] payload, final MetricValidator validator, final MetricRepository repository) {
+    public void handle(final byte[] payload) {
 
         MetadataWrapper<SystemInfo> object = processor.processSystemInfo(payload);
 

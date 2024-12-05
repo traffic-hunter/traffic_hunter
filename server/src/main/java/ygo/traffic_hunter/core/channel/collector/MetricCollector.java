@@ -1,63 +1,20 @@
 package ygo.traffic_hunter.core.channel.collector;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import lombok.Builder;
-import ygo.traffic_hunter.common.map.impl.system.SystemInfoMapperImpl;
-import ygo.traffic_hunter.common.map.impl.transaction.TransactionMapperImpl;
+import java.util.Objects;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.channel.collector.handler.MetricHandler;
-import ygo.traffic_hunter.core.channel.collector.handler.systeminfo.SysteminfoMetricHandler;
-import ygo.traffic_hunter.core.channel.collector.handler.transaction.TransactionMetricHandler;
-import ygo.traffic_hunter.core.channel.collector.processor.MetricProcessor;
-import ygo.traffic_hunter.core.channel.collector.processor.compress.ByteArrayMetricDecompressor;
-import ygo.traffic_hunter.core.channel.collector.validator.MetricValidator;
-import ygo.traffic_hunter.core.repository.MetricRepository;
 
+@Component
+@RequiredArgsConstructor
 public class MetricCollector {
 
-    private final Map<Byte, MetricHandler> map = new HashMap<>();
-
-    private final MetricValidator validator;
-
-    private final MetricRepository repository;
-
-    private final ByteArrayMetricDecompressor decompressor;
-
-    private final ObjectMapper mapper;
-
-    @Builder
-    public MetricCollector(final MetricValidator validator,
-                           final MetricRepository repository,
-                           final ByteArrayMetricDecompressor decompressor,
-                           final ObjectMapper mapper) {
-
-        this.validator = validator;
-        this.repository = repository;
-        this.decompressor = decompressor;
-        this.mapper = mapper;
-    }
-
-    public void registerProcessors() {
-
-        SysteminfoMetricHandler systeminfoMetricHandler = SysteminfoMetricHandler.builder()
-                .mapper(new SystemInfoMapperImpl(repository))
-                .processor(new MetricProcessor(decompressor, mapper))
-                .build();
-
-        TransactionMetricHandler transactionMetricHandler = TransactionMetricHandler.builder()
-                .mapper(new TransactionMapperImpl(repository))
-                .processor(new MetricProcessor(decompressor, mapper))
-                .build();
-
-        registerProcessor((byte) 1, systeminfoMetricHandler);
-        registerProcessor((byte) 2, transactionMetricHandler);
-    }
+    private final Set<MetricHandler> handlers;
 
     public void collect(final ByteBuffer byteBuffer) {
-        if(map.isEmpty()) {
+        if(handlers.isEmpty()) {
             throw new IllegalStateException("collector is empty..");
         }
 
@@ -65,18 +22,16 @@ public class MetricCollector {
 
         byte header = data[0];
 
-        MetricHandler metricHandler = Optional.of(map.get(header))
-                .orElseThrow(() -> new IllegalArgumentException("Unknown header.."));
+        MetricHandler metricHandler = handlers.stream()
+                .filter(handler -> Objects.equals(handler.getHeader(), header))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No Support Handler.."));
 
-        metricHandler.handle(data, validator, repository);
+        metricHandler.handle(data);
     }
 
     public void clear() {
-        map.clear();
-    }
-
-    private void registerProcessor(final byte header, final MetricHandler metricHandler) {
-        map.put(header, metricHandler);
+        handlers.clear();
     }
 
     private byte[] convert(final ByteBuffer byteBuffer) {

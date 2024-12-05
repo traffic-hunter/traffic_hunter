@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.domain.entity.Agent;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
@@ -138,10 +140,11 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
-    public List<MetricMeasurement> findMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                       final String agentName) {
+    public List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval,
+                                                                          final String agentName) {
 
-        String sql = "select * from metric_measurement m "
+        String sql = "select m.time, a.agent_name, a.agent_boot_time, a.agent_version, m.metric_data "
+                + "from metric_measurement m "
                 + "join agent a on m.agent_id = a.id "
                 + "where m.time > now() - ?::interval "
                 + "and a.agent_name = ? "
@@ -152,16 +155,10 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
-    public List<TransactionMeasurement> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                              final String agentName) {
+    public List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval,
+                                                                                 final String agentName) {
 
-        String sql = "select * from transaction_measurement "
-                + "where time > now() - ?::interval "
-                + "and agent_name = ? "
-                + "order by time desc "
-                + "limit 20";
-
-        return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName);
+        return null;
     }
 
     @Transactional

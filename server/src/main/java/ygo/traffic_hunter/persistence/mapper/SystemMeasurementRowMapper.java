@@ -5,21 +5,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.domain.entity.MetricMeasurement;
+import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.domain.metric.MetricData;
 
 @Component
-public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implements RowMapper<MetricMeasurement> {
+public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implements RowMapper<SystemMetricResponse> {
 
     public SystemMeasurementRowMapper(final ObjectMapper objectMapper) {
         super(objectMapper);
     }
 
     @Override
-    public MetricMeasurement mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-        return new MetricMeasurement(
+    public SystemMetricResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+        return SystemMetricResponse.create(
                 rs.getTimestamp("time").toInstant(),
-                rs.getInt("agent_id"),
+                rs.getString("agent_name"),
+                rs.getTimestamp("agent_boot_time").toInstant(),
+                rs.getString("agent_version"),
                 deserialize(rs.getString("metric_data"), MetricData.class)
         );
     }

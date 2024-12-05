@@ -1,6 +1,8 @@
 package ygo.traffic_hunter.core.repository;
 
 import java.util.List;
+import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
@@ -11,7 +13,7 @@ public interface MetricRepository extends AgentRepository {
 
     void save(TransactionMeasurement metric);
 
-    List<MetricMeasurement> findMetricsByRecentTimeAndAgentName(final TimeInterval interval, final String agentName);
+    List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval, final String agentName);
 
-    List<TransactionMeasurement> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval, final String agentName);
+    List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval, final String agentName);
 }

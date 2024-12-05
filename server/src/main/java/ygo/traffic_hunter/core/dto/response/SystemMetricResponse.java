@@ -1,6 +1,22 @@
 package ygo.traffic_hunter.core.dto.response;
 
+import java.time.Instant;
 import ygo.traffic_hunter.domain.metric.MetricData;
 
-public record SystemMetricResponse(String agentName, MetricData metricData) {
+public record SystemMetricResponse(
+        Instant time,
+        String agentName,
+        Instant agentBootTime,
+        String agentVersion,
+        MetricData metricData
+) {
+
+    public static SystemMetricResponse create(final Instant time,
+                                              final String agentName,
+                                              final Instant agentBootTime,
+                                              final String agentVersion,
+                                              final MetricData metricData) {
+
+        return new SystemMetricResponse(time, agentName, agentBootTime, agentVersion, metricData);
+    }
 }

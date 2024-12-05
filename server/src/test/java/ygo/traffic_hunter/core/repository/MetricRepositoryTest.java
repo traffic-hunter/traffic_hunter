@@ -11,22 +11,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import ygo.traffic_hunter.AbstractTestConfiguration;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
+import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
+import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
+import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.dbcp.HikariDbcpInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.gc.collections.GarbageCollectionTime;
 import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo;
-import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
-import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
-import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
 import ygo.traffic_hunter.core.dto.request.systeminfo.runtime.RuntimeStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServerInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.request.TomcatRequestInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.thread.TomcatThreadPoolInfo;
-import ygo.traffic_hunter.domain.entity.MetricMeasurement;
+import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository;
 
@@ -80,7 +80,7 @@ class MetricRepositoryTest extends AbstractTestConfiguration {
         timeSeriesRepository.save(mapper.map(metadataWrapper));
 
         // when
-        List<MetricMeasurement> metrics = timeSeriesRepository.findMetricsByRecentTimeAndAgentName(
+        List<SystemMetricResponse> metrics = timeSeriesRepository.findMetricsByRecentTimeAndAgentName(
                 TimeInterval.TEN_MINUTES, "test");
 
         // then
