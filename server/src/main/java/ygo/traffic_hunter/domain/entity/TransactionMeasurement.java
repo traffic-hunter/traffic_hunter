@@ -7,13 +7,7 @@ public record TransactionMeasurement(
 
         Instant time,
 
-        String agentId,
-
-        String agentName,
-
-        String agentVersion,
-
-        Instant agentBootTime,
+        Integer agentId,
 
         TransactionData transactionData
 ) {

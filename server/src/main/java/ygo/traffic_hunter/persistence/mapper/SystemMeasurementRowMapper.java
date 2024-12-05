@@ -19,10 +19,7 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
     public MetricMeasurement mapRow(final ResultSet rs, final int rowNum) throws SQLException {
         return new MetricMeasurement(
                 rs.getTimestamp("time").toInstant(),
-                rs.getString("agent_id"),
-                rs.getString("agent_name"),
-                rs.getString("agent_version"),
-                rs.getTimestamp("agent_boot_time").toInstant(),
+                rs.getInt("agent_id"),
                 deserialize(rs.getString("metric_data"), MetricData.class)
         );
     }

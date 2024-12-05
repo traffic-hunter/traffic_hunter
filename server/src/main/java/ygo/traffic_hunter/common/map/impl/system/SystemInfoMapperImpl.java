@@ -1,6 +1,7 @@
 package ygo.traffic_hunter.common.map.impl.system;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
@@ -17,6 +18,8 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServer
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.request.TomcatRequestInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.thread.TomcatThreadPoolInfo;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.repository.AgentRepository;
+import ygo.traffic_hunter.domain.entity.Agent;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.metric.MetricData;
 import ygo.traffic_hunter.domain.metric.cpu.CpuMetricMeasurement;
@@ -32,7 +35,10 @@ import ygo.traffic_hunter.domain.metric.web.tomcat.request.TomcatWebServerReques
 import ygo.traffic_hunter.domain.metric.web.tomcat.thread.TomcatWebServerThreadPoolMeasurement;
 
 @Component
+@RequiredArgsConstructor
 public class SystemInfoMapperImpl implements SystemInfoMapper {
+
+    private final AgentRepository agentRepository;
 
     @Override
     public MetricMeasurement map(final MetadataWrapper<SystemInfo> wrapper) {
@@ -41,20 +47,22 @@ public class SystemInfoMapperImpl implements SystemInfoMapper {
 
         SystemInfo data = wrapper.data();
 
+        Agent agent = agentRepository.findByAgentId(metadata.agentId());
+
         return new MetricMeasurement(
                 data.time(),
-                metadata.agentId(),
-                metadata.agentName(),
-                metadata.agentVersion(),
-                metadata.startTime(),
+                agent.id(),
                 getMetricData(data)
         );
     }
 
     @Override
     public SystemMetricResponse map(final MetricMeasurement measurement) {
+
+        Agent agent = agentRepository.findById(measurement.agentId());
+
         return new SystemMetricResponse(
-                measurement.agentName(),
+                agent.agentName(),
                 measurement.metricData()
         );
     }

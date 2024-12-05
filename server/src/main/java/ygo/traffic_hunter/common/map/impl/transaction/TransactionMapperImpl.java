@@ -1,16 +1,24 @@
 package ygo.traffic_hunter.common.map.impl.transaction;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.TransactionMapper;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.repository.AgentRepository;
+import ygo.traffic_hunter.domain.entity.Agent;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
 @Component
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class TransactionMapperImpl implements TransactionMapper {
+
+    private final AgentRepository agentRepository;
 
     @Override
     public TransactionMeasurement map(final MetadataWrapper<TransactionInfo> wrapper) {
@@ -19,20 +27,22 @@ public class TransactionMapperImpl implements TransactionMapper {
 
         TransactionInfo data = wrapper.data();
 
+        Agent agent = agentRepository.findByAgentId(metadata.agentId());
+
         return new TransactionMeasurement(
                 data.startTime(),
-                metadata.agentId(),
-                metadata.agentName(),
-                metadata.agentVersion(),
-                metadata.startTime(),
+                agent.id(),
                 getTransactionData(data)
         );
     }
 
     @Override
     public TransactionMetricResponse map(final TransactionMeasurement measurement) {
+
+        Agent agent = agentRepository.findById(measurement.agentId());
+
         return new TransactionMetricResponse(
-                measurement.agentName(),
+                agent.agentName(),
                 measurement.transactionData()
         );
     }

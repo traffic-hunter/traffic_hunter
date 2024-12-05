@@ -43,12 +43,12 @@ public class MetricCollector {
     public void registerProcessors() {
 
         SysteminfoMetricHandler systeminfoMetricHandler = SysteminfoMetricHandler.builder()
-                .mapper(new SystemInfoMapperImpl())
+                .mapper(new SystemInfoMapperImpl(repository))
                 .processor(new MetricProcessor(decompressor, mapper))
                 .build();
 
         TransactionMetricHandler transactionMetricHandler = TransactionMetricHandler.builder()
-                .mapper(new TransactionMapperImpl())
+                .mapper(new TransactionMapperImpl(repository))
                 .processor(new MetricProcessor(decompressor, mapper))
                 .build();
 

@@ -19,10 +19,7 @@ public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionDa
     public TransactionMeasurement mapRow(final ResultSet rs, final int rowNum) throws SQLException {
         return new TransactionMeasurement(
                 rs.getTimestamp("time").toInstant(),
-                rs.getString("agent_id"),
-                rs.getString("agent_name"),
-                rs.getString("agent_version"),
-                rs.getTimestamp("agent_boot_time").toInstant(),
+                rs.getInt("agent_id"),
                 deserialize(rs.getString("transaction_data"), TransactionData.class)
         );
     }

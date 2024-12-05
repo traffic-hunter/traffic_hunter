@@ -5,7 +5,7 @@ import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
-public interface MetricRepository {
+public interface MetricRepository extends AgentRepository {
 
     void save(MetricMeasurement metric);
 

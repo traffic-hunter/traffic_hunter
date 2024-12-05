@@ -10,14 +10,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
+import ygo.traffic_hunter.common.map.AgentMapper;
 import ygo.traffic_hunter.core.channel.MetricChannelFactory;
 import ygo.traffic_hunter.core.channel.MetricProcessingChannel;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
+import ygo.traffic_hunter.core.repository.AgentRepository;
 
 @Slf4j
 @Component
@@ -32,6 +35,10 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
     private final ObjectMapper objectMapper;
 
+    private final AgentRepository agentRepository;
+
+    private final AgentMapper mapper;
+
     @Override
     public void afterConnectionEstablished(final WebSocketSession session) throws Exception {
 
@@ -43,6 +50,7 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
     }
 
     @Override
+    @Transactional
     protected void handleTextMessage(final WebSocketSession session, final TextMessage message) {
 
         String payload = message.getPayload();
@@ -50,9 +58,12 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
         log.info("agent info = {}", payload);
 
         try {
+
             AgentMetadata agentMetadata = objectMapper.readValue(payload, AgentMetadata.class);
 
             agentMetadataMap.put(session.getId(), agentMetadata);
+
+            agentRepository.save(mapper.map(agentMetadata));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -71,10 +82,15 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) throws Exception {
+
         log.info("Connection closed = {} {} {}", session.getId(), status.getCode(), status.getReason());
+
         MetricProcessingChannel remove = channelMap.remove(session);
+
         agentMetadataMap.remove(session.getId());
+
         remove.close();
+
         session.close();
     }
 

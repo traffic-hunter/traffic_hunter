@@ -7,13 +7,7 @@ public record MetricMeasurement(
 
         Instant time,
 
-        String agentId,
-
-        String agentName,
-
-        String agentVersion,
-
-        Instant agentBootTime,
+        Integer agentId,
 
         MetricData metricData
 ) {

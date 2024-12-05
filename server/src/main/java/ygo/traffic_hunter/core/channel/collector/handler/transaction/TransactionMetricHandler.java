@@ -2,6 +2,7 @@ package ygo.traffic_hunter.core.channel.collector.handler.transaction;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.TransactionMapper;
 import ygo.traffic_hunter.core.channel.collector.handler.MetricHandler;
 import ygo.traffic_hunter.core.channel.collector.processor.MetricProcessor;
@@ -26,6 +27,7 @@ public class TransactionMetricHandler implements MetricHandler {
     }
 
     @Override
+    @Transactional
     public void handle(final byte[] payload, final MetricValidator validator, final MetricRepository repository) {
         MetadataWrapper<TransactionInfo> object = processor.processTransactionInfo(payload);
 
