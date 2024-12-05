@@ -12,10 +12,8 @@ public class UUIDGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(UUIDGenerator.class);
 
-    private static final String UUID_STORAGE_PATH = "./key/agent_id.txt";
-
     public static String generate() {
-        Path path = Paths.get(UUID_STORAGE_PATH);
+        Path path = Paths.get(getPath());
 
         if(!Files.exists(path.getParent())) {
             try {
@@ -44,5 +42,12 @@ public class UUIDGenerator {
             log.error("Failed to write file = {}", e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    private static String getPath() {
+        return System.getProperty("user.home")
+                + "/traffic-hunter"
+                + "/key"
+                + "/agent_id.txt";
     }
 }
