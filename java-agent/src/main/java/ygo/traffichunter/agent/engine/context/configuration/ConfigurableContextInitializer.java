@@ -62,10 +62,13 @@ public class ConfigurableContextInitializer {
     }
 
     public AgentMetadata setAgentMetadata(final Instant startTime, final AgentStatus status) {
+
+        final String agentName = property().name();
+
         return new AgentMetadata(
-                UUIDGenerator.generate(),
+                UUIDGenerator.generate(agentName),
                 Environment.VERSION.version(),
-                property().name(),
+                agentName,
                 startTime,
                 new AtomicReference<>(status)
         );

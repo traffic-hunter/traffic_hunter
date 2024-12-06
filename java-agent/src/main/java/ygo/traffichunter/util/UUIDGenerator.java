@@ -12,8 +12,8 @@ public class UUIDGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(UUIDGenerator.class);
 
-    public static String generate() {
-        Path path = Paths.get(getPath());
+    public static String generate(final String agentName) {
+        Path path = Paths.get(getPath(agentName));
 
         if(!Files.exists(path.getParent())) {
             try {
@@ -44,10 +44,13 @@ public class UUIDGenerator {
         }
     }
 
-    private static String getPath() {
+    private static String getPath(final String agentName) {
         return System.getProperty("user.home")
                 + "/traffic-hunter"
                 + "/key"
-                + "/agent_id.txt";
+                + "/"
+                + agentName
+                + "_"
+                + "agent_id.txt";
     }
 }

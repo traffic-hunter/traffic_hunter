@@ -8,7 +8,7 @@ class UUIDGeneratorTest extends AbstractTest {
 
     @Test
     void UUID_KEY_파일을_생성하고_UUID_KEY를_넣는다() {
-        String generate = UUIDGenerator.generate();
+        String generate = UUIDGenerator.generate("test");
 
         Assertions.assertNotNull(generate);
         System.out.println(generate);
