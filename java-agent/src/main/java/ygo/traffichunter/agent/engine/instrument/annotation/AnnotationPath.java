@@ -6,6 +6,7 @@ public enum AnnotationPath {
     SERVICE("org.springframework.stereotype.Service"),
     REPOSITORY("org.springframework.stereotype.Repository"),
     REST_CONTROLLER("org.springframework.web.bind.annotation.RestController"),
+    CONTROLLER("org.springframework.stereotype.Controller"),
     ;
 
     private final String path;

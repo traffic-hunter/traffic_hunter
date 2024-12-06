@@ -82,7 +82,8 @@ public class ConfigurableContextInitializer {
 
     private ElementMatcher<TypeDescription> getSpringComponentMatcher() {
         return isAnnotatedWith(named(AnnotationPath.SERVICE.getPath()))
-                .or(named(AnnotationPath.REST_CONTROLLER.getPath()))
+                .or(isAnnotatedWith(named(AnnotationPath.REST_CONTROLLER.getPath())))
+                .or(isAnnotatedWith(named(AnnotationPath.CONTROLLER.getPath())))
                 .or(isAnnotatedWith(named(AnnotationPath.REPOSITORY.getPath())));
     }
 
