@@ -26,8 +26,8 @@ public class SysteminfoMetricHandler implements MetricHandler {
     private final MetricRepository repository;
 
     @Override
-    public byte getHeader() {
-        return 1;
+    public MetricHeaderSpec getHeaderSpec() {
+        return MetricHeaderSpec.SYSTEM;
     }
 
     @Override

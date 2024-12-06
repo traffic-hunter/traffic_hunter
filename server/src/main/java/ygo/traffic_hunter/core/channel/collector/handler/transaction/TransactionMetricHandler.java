@@ -27,8 +27,8 @@ public class TransactionMetricHandler implements MetricHandler {
     private final MetricRepository repository;
 
     @Override
-    public byte getHeader() {
-        return 2;
+    public MetricHeaderSpec getHeaderSpec() {
+        return MetricHeaderSpec.TRANSACTION;
     }
 
     @Override
