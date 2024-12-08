@@ -1,12 +1,12 @@
-package ygo.traffic_hunter.core.channel.collector.handler;
+package ygo.traffic_hunter.core.collector.channel;
 
 import lombok.Getter;
 
-public interface MetricHandler {
+public interface MetricChannel {
 
     MetricHeaderSpec getHeaderSpec();
 
-    void handle(byte[] payload);
+    void open(byte[] payload);
 
     @Getter
     enum MetricHeaderSpec {

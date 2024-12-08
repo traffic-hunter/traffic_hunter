@@ -1,4 +1,4 @@
-package ygo.traffic_hunter.core.channel.collector.processor.compress;
+package ygo.traffic_hunter.core.collector.processor.compress;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

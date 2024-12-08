@@ -17,8 +17,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 import ygo.traffic_hunter.common.map.AgentMapper;
-import ygo.traffic_hunter.core.channel.MetricChannelFactory;
-import ygo.traffic_hunter.core.channel.MetricProcessingChannel;
+import ygo.traffic_hunter.core.collector.MetricCollector;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.repository.AgentRepository;
 
@@ -27,11 +26,9 @@ import ygo.traffic_hunter.core.repository.AgentRepository;
 @RequiredArgsConstructor
 public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
-    private final Map<WebSocketSession, MetricProcessingChannel> channelMap = new ConcurrentHashMap<>();
-
     private final Map<String, AgentMetadata> agentMetadataMap = new ConcurrentHashMap<>();
 
-    private final MetricChannelFactory factory;
+    private final MetricCollector collector;
 
     private final ObjectMapper objectMapper;
 
@@ -43,8 +40,6 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
     public void afterConnectionEstablished(final WebSocketSession session) throws Exception {
 
         log.info("New connection established = {}", session.getId());
-
-        channelMap.put(session, factory.createChannel());
 
         session.sendMessage(new TextMessage("New connection established session id: " + session.getId()));
     }
@@ -63,6 +58,10 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
             agentMetadataMap.put(session.getId(), agentMetadata);
 
+            if(agentRepository.existsByAgentId(agentMetadata.agentId())) {
+                return;
+            }
+
             agentRepository.save(mapper.map(agentMetadata));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -75,9 +74,7 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
         log.info("websocket session id = {}", session.getId());
 
-        MetricProcessingChannel metricProcessingChannel = channelMap.get(session);
-
-        metricProcessingChannel.process(byteBuffer);
+        collector.collect(byteBuffer);
     }
 
     @Override
@@ -85,11 +82,7 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
         log.info("Connection closed = {} {} {}", session.getId(), status.getCode(), status.getReason());
 
-        MetricProcessingChannel remove = channelMap.remove(session);
-
         agentMetadataMap.remove(session.getId());
-
-        remove.close();
 
         session.close();
     }

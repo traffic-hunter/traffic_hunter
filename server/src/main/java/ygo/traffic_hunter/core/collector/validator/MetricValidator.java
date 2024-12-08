@@ -1,4 +1,4 @@
-package ygo.traffic_hunter.core.channel.collector.validator;
+package ygo.traffic_hunter.core.collector.validator;
 
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +18,10 @@ public class MetricValidator {
         final AgentMetadata metadata = metric.metadata();
 
        if (Objects.isNull(metadata)) {
-           return false;
+           return true;
        }
 
-       return isCheck(metadata);
+       return !isCheck(metadata);
     }
 
     private boolean isCheck(final AgentMetadata metadata) {

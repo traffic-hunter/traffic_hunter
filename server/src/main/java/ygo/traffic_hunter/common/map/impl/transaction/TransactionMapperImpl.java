@@ -2,7 +2,6 @@ package ygo.traffic_hunter.common.map.impl.transaction;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.TransactionMapper;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
@@ -14,7 +13,6 @@ import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
 @Component
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TransactionMapperImpl implements TransactionMapper {
 

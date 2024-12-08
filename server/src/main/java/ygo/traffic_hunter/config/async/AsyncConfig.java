@@ -1,7 +1,6 @@
 package ygo.traffic_hunter.config.async;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,7 @@ public class AsyncConfig implements AsyncConfigurer {
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(Runtime.getRuntime().availableProcessors());
-        executor.setThreadNamePrefix("Async-");
+        executor.setThreadNamePrefix("MetricCollector-");
         executor.initialize();
         return executor;
     }
