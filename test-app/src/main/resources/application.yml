@@ -1,0 +1,24 @@
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: "*"
+
+server:
+  tomcat:
+    mbeanregistry:
+      enabled: true
+
+spring:
+  datasource:
+    hikari:
+      register-mbeans: true
+    url: jdbc:h2:mem:test
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    tomcat:
+      jmx-enabled: true
+
+  jmx:
+    unique-names: true
