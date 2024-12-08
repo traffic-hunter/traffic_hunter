@@ -1,12 +1,12 @@
-package ygo.testapp.service;
+package ygo.testapp2.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ygo.testapp.dto.TestDto;
-import ygo.testapp.entity.TestEntity;
-import ygo.testapp.repository.TestRepository;
+import ygo.testapp2.dto.TestDto;
+import ygo.testapp2.entity.TestEntity;
+import ygo.testapp2.repository.TestRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class TestService {
 
     public TestDto findById(final Long id) {
         TestEntity test = testRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("error"));
+                .orElseThrow(IllegalArgumentException::new);
 
         return new TestDto(test.getName(), test.getEmail());
     }
