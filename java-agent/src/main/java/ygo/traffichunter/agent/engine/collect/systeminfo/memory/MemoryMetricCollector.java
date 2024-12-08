@@ -6,10 +6,13 @@ import java.lang.management.MemoryMXBean;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
-import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.metric.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.memory.MemoryStatusInfo.MemoryUsage;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class MemoryMetricCollector extends AbstractMBeanMetricCollector<MemoryStatusInfo> {
 
     private static final Logger log = Logger.getLogger(MemoryMetricCollector.class.getName());

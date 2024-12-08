@@ -9,6 +9,10 @@ import ygo.traffichunter.agent.engine.metric.systeminfo.cpu.CpuStatusInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.thread.ThreadStatusInfo;
 import ygo.traffichunter.agent.engine.metric.web.tomcat.TomcatWebServerInfo;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public record SystemInfo(
         Instant time,
         MemoryStatusInfo memoryStatusInfo,

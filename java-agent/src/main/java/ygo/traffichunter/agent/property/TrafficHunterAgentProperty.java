@@ -3,6 +3,10 @@ package ygo.traffichunter.agent.property;
 import java.util.concurrent.TimeUnit;
 import ygo.traffichunter.retry.backoff.BackOffPolicy;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public record TrafficHunterAgentProperty(
         String name,
         String targetUri,

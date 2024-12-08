@@ -19,17 +19,45 @@ import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
 /**
- * After selecting a JVM, this agent execution engine collects the metrics of the JVM at regular intervals and transmits them to the server.
- * <br/>
- * <br/>
- * The transmission method is HTTP.
- * <br/>
- * <br/>
- * what metric is it?
- * <br/>
- * <br/>
- * garbage collection (GC), thread, tomcat, memory heap, cpu usage, transaction
- * <br/>
+ * The {@code AgentExecutionEngine} class is the core execution engine responsible for
+ * initializing, configuring, running, and shutting down the TrafficHunter Agent.
+ * This class encapsulates all the necessary steps to bootstrap the agent, manage its
+ * lifecycle, and ensure proper cleanup upon application termination.
+ *
+ * <p>Purpose:</p>
+ * <ul>
+ *     <li>Initialize and configure the TrafficHunter Agent with environment-specific settings.</li>
+ *     <li>Run the agent in a dedicated thread to monitor and manage traffic.</li>
+ *     <li>Register and manage shutdown hooks to ensure proper cleanup during termination.</li>
+ * </ul>
+ *
+ * <p>Key Components:</p>
+ * <ul>
+ *     <li>{@link TrafficHunterAgentShutdownHook} - Manages graceful shutdown of resources.</li>
+ *     <li>{@link ConfigurableEnvironment} - Loads environment-specific configurations.</li>
+ *     <li>{@link AgentRunner} - Executes the agent's core logic in a separate thread.</li>
+ *     <li>{@link AsciiBanner} - Prints metadata and banner information to the console.</li>
+ * </ul>
+ *
+ * <p>Thread Safety:</p>
+ * <ul>
+ *     <li>The class uses thread-safe constructs such as {@link TrafficHunterAgentShutdownHook}
+ *         to manage concurrent operations.</li>
+ *     <li>Execution and shutdown are handled in separate threads to prevent blocking the main process.</li>
+ * </ul>
+ *
+ * <p>Limitations:</p>
+ * <ul>
+ *     <li>This class assumes that the {@code Instrumentation} object is correctly provided at runtime.</li>
+ *     <li>Agent initialization failures may result in partial cleanup if not handled carefully.</li>
+ * </ul>
+ *
+ * @see TrafficHunterAgentShutdownHook
+ * @see AgentExecutionEngine.AgentRunner
+ * @see ConfigurableEnvironment
+ * @see Instrumentation
+ * @author yungwang-o
+ * @version 1.0.0
  */
 public final class AgentExecutionEngine {
 
@@ -48,6 +76,16 @@ public final class AgentExecutionEngine {
         this.environment = new YamlConfigurableEnvironment(args);
     }
 
+    /**
+     * Initializes and executes the TrafficHunter Agent.
+     * <p>This method performs the following tasks:</p>
+     * <ul>
+     *     <li>Loads environment-specific configurations using {@link YamlConfigurableEnvironment}.</li>
+     *     <li>Initializes the agent's execution context and metadata.</li>
+     *     <li>Registers shutdown hooks for cleanup during termination.</li>
+     *     <li>Starts the agent's core logic in a dedicated thread.</li>
+     * </ul>
+     */
     private void run() {
         StartUp startUp = new StartUp();
         Instant startTime = startUp.getStartTime();
@@ -67,7 +105,6 @@ public final class AgentExecutionEngine {
         AgentRunner runner = new AgentRunner(property, context, metadata);
         Thread runnerThread = new Thread(runner);
         runnerThread.setName("TrafficHunterAgentRunnerThread");
-        runnerThread.setDaemon(true);
         if(context.isInit()) {
             log.info("Agent initialization completed.");
             runnerThread.start();
@@ -78,6 +115,18 @@ public final class AgentExecutionEngine {
         log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime().getSeconds() / 1000);
     }
 
+    /**
+     * Registers shutdown hooks for the agent's cleanup operations.
+     * <p>Ensures that all resources are released properly, including:</p>
+     * <ul>
+     *     <li>Removing all state from {@link SyncQueue}.</li>
+     *     <li>Clearing agent state event listeners from the context.</li>
+     *     <li>Closing the {@link AgentRunner} and releasing associated resources.</li>
+     * </ul>
+     *
+     * @param context The execution context of the agent.
+     * @param runner  The agent runner instance responsible for managing execution.
+     */
     private void registryShutdownHook(final AgentExecutableContext context, final AgentRunner runner) {
         shutdownHook.addRuntimeShutdownHook(SyncQueue.INSTANCE::removeAll);
         shutdownHook.addRuntimeShutdownHook(context::removeAllAgentStateEventListeners);
@@ -89,7 +138,15 @@ public final class AgentExecutionEngine {
     }
 
     /**
-     * agent's start and end time measure
+     * The {@code StartUp} class extends {@link LifeCycle} to measure the agent's
+     * startup and shutdown durations. It provides timestamps for the agent's
+     * lifecycle events and calculates the total uptime.
+     *
+     * <p>Features:</p>
+     * <ul>
+     *     <li>Tracks the agent's start time and end time.</li>
+     *     <li>Calculates the total uptime using {@link Duration}.</li>
+     * </ul>
      */
     static class StartUp extends LifeCycle {
 
@@ -117,7 +174,15 @@ public final class AgentExecutionEngine {
     }
 
     /**
-     * Responsible for executing the agent.
+     * The {@code AgentRunner} class implements {@link Runnable} to execute the core logic
+     * of the TrafficHunter Agent in a separate thread. It initializes the session manager
+     * and orchestrates agent operations after the target application is loaded.
+     *
+     * <p>Features:</p>
+     * <ul>
+     *     <li>Introduces a delay to ensure the target application is fully loaded before execution.</li>
+     *     <li>Manages the lifecycle of the {@link MetricSendSessionManager}.</li>
+     * </ul>
      */
     static final class AgentRunner implements Runnable {
 
@@ -130,6 +195,10 @@ public final class AgentExecutionEngine {
             this.sessionManager = new MetricSendSessionManager(property, context, metadata);
         }
 
+        /**
+         * Executes the agent's core logic. Introduces a delay to ensure that
+         * the target application is fully loaded before starting.
+         */
         @Override
         public void run() {
             try {

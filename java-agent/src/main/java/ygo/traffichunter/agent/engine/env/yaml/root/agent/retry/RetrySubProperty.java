@@ -2,6 +2,10 @@ package ygo.traffichunter.agent.engine.env.yaml.root.agent.retry;
 
 import ygo.traffichunter.agent.engine.env.yaml.root.agent.retry.backoff.BackOffSubProperty;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class RetrySubProperty {
 
     private int maxAttempt;

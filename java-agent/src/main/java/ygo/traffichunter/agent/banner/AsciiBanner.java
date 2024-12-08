@@ -10,6 +10,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 
+/**
+ * banner print.
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class AsciiBanner {
 
     private static final String BANNER_NAME = "agent-banner.txt";

@@ -1,7 +1,5 @@
 package ygo.traffichunter.agent.engine.instrument;
 
-import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
-
 import java.lang.instrument.Instrumentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +7,11 @@ import ygo.traffichunter.agent.engine.AgentExecutionEngine;
 import ygo.traffichunter.agent.engine.env.Environment;
 import ygo.traffichunter.agent.engine.instrument.bootstrap.BootState;
 
+/**
+ * main.
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class JavaInstrumentAgentMain {
 
     private static final Logger log = LoggerFactory.getLogger(JavaInstrumentAgentMain.class);

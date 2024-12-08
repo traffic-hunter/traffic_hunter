@@ -4,6 +4,10 @@ import javax.management.ObjectName;
 import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
 import ygo.traffichunter.agent.engine.metric.dbcp.HikariDbcpInfo;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class HikariCPMetricCollector extends AbstractMBeanMetricCollector<HikariDbcpInfo> {
 
     @Override

@@ -1,5 +1,9 @@
 package ygo.traffichunter.agent.engine.env;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public enum Environment {
 
     DEFAULT_PATH("/env/agent-env.yml"),

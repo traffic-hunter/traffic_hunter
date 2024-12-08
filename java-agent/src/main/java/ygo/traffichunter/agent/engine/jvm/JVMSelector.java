@@ -8,6 +8,10 @@ import java.util.Objects;
 import java.util.logging.Logger;
 import javax.management.remote.JMXServiceURL;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class JVMSelector {
 
     private static final Logger log = Logger.getLogger(JVMSelector.class.getName());

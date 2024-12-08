@@ -15,6 +15,25 @@ import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
+/**
+ * The {@code MetricWebSocketClient} class extends {@link WebSocketClient}
+ * to provide specialized functionality for sending serialized metrics over a WebSocket connection.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Automatically sends metadata when the connection is opened.</li>
+ *     <li>Supports sending metrics as JSON or compressed binary data.</li>
+ *     <li>Provides utility methods to check and manage WebSocket connection state.</li>
+ * </ul>
+ *
+ * @see WebSocketClient
+ * @see SerializationByteArrayConverter
+ * @see AgentMetadata
+ * @see MetricType
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class MetricWebSocketClient extends WebSocketClient {
 
     private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);

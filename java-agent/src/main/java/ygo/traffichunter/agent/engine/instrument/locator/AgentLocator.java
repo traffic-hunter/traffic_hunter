@@ -7,8 +7,11 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import ygo.traffichunter.agent.engine.instrument.JavaInstrumentAgentMain;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class AgentLocator {
-
 
     public static File getAgentJarFile() throws URISyntaxException {
 

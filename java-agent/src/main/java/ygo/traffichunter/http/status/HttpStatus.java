@@ -1,5 +1,10 @@
 package ygo.traffichunter.http.status;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
+@Deprecated(since = "1.0.0")
 public enum HttpStatus {
 
     OK(200, "request ok!!"),

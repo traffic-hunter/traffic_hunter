@@ -6,6 +6,23 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+/**
+ * The {@code AbstractMBeanMetricCollector} abstract class provides a base implementation
+ * for collecting metrics using the JMX {@link MBeanServer}.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Extends {@link MetricCollector} for metric collection.</li>
+ *     <li>Provides helper methods to query MBeans and retrieve attributes.</li>
+ *     <li>Handles exceptions gracefully through the nested {@link MetricCollectionException} class.</li>
+ * </ul>
+ *
+ * @see MetricCollector
+ * @see MBeanServer
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public abstract class AbstractMBeanMetricCollector<T> implements MetricCollector<T> {
 
     protected final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();

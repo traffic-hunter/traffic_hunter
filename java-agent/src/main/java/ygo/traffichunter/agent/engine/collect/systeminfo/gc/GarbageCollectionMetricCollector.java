@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
-import ygo.traffichunter.agent.engine.collect.MetricCollector;
 import ygo.traffichunter.agent.engine.collect.systeminfo.memory.MemoryMetricCollector;
 import ygo.traffichunter.agent.engine.metric.systeminfo.gc.GarbageCollectionStatusInfo;
 import ygo.traffichunter.agent.engine.metric.systeminfo.gc.collections.GarbageCollectionTime;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class GarbageCollectionMetricCollector extends AbstractMBeanMetricCollector<GarbageCollectionStatusInfo> {
 
     private static final Logger log = Logger.getLogger(MemoryMetricCollector.class.getName());

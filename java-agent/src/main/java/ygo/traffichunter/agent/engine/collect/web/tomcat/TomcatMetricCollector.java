@@ -1,7 +1,5 @@
 package ygo.traffichunter.agent.engine.collect.web.tomcat;
 
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +9,10 @@ import ygo.traffichunter.agent.engine.metric.web.tomcat.request.TomcatRequestInf
 import ygo.traffichunter.agent.engine.metric.web.tomcat.thread.TomcatThreadPoolInfo;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class TomcatMetricCollector extends AbstractMBeanMetricCollector<TomcatWebServerInfo> {
 
     private static final Logger log = LoggerFactory.getLogger(TomcatMetricCollector.class.getName());

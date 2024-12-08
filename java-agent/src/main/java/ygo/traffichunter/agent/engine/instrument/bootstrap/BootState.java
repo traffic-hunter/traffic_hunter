@@ -2,6 +2,10 @@ package ygo.traffichunter.agent.engine.instrument.bootstrap;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class BootState {
 
     private static final Boolean STATE_NONE = false;

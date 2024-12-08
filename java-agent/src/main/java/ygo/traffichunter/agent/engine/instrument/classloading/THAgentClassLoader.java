@@ -1,5 +1,9 @@
 package ygo.traffichunter.agent.engine.instrument.classloading;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class THAgentClassLoader extends ClassLoader {
 
     public THAgentClassLoader(final ClassLoader parent) {

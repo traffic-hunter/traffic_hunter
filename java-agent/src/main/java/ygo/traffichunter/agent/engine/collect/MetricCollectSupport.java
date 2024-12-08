@@ -18,6 +18,31 @@ import ygo.traffichunter.agent.engine.jvm.JVMSelector;
 import ygo.traffichunter.agent.engine.metric.systeminfo.SystemInfo;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
+/**
+ * The {@code MetricCollectSupport} class provides functionality for collecting system metrics
+ * from the local JVM or a target JVM via JMX.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Integrates multiple metric collectors for memory, CPU, threads, garbage collection,
+ *         runtime, Tomcat, and HikariCP metrics.</li>
+ *     <li>Supports collecting metrics from the local JVM or a remote JVM identified by a JMX path.</li>
+ *     <li>Combines collected metrics into a unified {@link SystemInfo} object.</li>
+ * </ul>
+ *
+ * @see SystemInfo
+ * @see MemoryMetricCollector
+ * @see CpuMetricCollector
+ * @see ThreadMetricCollector
+ * @see GarbageCollectionMetricCollector
+ * @see RuntimeMetricCollector
+ * @see TomcatMetricCollector
+ * @see HikariCPMetricCollector
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
+
 public class MetricCollectSupport {
 
     private static final Logger log = LoggerFactory.getLogger(MetricCollectSupport.class);

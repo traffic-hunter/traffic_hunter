@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
+import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
 import net.bytebuddy.asm.Advice;
@@ -32,6 +33,25 @@ import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.util.UUIDGenerator;
 
+/**
+ * The {@code ConfigurableContextInitializer} class is responsible for initializing the environment,
+ * setting up agent metadata, and configuring ByteBuddy for runtime class transformations.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Loads properties using a configurable environment.</li>
+ *     <li>Sets up agent metadata based on the current environment and runtime status.</li>
+ *     <li>Configures ByteBuddy to instrument methods annotated with Spring component annotations.</li>
+ * </ul>
+ *
+ * @see ConfigurableEnvironment
+ * @see TrafficHunterAgentProperty
+ * @see ByteBuddy
+ * @see AgentMetadata
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class ConfigurableContextInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurableContextInitializer.class);
@@ -87,6 +107,18 @@ public class ConfigurableContextInitializer {
                 .or(isAnnotatedWith(named(AnnotationPath.REPOSITORY.getPath())));
     }
 
+    /**
+     * The {@code TransactionAdvise} inner class provides method-level advice for tracking transaction execution times
+     * and errors. It uses ByteBuddy's {@link Advice} API to inject behavior into target methods.
+     *
+     * <p>Features:</p>
+     * <ul>
+     *     <li>Records the start and end times of method execution.</li>
+     *     <li>Calculates the duration of the method call.</li>
+     *     <li>Logs transaction information, including any thrown exceptions.</li>
+     *     <li>Stores transaction data in the {@link SyncQueue} for later processing.</li>
+     * </ul>
+     */
     private static class TransactionAdvise {
 
         @OnMethodEnter

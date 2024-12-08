@@ -7,6 +7,26 @@ import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.event.listener.AgentStateEventListener;
 import ygo.traffichunter.agent.event.object.AgentStateEvent;
 
+/**
+ * The {@code AgentMetadata} record represents metadata for an agent and acts as an
+ * {@link AgentStateEventListener} to respond to state change events.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Stores immutable metadata fields such as agent ID, version, name, and start time.</li>
+ *     <li>Maintains a mutable {@link AtomicReference} for the agent's current status.</li>
+ *     <li>Implements {@link AgentStateEventListener} to react to state change events.</li>
+ *     <li>Overrides {@code equals} and {@code hashCode} to handle mutable status appropriately.</li>
+ * </ul>
+ *
+ * @see AgentStateEventListener
+ * @see AgentStateEvent
+ * @see AgentStatus
+ * @see AtomicReference
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public record AgentMetadata(
         String agentId,
         String agentVersion,

@@ -12,6 +12,48 @@ import ygo.traffichunter.agent.event.listener.AgentStateEventListener;
 import ygo.traffichunter.agent.event.object.AgentStateEvent;
 import ygo.traffichunter.agent.event.store.AgentStateEventStore;
 
+/**
+ * The {@code TrafficHunterAgentExecutableContext} class represents the execution context
+ * for the TrafficHunter Agent. It manages the agent's state, event listeners, environment
+ * configuration, and shutdown operations.
+ *
+ * <p>Purpose:</p>
+ * <ul>
+ *     <li>Maintains the current state of the agent using an atomic {@link AgentStatus}.</li>
+ *     <li>Registers and manages {@link AgentStateEventListener} instances for state change notifications.</li>
+ *     <li>Integrates a shutdown mechanism using {@link TrafficHunterAgentShutdownHook}.</li>
+ * </ul>
+ *
+ * <p>Key Features:</p>
+ * <ul>
+ *     <li>{@code init()} - Initializes the agent with the provided environment settings.</li>
+ *     <li>{@code addAgentStateEventListener()} - Adds a listener to observe state changes.</li>
+ *     <li>{@code removeAllAgentStateEventListeners()} - Removes all registered listeners.</li>
+ *     <li>{@code close()} - Safely shuts down the agent using a dedicated shutdown thread.</li>
+ *     <li>{@code setStatus()} - Atomically updates the agent's state and notifies listeners of the change.</li>
+ * </ul>
+ *
+ * <p>Thread Safety:</p>
+ * <ul>
+ *     <li>The {@code status} is managed using {@link AtomicReference}, ensuring thread-safe updates.</li>
+ *     <li>Shutdown operations are protected by a {@link ReentrantLock} to prevent concurrent execution.</li>
+ *     <li>{@link AtomicBoolean} is used to ensure the shutdown logic executes only once.</li>
+ * </ul>
+ *
+ * <p>Limitations:</p>
+ * <ul>
+ *     <li>State listeners are invoked sequentially; long-running listeners may delay others.</li>
+ *     <li>Shutdown operations rely on an additional thread, which may cause delays during JVM termination.</li>
+ * </ul>
+ *
+ * @see AgentExecutableContext
+ * @see AgentStatus
+ * @see TrafficHunterAgentShutdownHook
+ * @see ConfigurableContextInitializer
+ * @see AgentStateEventListener
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class TrafficHunterAgentExecutableContext extends AgentStateEventStore implements AgentExecutableContext {
 
     private final ConfigurableEnvironment environment;
@@ -50,6 +92,15 @@ public class TrafficHunterAgentExecutableContext extends AgentStateEventStore im
         return new ConfigurableContextInitializer(environment);
     }
 
+    /**
+     * Safely shuts down the agent by executing the registered shutdown hooks.
+     * <p>Ensures that:</p>
+     * <ul>
+     *     <li>The shutdown hook is executed only once.</li>
+     *     <li>Concurrent shutdown attempts are prevented using a {@link ReentrantLock}.</li>
+     * </ul>
+     * If the shutdown hook is not enabled, this method does nothing.
+     */
     @Override
     public void close() {
 

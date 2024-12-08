@@ -2,6 +2,10 @@ package ygo.traffichunter.agent.engine.env.yaml.root;
 
 import ygo.traffichunter.agent.engine.env.yaml.root.agent.AgentSubProperty;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class RootYamlProperty {
 
     private AgentSubProperty agent;

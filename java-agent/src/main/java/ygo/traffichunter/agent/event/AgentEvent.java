@@ -3,6 +3,10 @@ package ygo.traffichunter.agent.event;
 import java.time.Instant;
 import java.util.EventObject;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public abstract class AgentEvent extends EventObject {
 
     private final long timestamp;

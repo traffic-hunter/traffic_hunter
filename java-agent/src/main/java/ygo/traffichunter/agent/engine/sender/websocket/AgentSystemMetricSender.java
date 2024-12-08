@@ -11,6 +11,24 @@ import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 import ygo.traffichunter.websocket.MetricWebSocketClient;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
+/**
+ * The {@code AgentSystemMetricSender} class is responsible for sending system metrics
+ * to the server via a WebSocket connection.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Collects system metric data from the local environment.</li>
+ *     <li>Wraps the system data with metadata and sends it in a compressed format.</li>
+ *     <li>Uses {@link MetricCollectSupport} for metric collection.</li>
+ * </ul>
+ *
+ * @see MetricSender
+ * @see MetricWebSocketClient
+ * @see MetricCollectSupport
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class AgentSystemMetricSender implements MetricSender {
 
     private static final Logger log = LoggerFactory.getLogger(AgentSystemMetricSender.class);

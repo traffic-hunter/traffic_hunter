@@ -2,6 +2,14 @@ package ygo.traffichunter.util;
 
 import java.net.URI;
 
+/**
+ * The {@code AgentUtil} enum provides utility methods for constructing
+ * WebSocket and HTTP URLs for the TrafficHunter Agent. It also includes
+ * methods for validating and formatting server addresses.
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+*/
 public enum AgentUtil {
     WEBSOCKET_URL("ws://%s/traffic-hunter/tx"),
     HTTP_URL("http://%s/traffic-hunter"),

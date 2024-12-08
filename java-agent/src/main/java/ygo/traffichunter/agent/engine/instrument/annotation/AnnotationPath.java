@@ -1,5 +1,13 @@
 package ygo.traffichunter.agent.engine.instrument.annotation;
 
+/**
+ * The {@code AnnotationPath} enum defines commonly used annotation paths
+ * for Spring-based applications, which are used for bytecode manipulation
+ * with ByteBuddy.
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public enum AnnotationPath {
 
     TRANSACTIONAL("org.springframework.transaction.annotation.Transactional"),

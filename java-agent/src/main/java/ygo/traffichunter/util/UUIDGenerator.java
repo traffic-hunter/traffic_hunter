@@ -8,6 +8,10 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class UUIDGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(UUIDGenerator.class);

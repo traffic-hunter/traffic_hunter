@@ -5,6 +5,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The {@code TrafficHunterAgentShutdownHook} class is responsible for managing and
+ * registering shutdown hooks to execute specific actions when the Java application
+ * terminates. This class allows users to add custom {@link Runnable} actions that
+ * will be executed gracefully during the shutdown process.
+ *
+ * @see Runtime#addShutdownHook(Thread)
+ * @see Runnable
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class TrafficHunterAgentShutdownHook implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(TrafficHunterAgentShutdownHook.class);

@@ -2,6 +2,10 @@ package ygo.traffichunter.agent.engine.env.yaml.root.agent;
 
 import ygo.traffichunter.agent.engine.env.yaml.root.agent.retry.RetrySubProperty;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class AgentSubProperty {
 
     private String name;

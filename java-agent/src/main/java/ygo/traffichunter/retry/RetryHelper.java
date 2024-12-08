@@ -1,13 +1,47 @@
 package ygo.traffichunter.retry;
 
 import io.github.resilience4j.core.IntervalFunction;
-import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 import ygo.traffichunter.retry.backoff.BackOffPolicy;
 
+/**
+ * The {@code RetryHelper} class simplifies the configuration of retry logic,
+ * including backoff policies, maximum attempts, and exception handling.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Provides a fluent {@code Builder} for configuring retry parameters.</li>
+ *     <li>Supports customizable backoff policies via {@link BackOffPolicy}.</li>
+ *     <li>Configures exception-based retry logic with a {@link Predicate}.</li>
+ *     <li>Generates a {@link RetryConfig} compatible with retry libraries.</li>
+ * </ul>
+ *
+ * <p>Example:</p>
+ * <pre>{@code
+ * RetryHelper retryHelper = RetryHelper.builder()
+ *     .backOffPolicy(new BackOffPolicy(1000, 2))
+ *     .maxAttempts(5)
+ *     .retryPredicate(e -> e instanceof IllegalStateException)
+ *     .retryName("SampleRetry")
+ *     .isCheck(true)
+ *     .build();
+ *
+ * RetryConfig retryConfig = retryHelper.configureRetry();
+ * }</pre>
+ *
+ * <p>Thread Safety:</p>
+ * <ul>
+ *     <li>This class is immutable and thread-safe once built.</li>
+ * </ul>
+ *
+ * @see RetryConfig
+ * @see BackOffPolicy
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class RetryHelper {
 
     private static final Logger log = Logger.getLogger(RetryHelper.class.getName());

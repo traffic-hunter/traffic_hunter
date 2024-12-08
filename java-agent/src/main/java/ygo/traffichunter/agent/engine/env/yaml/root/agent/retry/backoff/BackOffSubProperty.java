@@ -1,5 +1,9 @@
 package ygo.traffichunter.agent.engine.env.yaml.root.agent.retry.backoff;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class BackOffSubProperty {
 
     private long intervalMillis;

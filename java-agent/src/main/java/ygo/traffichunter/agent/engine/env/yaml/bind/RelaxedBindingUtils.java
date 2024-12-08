@@ -2,10 +2,13 @@ package ygo.traffichunter.agent.engine.env.yaml.bind;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class RelaxedBindingUtils extends PropertyUtils {
 
     private static final Logger log = LoggerFactory.getLogger(RelaxedBindingUtils.class);

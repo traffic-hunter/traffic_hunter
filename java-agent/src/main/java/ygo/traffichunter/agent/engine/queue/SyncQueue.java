@@ -4,6 +4,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public enum SyncQueue {
 
     INSTANCE,

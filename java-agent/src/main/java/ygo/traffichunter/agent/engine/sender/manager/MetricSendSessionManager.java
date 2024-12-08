@@ -1,9 +1,5 @@
 package ygo.traffichunter.agent.engine.sender.manager;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +18,50 @@ import ygo.traffichunter.retry.RetryHelper;
 import ygo.traffichunter.util.AgentUtil;
 import ygo.traffichunter.websocket.MetricWebSocketClient;
 
+/**
+ * The {@code MetricSendSessionManager} class manages the session for sending
+ * transaction and system metrics from the TrafficHunter Agent to a server.
+ * It handles WebSocket connections, retries, scheduling, and lifecycle management
+ * of the metric-sending operations.
+ *
+ * <p>Purpose:</p>
+ * <ul>
+ *     <li>Manages WebSocket connections for real-time metric transmission.</li>
+ *     <li>Schedules periodic system metric transmissions using a {@link ScheduledExecutorService}.</li>
+ *     <li>Retries connection attempts in case of failures with a configurable back-off policy.</li>
+ *     <li>Provides lifecycle management for starting and stopping the session.</li>
+ * </ul>
+ *
+ * <p>Key Features:</p>
+ * <ul>
+ *     <li>{@code run()} - Starts the metric sending session, ensuring retries and scheduling are properly configured.</li>
+ *     <li>{@code close()} - Safely shuts down the session, releasing all resources.</li>
+ *     <li>Integrates with {@link Retry} to handle WebSocket reconnections in case of failures.</li>
+ * </ul>
+ *
+ * <p>Thread Management:</p>
+ * <ul>
+ *     <li>Uses a {@link ScheduledExecutorService} for scheduling periodic system metrics.</li>
+ *     <li>Uses a {@link ExecutorService} for running transaction metric transmissions.</li>
+ *     <li>Both executors are safely shut down during the {@code close()} method.</li>
+ * </ul>
+ *
+ * <p>Limitations:</p>
+ * <ul>
+ *     <li>If the agent's context status is already {@code RUNNING}, the session cannot be restarted without stopping it first.</li>
+ *     <li>Retries only handle specific exceptions, as configured in the {@link RetryHelper}.</li>
+ * </ul>
+ *
+ * @see Retry
+ * @see ScheduledExecutorService
+ * @see MetricWebSocketClient
+ * @see TrafficHunterAgentProperty
+ * @see AgentExecutableContext
+ * @see AgentMetadata
+ * @see RetryHelper
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class MetricSendSessionManager {
 
     private static final Logger log = LoggerFactory.getLogger(MetricSendSessionManager.class);

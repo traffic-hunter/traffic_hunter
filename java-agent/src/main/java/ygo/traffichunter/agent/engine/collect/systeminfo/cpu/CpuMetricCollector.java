@@ -8,6 +8,10 @@ import javax.management.MBeanServerConnection;
 import ygo.traffichunter.agent.engine.collect.AbstractMBeanMetricCollector;
 import ygo.traffichunter.agent.engine.metric.systeminfo.cpu.CpuStatusInfo;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class CpuMetricCollector extends AbstractMBeanMetricCollector<CpuStatusInfo> {
 
     private static final Logger log = Logger.getLogger(CpuStatusInfo.class.getName());

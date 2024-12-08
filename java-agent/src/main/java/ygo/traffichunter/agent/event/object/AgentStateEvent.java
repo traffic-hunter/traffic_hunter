@@ -4,6 +4,10 @@ import java.time.Instant;
 import ygo.traffichunter.agent.AgentStatus;
 import ygo.traffichunter.agent.event.AgentEvent;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class AgentStateEvent extends AgentEvent {
 
     private final AgentStatus beforeStatus;

@@ -10,6 +10,11 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
+@Deprecated(since = "1.0.0")
 public class HttpBuilder {
 
     private final URI uri;

@@ -1,7 +1,9 @@
 package ygo.traffichunter.agent.engine.metric.systeminfo.thread;
 
-import java.lang.management.ThreadInfo;
-
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public record ThreadStatusInfo(
         int threadCount,
         int getPeekThreadCount,

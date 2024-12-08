@@ -15,6 +15,24 @@ import ygo.traffichunter.retry.backoff.BackOffPolicy;
 import ygo.traffichunter.retry.backoff.policy.ExponentialBackOffPolicy;
 import ygo.traffichunter.util.FileUtils;
 
+/**
+ * The {@code YamlConfigurableEnvironment} class implements {@link ConfigurableEnvironment}
+ * to load configuration properties from a YAML file or input stream.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Loads configuration properties from a YAML file or input stream.</li>
+ *     <li>Parses YAML data into a {@link TrafficHunterAgentProperty} instance using
+ *         custom relaxed binding rules.</li>
+ *     <li>Supports a default configuration file or custom file paths.</li>
+ * </ul>
+ *
+ * @see ConfigurableEnvironment
+ * @see TrafficHunterAgentProperty
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class YamlConfigurableEnvironment implements ConfigurableEnvironment {
 
     private static final String DEFAULT_CONFIG_FILE = "agent-env.yml";
