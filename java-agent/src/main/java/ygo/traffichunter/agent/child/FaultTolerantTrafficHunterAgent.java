@@ -11,21 +11,6 @@ import ygo.traffichunter.retry.backoff.BackOffPolicy;
  * and back-off policies. This class is designed to handle scenarios where failures
  * may occur and ensures that the agent can recover gracefully.
  *
- * <p>Purpose:</p>
- * <ul>
- *     <li>Adds retry logic with a customizable maximum attempt count.</li>
- *     <li>Supports back-off policies to control the retry intervals dynamically.</li>
- *     <li>Provides a fluent API for configuring fault-tolerant behavior.</li>
- * </ul>
- *
- * <p>Key Features:</p>
- * <ul>
- *     <li>{@code retry(int maxAttempt)} - Sets the maximum number of retry attempts.</li>
- *     <li>{@code backOffPolicy(BackOffPolicy backOffPolicy)} - Configures the back-off policy.</li>
- *     <li>Overrides {@code complete()} to include fault-tolerant configurations
- *         in the immutable {@code TrafficHunterAgentProperty} object.</li>
- * </ul>
- *
  * <p>Example Usage:</p>
  * <pre>{@code
  * TrafficHunterProperty property = TrafficHunterAgent.connect("localhost:8080")
@@ -39,17 +24,6 @@ import ygo.traffichunter.retry.backoff.BackOffPolicy;
  *     .backOffPolicy(new ExponentialBackOffPolicy()) // Use exponential back-off policy
  *     .complete();
  * }</pre>
- *
- * <p>Thread Safety:</p>
- * <ul>
- *     <li>This class is not thread-safe. Each thread should use its own instance.</li>
- * </ul>
- *
- * <p>Extensibility:</p>
- * <ul>
- *     <li>The class can be extended further to include additional fault-tolerant mechanisms,
- *         such as circuit breakers or timeout strategies.</li>
- * </ul>
  *
  * @see TrafficHunterAgent
  * @see BackOffPolicy
