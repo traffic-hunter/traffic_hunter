@@ -21,6 +21,10 @@ import ygo.traffic_hunter.persistence.mapper.AgentRowMapper;
 import ygo.traffic_hunter.persistence.mapper.SystemMeasurementRowMapper;
 import ygo.traffic_hunter.persistence.mapper.TransactionMeasurementRowMapper;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Slf4j
 @Repository
 @RequiredArgsConstructor

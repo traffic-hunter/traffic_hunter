@@ -2,6 +2,10 @@ package ygo.traffic_hunter.domain.interval;
 
 import lombok.Getter;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Getter
 public enum TimeInterval {
 

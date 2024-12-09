@@ -1,5 +1,9 @@
 package ygo.traffic_hunter.domain.metric.dbcp.hikari;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public record HikariCPMeasurement(
         // Connection Status
         int activeConnections,      // Number of active connections currently in use

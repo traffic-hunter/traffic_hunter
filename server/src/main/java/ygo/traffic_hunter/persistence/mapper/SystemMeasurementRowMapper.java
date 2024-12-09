@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.domain.metric.MetricData;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implements RowMapper<SystemMetricResponse> {
 

@@ -6,6 +6,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Configuration
 public class LockConfig {
 

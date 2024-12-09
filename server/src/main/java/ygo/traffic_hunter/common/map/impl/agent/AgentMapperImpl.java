@@ -5,6 +5,10 @@ import ygo.traffic_hunter.common.map.AgentMapper;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.domain.entity.Agent;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 public class AgentMapperImpl implements AgentMapper {
 

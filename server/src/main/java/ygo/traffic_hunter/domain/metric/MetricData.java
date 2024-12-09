@@ -8,6 +8,10 @@ import ygo.traffic_hunter.domain.metric.gc.GCMetricMeasurement;
 import ygo.traffic_hunter.domain.metric.runtime.RuntimeMetricMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.TomcatWebServerMeasurement;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public record MetricData(
         CpuMetricMeasurement cpuMetric,
 

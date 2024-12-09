@@ -1,5 +1,9 @@
 package ygo.traffic_hunter.common.exception;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public class TrafficHunterException extends RuntimeException {
 
     public TrafficHunterException() {

@@ -11,6 +11,10 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Configuration
 @EnableCaching
 public class CacheConfig {

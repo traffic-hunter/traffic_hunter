@@ -3,6 +3,10 @@ package ygo.traffic_hunter.core.dto.response;
 import java.time.Instant;
 import ygo.traffic_hunter.domain.metric.MetricData;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public record SystemMetricResponse(
         Instant time,
         String agentName,

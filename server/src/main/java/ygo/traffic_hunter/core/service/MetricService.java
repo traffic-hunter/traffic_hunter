@@ -18,6 +18,10 @@ import ygo.traffic_hunter.core.sse.ServerSentEventManager;
 import ygo.traffic_hunter.core.websocket.handler.MetricWebSocketHandler;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)

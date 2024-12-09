@@ -6,6 +6,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.domain.entity.Agent;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 public class AgentRowMapper implements RowMapper<Agent> {
 

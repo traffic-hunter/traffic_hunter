@@ -12,6 +12,10 @@ import ygo.traffic_hunter.domain.entity.Agent;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 @RequiredArgsConstructor
 public class TransactionMapperImpl implements TransactionMapper {

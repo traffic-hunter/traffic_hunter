@@ -34,6 +34,10 @@ import ygo.traffic_hunter.domain.metric.web.tomcat.TomcatWebServerMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.request.TomcatWebServerRequestMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.thread.TomcatWebServerThreadPoolMeasurement;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 @RequiredArgsConstructor
 public class SystemInfoMapperImpl implements SystemInfoMapper {

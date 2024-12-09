@@ -4,6 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @RequiredArgsConstructor
 public class RowMapSupport<T> {
 

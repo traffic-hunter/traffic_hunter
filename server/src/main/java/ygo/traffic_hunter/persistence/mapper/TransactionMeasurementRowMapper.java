@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionData> implements RowMapper<TransactionMeasurement> {
 

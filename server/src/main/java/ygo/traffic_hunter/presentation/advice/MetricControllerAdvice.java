@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
 import ygo.traffic_hunter.common.exception.TrafficHunterException;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Slf4j
 @RestControllerAdvice(annotations = RestController.class)
 public class MetricControllerAdvice {

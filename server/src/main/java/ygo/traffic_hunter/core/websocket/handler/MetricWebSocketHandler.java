@@ -21,6 +21,10 @@ import ygo.traffic_hunter.core.collector.MetricCollector;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.repository.AgentRepository;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

@@ -9,6 +9,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.common.aop.lock.method.LockMode;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Aspect
 @Component
 @RequiredArgsConstructor

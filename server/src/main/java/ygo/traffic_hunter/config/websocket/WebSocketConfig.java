@@ -7,6 +7,10 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import ygo.traffic_hunter.core.websocket.handler.MetricWebSocketHandler;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Configuration
 @EnableWebSocket
 @RequiredArgsConstructor

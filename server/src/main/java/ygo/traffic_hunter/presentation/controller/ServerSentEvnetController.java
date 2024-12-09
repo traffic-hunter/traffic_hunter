@@ -12,6 +12,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.service.MetricService;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @RestController
 @RequiredArgsConstructor
 public class ServerSentEvnetController {

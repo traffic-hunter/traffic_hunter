@@ -5,6 +5,10 @@ import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 public interface TransactionMapper {
 
     TransactionMeasurement map(MetadataWrapper<TransactionInfo> wrapper);

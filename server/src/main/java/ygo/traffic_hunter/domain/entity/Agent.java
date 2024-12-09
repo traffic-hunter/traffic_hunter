@@ -3,6 +3,10 @@ package ygo.traffic_hunter.domain.entity;
 import java.time.Instant;
 import lombok.Builder;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Builder
 public record Agent(
 
