@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import org.springframework.stereotype.Component;
 
+/**
+ * unzip metric binary data.
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 public class ByteArrayMetricDecompressor {
 

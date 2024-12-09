@@ -10,6 +10,16 @@ import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 
+/**
+ * <p>
+ *  The {@code MetricProcessor} class is responsible for processing raw metric payloads
+ *  into structured data objects. It uses decompression and deserialization to convert
+ *  byte arrays into {@code MetadataWrapper} objects.
+ * </p>
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Processor
 @RequiredArgsConstructor
 public class MetricProcessor {

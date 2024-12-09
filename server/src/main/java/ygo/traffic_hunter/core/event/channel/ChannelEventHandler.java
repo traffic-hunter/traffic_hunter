@@ -14,6 +14,56 @@ import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 
+/**
+ * <p>
+ *  The {@code ChannelEventHandler} class is responsible for handling metric events and
+ *  persisting the processed data into a repository. It ensures transaction management
+ *  and validation of incoming metric events.
+ * </p>
+ *
+ * <h4>Core Responsibilities</h4>
+ * <ul>
+ *     <li>Listens for {@link TransactionMetricEvent} and {@link SystemInfoMetricEvent} events.</li>
+ *     <li>Validates incoming metrics using {@link MetricValidator}.</li>
+ *     <li>Maps valid metric events to database entities using mappers.</li>
+ *     <li>Persists the mapped entities into the {@link MetricRepository}.</li>
+ *     <li>Handles transactions independently for each event.</li>
+ * </ul>
+ *
+ * <h4>Transaction Management</h4>
+ * <p>
+ * Each event listener method is annotated with {@code @Transactional}, ensuring that:
+ * </p>
+ * <ul>
+ *     <li>Each event is processed within its own transaction.</li>
+ *     <li>Failures in processing one event do not affect the processing of others.</li>
+ * </ul>
+ *
+ * <h2>Workflow</h2>
+ * <ol>
+ *     <li>An event is published ({@link TransactionMetricEvent} or {@link SystemInfoMetricEvent}).</li>
+ *     <li>The corresponding event handler method is triggered.</li>
+ *     <li>The metric data is validated using {@link MetricValidator}.</li>
+ *     <li>If valid, the metric is mapped to a database entity.</li>
+ *     <li>The entity is saved in the database.</li>
+ * </ol>
+ *
+ * <h2>Dependencies</h2>
+ * <ul>
+ *     <li>{@link MetricValidator}: Ensures metrics meet validation criteria.</li>
+ *     <li>{@link SystemInfoMapper}: Maps {@link SystemInfo} metrics to database entities.</li>
+ *     <li>{@link TransactionMapper}: Maps {@link TransactionInfo} metrics to database entities.</li>
+ *     <li>{@link MetricRepository}: Handles database persistence of metrics.</li>
+ * </ul>
+ *
+ * @see TransactionMetricEvent
+ * @see SystemInfoMetricEvent
+ * @see MetricValidator
+ * @see MetricRepository
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Component
 @RequiredArgsConstructor
 public class ChannelEventHandler {

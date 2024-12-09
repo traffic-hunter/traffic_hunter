@@ -8,6 +8,13 @@ import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.repository.AgentRepository;
 
+/**
+ * The {@code MetricValidator} class is responsible for validating the metadata
+ * of metrics to ensure their integrity and agent status.
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Validator
 @RequiredArgsConstructor
 public class MetricValidator {

@@ -6,6 +6,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager;
 
+/**
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Slf4j
 @Component
 public class ServerSentEventAlertManager implements ServerSentEventManager {

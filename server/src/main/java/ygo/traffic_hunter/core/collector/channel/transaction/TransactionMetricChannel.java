@@ -8,8 +8,21 @@ import ygo.traffic_hunter.core.collector.channel.MetricChannel;
 import ygo.traffic_hunter.core.collector.processor.MetricProcessor;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
+import ygo.traffic_hunter.core.event.channel.ChannelEventHandler;
 import ygo.traffic_hunter.core.event.channel.TransactionMetricEvent;
 
+/**
+ * The {@code TransactionMetricChannel} class handles transaction metrics by processing
+ * the raw payload and publishing events for further processing.
+ *
+ * @see MetricProcessor
+ * @see ChannelEventHandler
+ * @see TransactionMetricEvent
+ * @see MetricChannel
+ *
+ * @author yungwang-o
+ * @version 1.0.0
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
