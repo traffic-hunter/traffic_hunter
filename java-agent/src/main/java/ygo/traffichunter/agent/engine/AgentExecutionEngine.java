@@ -17,36 +17,30 @@ import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.engine.sender.manager.MetricSendSessionManager;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
+import ygo.traffichunter.agent.trace.opentelemetry.TraceManager;
 
 /**
- * The {@code AgentExecutionEngine} class is the core execution engine responsible for
- * initializing, configuring, running, and shutting down the TrafficHunter Agent.
- * This class encapsulates all the necessary steps to bootstrap the agent, manage its
- * lifecycle, and ensure proper cleanup upon application termination.
- *
- * <p>Purpose:</p>
+ * <p>
+ *  The {@code AgentExecutionEngine} class is the core execution engine responsible for
+ *  initializing, configuring, running, and shutting down the TrafficHunter Agent.
+ *  This class encapsulates all the necessary steps to bootstrap the agent, manage its
+ *  lifecycle, and ensure proper cleanup upon application termination.
+ * </p>
+ * <h4>Purpose:</h4>
  * <ul>
  *     <li>Initialize and configure the TrafficHunter Agent with environment-specific settings.</li>
  *     <li>Run the agent in a dedicated thread to monitor and manage traffic.</li>
  *     <li>Register and manage shutdown hooks to ensure proper cleanup during termination.</li>
  * </ul>
  *
- * <p>Key Components:</p>
+ * <h4>Key Components:</h4>
  * <ul>
  *     <li>{@link TrafficHunterAgentShutdownHook} - Manages graceful shutdown of resources.</li>
  *     <li>{@link ConfigurableEnvironment} - Loads environment-specific configurations.</li>
  *     <li>{@link AgentRunner} - Executes the agent's core logic in a separate thread.</li>
- *     <li>{@link AsciiBanner} - Prints metadata and banner information to the console.</li>
  * </ul>
  *
- * <p>Thread Safety:</p>
- * <ul>
- *     <li>The class uses thread-safe constructs such as {@link TrafficHunterAgentShutdownHook}
- *         to manage concurrent operations.</li>
- *     <li>Execution and shutdown are handled in separate threads to prevent blocking the main process.</li>
- * </ul>
- *
- * <p>Limitations:</p>
+ * <h4>Limitations:</h4>
  * <ul>
  *     <li>This class assumes that the {@code Instrumentation} object is correctly provided at runtime.</li>
  *     <li>Agent initialization failures may result in partial cleanup if not handled carefully.</li>
@@ -112,22 +106,17 @@ public final class AgentExecutionEngine {
             context.close();
         }
 
-        log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime().getSeconds() / 1000);
+        log.info("Started TrafficHunter Agent in {} second", String.format("%.3f", startUp.getUpTime()));
     }
 
     /**
      * Registers shutdown hooks for the agent's cleanup operations.
-     * <p>Ensures that all resources are released properly, including:</p>
-     * <ul>
-     *     <li>Removing all state from {@link SyncQueue}.</li>
-     *     <li>Clearing agent state event listeners from the context.</li>
-     *     <li>Closing the {@link AgentRunner} and releasing associated resources.</li>
-     * </ul>
      *
      * @param context The execution context of the agent.
      * @param runner  The agent runner instance responsible for managing execution.
      */
     private void registryShutdownHook(final AgentExecutableContext context, final AgentRunner runner) {
+        shutdownHook.addRuntimeShutdownHook(TraceManager::close);
         shutdownHook.addRuntimeShutdownHook(SyncQueue.INSTANCE::removeAll);
         shutdownHook.addRuntimeShutdownHook(context::removeAllAgentStateEventListeners);
         shutdownHook.addRuntimeShutdownHook(runner::close);
@@ -139,16 +128,15 @@ public final class AgentExecutionEngine {
 
     /**
      * The {@code StartUp} class extends {@link LifeCycle} to measure the agent's
-     * startup and shutdown durations. It provides timestamps for the agent's
-     * lifecycle events and calculates the total uptime.
+     * startup durations.
      *
      * <p>Features:</p>
      * <ul>
      *     <li>Tracks the agent's start time and end time.</li>
-     *     <li>Calculates the total uptime using {@link Duration}.</li>
+     *     <li>Calculates the total uptime.</li>
      * </ul>
      */
-    static class StartUp extends LifeCycle {
+    private static class StartUp extends LifeCycle {
 
         public StartUp() {
             super();
@@ -168,8 +156,12 @@ public final class AgentExecutionEngine {
         }
 
         @Override
-        public Duration getUpTime() {
-            return Duration.between(this.startTime, getEndTime());
+        public Double getUpTime() {
+            if(getStartTime() == null && getEndTime() == null) {
+                throw new IllegalStateException("No start time or end time specified");
+            }
+
+            return Duration.between(getStartTime(), getEndTime()).toMillis() / 1_000.0;
         }
     }
 
@@ -184,7 +176,7 @@ public final class AgentExecutionEngine {
      *     <li>Manages the lifecycle of the {@link MetricSendSessionManager}.</li>
      * </ul>
      */
-    static final class AgentRunner implements Runnable {
+    private static final class AgentRunner implements Runnable {
 
         private final MetricSendSessionManager sessionManager;
 
@@ -202,13 +194,11 @@ public final class AgentExecutionEngine {
         @Override
         public void run() {
             try {
-                // run after loading the target application
                 log.info("Waiting for Agent Runner...");
-                Thread.sleep(5000);
+                Thread.sleep(8000);
                 sessionManager.run();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
             }
         }
 

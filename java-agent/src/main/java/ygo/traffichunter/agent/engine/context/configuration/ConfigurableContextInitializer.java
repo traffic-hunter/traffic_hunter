@@ -4,13 +4,18 @@ import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
-import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -28,9 +33,10 @@ import ygo.traffichunter.agent.engine.env.ConfigurableEnvironment;
 import ygo.traffichunter.agent.engine.env.Environment;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
-import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
-import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
+import ygo.traffichunter.agent.trace.opentelemetry.TraceExporter;
+import ygo.traffichunter.agent.trace.opentelemetry.TraceManager;
+import ygo.traffichunter.agent.trace.opentelemetry.TraceManager.SpanScope;
 import ygo.traffichunter.util.UUIDGenerator;
 
 /**
@@ -72,8 +78,6 @@ public class ConfigurableContextInitializer {
 
     public void retransform(final Instrumentation inst) {
         new Default()
-                .with(RedefinitionStrategy.RETRANSFORMATION)
-                .disableClassFormatChanges()
                 .ignore(ignoreMatchPackage())
                 .type(getSpringComponentMatcher())
                 .transform((builder, typeDescription, classLoader, module, protectionDomain) ->
@@ -108,41 +112,48 @@ public class ConfigurableContextInitializer {
     }
 
     /**
-     * The {@code TransactionAdvise} inner class provides method-level advice for tracking transaction execution times
-     * and errors. It uses ByteBuddy's {@link Advice} API to inject behavior into target methods.
+     * <p>
+     * Intercepts method execution to create a span for tracing.
+     * Handles span lifecycle, recording exceptions, and closing the scope.
+     * </p>
      *
-     * <p>Features:</p>
-     * <ul>
-     *     <li>Records the start and end times of method execution.</li>
-     *     <li>Calculates the duration of the method call.</li>
-     *     <li>Logs transaction information, including any thrown exceptions.</li>
-     *     <li>Stores transaction data in the {@link SyncQueue} for later processing.</li>
-     * </ul>
+     * <p><b>Note:</b> Ensure the class has a <code>public</code> access modifier to avoid
+     * visibility issues when used with external components or frameworks like ByteBuddy.
+     * Using a private or package-private access modifier may result in runtime errors
+     * due to restricted access.</p>
+     *
+     * @see TraceManager
      */
-    private static class TransactionAdvise {
+    public static class TransactionAdvise {
+
+        public static final Tracer tracer = TraceManager.configure(new TraceExporter());
 
         @OnMethodEnter
-        public static Instant enter() {
-            return Instant.now();
+        public static SpanScope enter(@Origin final String method) {
+
+            Span currentSpan = Span.current();
+
+            Span span = tracer.spanBuilder(method)
+                    .setParent(Context.current().with(currentSpan))
+                    .setAttribute("method.name", method)
+                    .setStartTimestamp(Instant.now())
+                    .startSpan();
+
+            Scope scope = span.makeCurrent();
+
+            return new SpanScope(span, scope);
         }
 
-        @OnMethodExit(onThrowable = Throwable.class)
-        public static void exit(@Origin final String method,
-                                @Enter final Instant startTime,
-                                @Thrown final Throwable throwable) {
+        @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
+        public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
 
-            final Instant endTime = Instant.now();
-            final long duration = endTime.toEpochMilli() - startTime.toEpochMilli();
+            if (Objects.nonNull(throwable)) {
+                spanScope.span().recordException(throwable);
+                spanScope.span().setStatus(StatusCode.ERROR);
+            }
 
-            final TransactionInfo txInfo = TransactionInfo.create(method,
-                    startTime,
-                    endTime,
-                    duration,
-                    throwable == null ? "No Error Message" : throwable.getMessage(),
-                    throwable == null
-            );
-
-            SyncQueue.INSTANCE.add(txInfo);
+            spanScope.span().end(Instant.now());
+            spanScope.scope().close();
         }
     }
 }

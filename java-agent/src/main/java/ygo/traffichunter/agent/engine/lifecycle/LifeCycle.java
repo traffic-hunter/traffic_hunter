@@ -61,5 +61,5 @@ public abstract class LifeCycle {
 
     public abstract Instant getEndTime();
 
-    public abstract Duration getUpTime();
+    public abstract Double getUpTime();
 }

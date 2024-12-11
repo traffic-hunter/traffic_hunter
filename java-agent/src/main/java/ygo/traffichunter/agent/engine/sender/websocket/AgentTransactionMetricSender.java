@@ -1,30 +1,27 @@
 package ygo.traffichunter.agent.engine.sender.websocket;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ygo.traffichunter.agent.engine.queue.SyncQueue;
-import ygo.traffichunter.agent.engine.sender.MetricSender;
-import ygo.traffichunter.agent.engine.metric.transaction.TransactionInfo;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.agent.engine.metric.metadata.MetadataWrapper;
+import ygo.traffichunter.agent.engine.metric.transaction.TraceInfo;
+import ygo.traffichunter.agent.engine.queue.SyncQueue;
+import ygo.traffichunter.agent.engine.sender.MetricSender;
 import ygo.traffichunter.websocket.MetricWebSocketClient;
 import ygo.traffichunter.websocket.converter.SerializationByteArrayConverter.MetricType;
 
 /**
+ * <p>
  * The {@code AgentTransactionMetricSender} class is responsible for sending transaction metrics
  * to the server via a WebSocket connection.
+ * </p>
  *
  * <p>Features:</p>
  * <ul>
  *     <li>Continuously retrieves transaction data from a synchronized queue.</li>
  *     <li>Wraps the transaction data with metadata and sends it in a compressed format.</li>
  *     <li>Relies on {@link SyncQueue} for thread-safe access to transaction data.</li>
- * </ul>
- *
- * <p>Thread Safety:</p>
- * <ul>
- *     <li>This class relies on {@link SyncQueue}, which provides thread-safe operations for data retrieval.</li>
- *     <li>The {@code toSend} method runs in a blocking loop, making it suitable for dedicated threads.</li>
  * </ul>
  *
  * @see MetricSender
@@ -40,8 +37,6 @@ public class AgentTransactionMetricSender implements MetricSender {
 
     private final MetricWebSocketClient client;
 
-    public static SyncQueue syncQueue = SyncQueue.INSTANCE;
-
     public AgentTransactionMetricSender(final MetricWebSocketClient client) {
         this.client = client;
     }
@@ -49,15 +44,20 @@ public class AgentTransactionMetricSender implements MetricSender {
     @Override
     public void toSend(final AgentMetadata metadata)  {
 
-        while (true) {
-            try {
-                TransactionInfo txInfo = syncQueue.poll();
+        while (!Thread.currentThread().isInterrupted()) {
 
-                MetadataWrapper<TransactionInfo> wrapper = MetadataWrapper.create(metadata, txInfo);
+            try {
+
+                List<TraceInfo> trInfo = SyncQueue.INSTANCE.poll();
+
+                MetadataWrapper<List<TraceInfo>> wrapper = MetadataWrapper.create(metadata, trInfo);
 
                 client.compressToSend(wrapper, MetricType.TRANSACTION_METRIC);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                break;
+            } catch (IllegalStateException e) {
+                log.error("exception while sending transaction metric = {}", e.getMessage());
                 throw new RuntimeException(e);
             }
         }

@@ -24,4 +24,8 @@ public abstract class AgentEvent extends EventObject {
     public final long getTimestamp() {
         return this.timestamp;
     }
+
+    public Object getSource() {
+        return super.getSource();
+    }
 }
