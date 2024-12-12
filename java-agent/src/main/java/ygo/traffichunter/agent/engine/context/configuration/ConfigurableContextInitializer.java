@@ -148,8 +148,15 @@ public class ConfigurableContextInitializer {
         public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
 
             if (Objects.nonNull(throwable)) {
+
+                String exception = throwable.getClass().getName()
+                        + " "
+                        + "("
+                        + throwable.getMessage()
+                        + ")";
+
                 spanScope.span().recordException(throwable);
-                spanScope.span().setStatus(StatusCode.ERROR);
+                spanScope.span().setStatus(StatusCode.ERROR, exception);
             }
 
             spanScope.span().end(Instant.now());

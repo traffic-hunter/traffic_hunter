@@ -1,8 +1,10 @@
 package ygo.traffichunter.agent.engine.metric.transaction;
 
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * @author yungwang-o
@@ -24,6 +26,8 @@ public record TraceInfo(
 
         long duration,
 
+        String exception,
+
         boolean ended
 ) {
 
@@ -43,7 +47,16 @@ public record TraceInfo(
                 startTime,
                 endTime,
                 between.toMillis(),
+                getException(spanData),
                 spanData.hasEnded()
         );
+    }
+
+    private static String getException(final SpanData spanData) {
+        if(Objects.equals(spanData.getStatus().getStatusCode(), StatusCode.ERROR)) {
+            return spanData.getStatus().getDescription();
+        }
+
+        return "success";
     }
 }
