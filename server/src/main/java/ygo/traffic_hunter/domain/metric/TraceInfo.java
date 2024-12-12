@@ -22,6 +22,8 @@ public record TraceInfo(
 
         long duration,
 
+        String exception,
+
         boolean ended
 ) {
 }

@@ -24,6 +24,8 @@ public record TransactionData(
 
         long duration,
 
+        String exception,
+
         boolean ended
 ) {
 
@@ -36,6 +38,7 @@ public record TransactionData(
                 .startTime(traceInfo.startTime())
                 .endTime(traceInfo.endTime())
                 .duration(traceInfo.duration())
+                .exception(traceInfo.exception())
                 .ended(traceInfo.ended())
                 .build();
     }
