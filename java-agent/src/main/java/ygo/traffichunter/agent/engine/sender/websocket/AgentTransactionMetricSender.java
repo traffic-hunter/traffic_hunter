@@ -1,6 +1,5 @@
 package ygo.traffichunter.agent.engine.sender.websocket;
 
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
@@ -48,9 +47,9 @@ public class AgentTransactionMetricSender implements MetricSender {
 
             try {
 
-                List<TraceInfo> trInfo = SyncQueue.INSTANCE.poll();
+                TraceInfo trInfo = SyncQueue.INSTANCE.poll();
 
-                MetadataWrapper<List<TraceInfo>> wrapper = MetadataWrapper.create(metadata, trInfo);
+                MetadataWrapper<TraceInfo> wrapper = MetadataWrapper.create(metadata, trInfo);
 
                 client.compressToSend(wrapper, MetricType.TRANSACTION_METRIC);
             } catch (InterruptedException e) {

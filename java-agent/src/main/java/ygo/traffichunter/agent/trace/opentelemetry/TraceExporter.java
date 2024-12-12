@@ -4,7 +4,6 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ygo.traffichunter.agent.engine.metric.transaction.TraceInfo;
@@ -28,11 +27,9 @@ public class TraceExporter implements SpanExporter {
         }
 
         try {
-            List<TraceInfo> traceInfos = spans.stream()
+            spans.stream()
                     .map(TraceInfo::translate)
-                    .toList();
-
-            SyncQueue.INSTANCE.add(traceInfos);
+                    .forEach(SyncQueue.INSTANCE::add);
 
             return CompletableResultCode.ofSuccess();
         } catch (RuntimeException e) {

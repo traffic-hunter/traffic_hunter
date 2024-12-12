@@ -6,6 +6,7 @@ import java.time.Instant;
  * @author yungwang-o
  * @version 1.0.0
  */
+@Deprecated(since = "1.0.0")
 public record TransactionInfo(
         String txName,
         Instant startTime,
