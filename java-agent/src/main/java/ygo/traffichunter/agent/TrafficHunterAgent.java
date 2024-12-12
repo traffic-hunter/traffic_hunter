@@ -6,23 +6,22 @@ import ygo.traffichunter.agent.child.FaultTolerantTrafficHunterAgent;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
 
 /**
+ * <p>
  * The {@code TrafficHunterAgent} class is responsible for holding and managing configuration
  * details required to set up and execute traffic monitoring or management tasks.
  * This class provides a fluent API for constructing and customizing the configuration
  * properties, such as scheduling intervals, target URIs, and resource locations.
+ * </p>
  *
  * <p>Example Usage:</p>
  * <pre>{@code
- * TrafficHunterAgent agent = TrafficHunterAgent.connect("localhost:8080")
+ * TrafficHunterProperty property = TrafficHunterAgent.connect("localhost:8080")
  *     .name("MyAgent")
  *     .targetUri("localhost:8888")
  *     .locationJar("/path/to/agent.jar")
  *     .scheduleInterval(10)
  *     .scheduleTimeUnit(TimeUnit.MINUTES)
  *     .complete();
- *
- * TrafficHunterAgentProperty properties = agent.complete();
- * System.out.println("Agent name: " + properties.getName());
  * }</pre>
  *
  * <p>Extensibility:</p>
