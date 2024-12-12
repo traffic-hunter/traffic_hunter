@@ -1,5 +1,6 @@
 package ygo.traffic_hunter.core.event.channel;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
+import ygo.traffic_hunter.domain.metric.TraceInfo;
 
 /**
  * <p>
@@ -80,7 +82,7 @@ public class ChannelEventHandler {
     @Transactional
     public void handle(final TransactionMetricEvent event) {
 
-        MetadataWrapper<TransactionInfo> object = event.transactionInfo();
+        MetadataWrapper<TraceInfo> object = event.transactionInfo();
 
         if(validator.validate(object)) {
             return;

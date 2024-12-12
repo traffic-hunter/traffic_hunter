@@ -78,7 +78,7 @@ public class MetricWebSocketHandler extends BinaryWebSocketHandler {
 
         log.info("websocket session id = {}", session.getId());
 
-        //collector.collect(byteBuffer);
+        collector.collect(byteBuffer);
     }
 
     @Override

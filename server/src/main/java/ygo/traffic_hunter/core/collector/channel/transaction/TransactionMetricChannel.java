@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel;
 import ygo.traffic_hunter.core.collector.processor.MetricProcessor;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
-import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 import ygo.traffic_hunter.core.event.channel.ChannelEventHandler;
 import ygo.traffic_hunter.core.event.channel.TransactionMetricEvent;
+import ygo.traffic_hunter.domain.metric.TraceInfo;
 
 /**
  * The {@code TransactionMetricChannel} class handles transaction metrics by processing
@@ -40,7 +40,7 @@ public class TransactionMetricChannel implements MetricChannel {
     @Override
     public void open(final byte[] payload) {
 
-        MetadataWrapper<TransactionInfo> object = processor.processTransactionInfo(payload);
+        MetadataWrapper<TraceInfo> object = processor.processTransactionInfo(payload);
 
         log.info("Transaction metric data: {}", object);
 

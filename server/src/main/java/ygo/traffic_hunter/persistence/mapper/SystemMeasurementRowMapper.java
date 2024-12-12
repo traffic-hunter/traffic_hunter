@@ -31,6 +31,6 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
     }
 
     public String serialize(final MetricData metricData) {
-        return super.serialize(metricData);
+        return super.serialize0(metricData);
     }
 }

@@ -72,7 +72,7 @@ public class TimeSeriesRepository implements MetricRepository {
                 Timestamp.from(metric.time()),
                 metric.agentId(),
                 systemMeasurementRowMapper.serialize(metric.metricData())
-                );
+        );
     }
 
     @Override

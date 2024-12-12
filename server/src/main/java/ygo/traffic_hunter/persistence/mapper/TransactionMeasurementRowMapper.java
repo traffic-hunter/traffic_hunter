@@ -3,6 +3,7 @@ package ygo.traffic_hunter.persistence.mapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
@@ -28,7 +29,11 @@ public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionDa
         );
     }
 
+    public String serialize(final List<TransactionData> txData) {
+        return super.serialize0(txData);
+    }
+
     public String serialize(final TransactionData txData) {
-        return super.serialize(txData);
+        return super.serialize0(txData);
     }
 }

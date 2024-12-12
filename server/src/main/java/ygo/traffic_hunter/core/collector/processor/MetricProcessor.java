@@ -8,7 +8,7 @@ import ygo.traffic_hunter.core.annotation.Processor;
 import ygo.traffic_hunter.core.collector.processor.compress.ByteArrayMetricDecompressor;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
-import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
+import ygo.traffic_hunter.domain.metric.TraceInfo;
 
 /**
  * <p>
@@ -42,12 +42,12 @@ public class MetricProcessor {
         }
     }
 
-    public MetadataWrapper<TransactionInfo> processTransactionInfo(final byte[] data) {
+    public MetadataWrapper<TraceInfo> processTransactionInfo(final byte[] data) {
 
         byte[] unzipped = decompressor.unzip(data);
 
         JavaType javaType = objectMapper.getTypeFactory()
-                .constructParametricType(MetadataWrapper.class, TransactionInfo.class);
+                .constructParametricType(MetadataWrapper.class, TraceInfo.class);
 
         try {
             return objectMapper.readValue(unzipped, javaType);
