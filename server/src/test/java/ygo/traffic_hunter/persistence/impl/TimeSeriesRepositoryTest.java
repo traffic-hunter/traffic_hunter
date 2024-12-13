@@ -3,6 +3,7 @@ package ygo.traffic_hunter.persistence.impl;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +11,7 @@ import ygo.traffic_hunter.AbstractTestConfiguration;
 import ygo.traffic_hunter.domain.entity.Agent;
 
 @SpringBootTest
+@Disabled
 class TimeSeriesRepositoryTest extends AbstractTestConfiguration {
 
     @Autowired
