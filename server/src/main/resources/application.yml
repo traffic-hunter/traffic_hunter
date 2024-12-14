@@ -1,0 +1,18 @@
+server:
+  port: 9100
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${USER_NAME}
+    password: ${PASSWORD}
+    url: jdbc:postgresql://${DB_IP}/${DB_NAME}
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+  jooq:
+    sql-dialect: postgres
+
