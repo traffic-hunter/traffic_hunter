@@ -8,7 +8,7 @@ The current stable version is v1.0.0.
 
 ### Notes
 
-- Agent that is v1.0.0 supports only spring framework 6.x and boot 3.x
+- Agent that is v1.0.0 supports only `spring framework 6.x` and `boot 3.x`
 
 ## Intro. Traffic-Hunter
 
