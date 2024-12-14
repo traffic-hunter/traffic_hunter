@@ -14,7 +14,7 @@ java {
 }
 
 bootJar {
-    archiveFileName = 'Traffic-Hunter-Server.jar'
+    archiveFileName = 'traffic-hunter-server-v1.0.0.jar'
 }
 
 repositories {
