@@ -1,7 +1,5 @@
 # Traffic-Hunter APM
 
----
-
 ## Latest Release 🚀
 
 The current stable version is v1.0.0. 
@@ -13,8 +11,6 @@ The current stable version is v1.0.0.
 - Agent that is v1.0.0 supports only spring framework 6.x and boot 3.x
 
 ## Intro. Traffic-Hunter
-
----
 
 **Traffic-Hunter** is APM (Application Performance Management) 
 
@@ -36,13 +32,9 @@ The current stable version is v1.0.0.
 
 ## Getting Started
 
----
-
 - [**Quick-start**](https://github.com/yungwangoh/traffic_hunter/wiki/Quick%E2%80%90Start) - Quick-start and installation guide.
 
 ## Overview 👀
-
----
 
 - **Application Health Check** - cpu, heap memory, thread, web server, dbcp (database connection pool)
 
@@ -54,8 +46,6 @@ The current stable version is v1.0.0.
 
 ## Version Compatibility 👏
 
----
-
 | Java Version | Agent           | Server         | Notes                                     |
 |--------------|-----------------|----------------|-------------------------------------------|
 | 21           | ✅ Supported     | ✅ Supported   | Includes support for advanced features like virtual threads |
@@ -66,8 +56,6 @@ The current stable version is v1.0.0.
 - Ensure both the agent and the server are running compatible Java versions.
 
 ## License
-
----
 
 ```text
 The MIT License
