@@ -65,7 +65,7 @@ tasks.register('deployAgent', Copy) {
     into layout.projectDirectory.dir('/Users/yungwang-o/Documents/agent')
 
     rename { filename ->
-        'my-agent.jar'
+        'traffic-hunter-agent-v1.0.0.jar'
     }
 
     fileMode(0644)
