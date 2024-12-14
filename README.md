@@ -2,7 +2,7 @@
 
 ## Latest Release 🚀
 
-The current stable version is v1.0.0. 
+The pre-release version is v1.0.0. 
 
 - 2024/12/30 - 1.0.0 version
 
