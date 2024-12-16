@@ -15,7 +15,7 @@ COPY src ./src
 RUN chmod +x ./gradlew
 
 # Run the build
-RUN ./gradlew bootJar --exclude-task test
+RUN ./gradlew build --exclude-task test
 
 # Base image for running
 FROM bellsoft/liberica-openjdk-alpine:21.0.4

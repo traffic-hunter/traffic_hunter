@@ -21,6 +21,8 @@ shadowJar {
                 'Permissions': 'all-permissions'
         )
     }
+
+    archiveFileName.set("traffic-hunter-agent-v1.0.0.jar")
 }
 
 jmh {
@@ -55,18 +57,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-tasks.register('deployAgent', Copy) {
-    dependsOn tasks.named('assemble')
-
-    from tasks.named('shadowJar')
-
-    into layout.projectDirectory.dir('/Users/yungwang-o/Documents/agent')
-
-    rename { filename ->
-        'traffic-hunter-agent-v1.0.0.jar'
-    }
-
-    fileMode(0644)
 }
