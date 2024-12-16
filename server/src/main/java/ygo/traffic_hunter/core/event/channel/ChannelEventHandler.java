@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.common.exception.TrafficHunterException;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.common.map.TransactionMapper;
 import ygo.traffic_hunter.core.collector.validator.MetricValidator;
@@ -107,7 +108,7 @@ public class ChannelEventHandler {
         MetadataWrapper<TraceInfo> object = event.transactionInfo();
 
         if(validator.validate(object)) {
-            return;
+            throw new TrafficHunterException("Metric validation failed");
         }
 
         TransactionMeasurement measurement = transactionMapper.map(object);
@@ -122,7 +123,7 @@ public class ChannelEventHandler {
         MetadataWrapper<SystemInfo> object = event.systemInfo();
 
         if(validator.validate(object)) {
-            return;
+            throw new TrafficHunterException("Metric validation failed");
         }
 
         MetricMeasurement measurement = systemInfoMapper.map(object);
