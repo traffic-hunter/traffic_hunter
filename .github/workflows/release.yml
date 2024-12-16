@@ -10,7 +10,7 @@ name: Java CI/CD with Gradle
 on:
   push:
     branches:
-      - 'release-v*' # release-v로 시작하는 브랜치 푸시에 실행
+      - 'v*' # release-v로 시작하는 브랜치 푸시에 실행
 
 jobs:
   build:
