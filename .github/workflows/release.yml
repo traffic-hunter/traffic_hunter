@@ -57,7 +57,7 @@ jobs:
           name: build-artifacts
 
       - name: List downloaded files
-        run: ls -R build-artifacts/
+        run: ls -R
 
       - name: Create GitHub Release
         id: create_release
