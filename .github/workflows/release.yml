@@ -72,5 +72,5 @@ jobs:
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            build/libs/traffic-hunter-agent-*.jar
-            build/libs/traffic-hunter-server-*.jar
+            artifacts/traffic-hunter-agent-*.jar
+            artifacts/traffic-hunter-server-*.jar
