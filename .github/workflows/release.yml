@@ -10,56 +10,67 @@ name: Java CI/CD with Gradle
 on:
   push:
     branches:
-      - 'v*' # release-v로 시작하는 브랜치 푸시에 실행
+      - 'v*' # v로 시작하는 브랜치 푸시에 실행
 
 jobs:
   build:
-
     runs-on: self-hosted
     permissions:
       contents: write
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'liberica'
 
-      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v4.0.0
 
-      - name: Build agent
+      - name: Build java-agent
         run: ./gradlew :java-agent:shadowJar
 
       - name: Build server
         run: ./gradlew :server:build
 
-      - name: Create release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            java-agent/build/libs/traffic-hunter-*.jar
+            server/build/libs/traffic-hunter-*.jar
+
+  release:
+    runs-on: self-hosted
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: build/libs
+
+      - name: Create GitHub Release
         id: create_release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Automated release for ${{ github.ref_name }}.
           draft: true
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload java-agent ShadowJar
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: java-agent/build/libs/traffic-hunter-agent-${{ github.ref_name }}.jar
-          asset_name: traffic-hunter-agent-${{ github.ref_name }}.jar
-          asset_content_type: application/java-archive
-
-      - name: Upload server JAR
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: java-agent/build/libs/traffic-hunter-server-${{ github.ref_name }}.jar
-          asset_name: traffic-hunter-server-${{ github.ref_name }}.jar
-          asset_content_type: application/java-archive
+          artifacts: |
+            build/libs/traffic-hunter-agent-*.jar
+            build/libs/traffic-hunter-server-*.jar
