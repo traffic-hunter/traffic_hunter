@@ -54,8 +54,11 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: jar-files
-          path: artifacts
+          name: build-artifacts
+          path: build-artifacts
+
+      - name: List downloaded files
+        run: ls -R build-artifacts/
 
       - name: Create GitHub Release
         id: create_release
@@ -68,6 +71,6 @@ jobs:
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            artifacts/traffic-hunter-agent-*.jar
-            artifacts/traffic-hunter-server-*.jar
+            build-artifacts/build/libs/traffic-hunter-agent-*.jar
+            build-artifacts/build/libs/traffic-hunter-server-*.jar
 
