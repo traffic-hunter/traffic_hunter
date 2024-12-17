@@ -9,12 +9,12 @@ name: Java CI/CD with Gradle
 
 on:
   push:
-    branches:
-      - 'v*' # v로 시작하는 브랜치 푸시에 실행
+    tags:
+      - 'v*'
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
@@ -36,29 +36,26 @@ jobs:
       - name: Build server
         run: ./gradlew :server:build
 
-      - name: Upload artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts
+          name: jar-files
           path: |
-            java-agent/build/libs/traffic-hunter-*.jar
-            server/build/libs/traffic-hunter-*.jar
+            java-agent/build/libs/*.jar
+            server/build/libs/*.jar
 
   release:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: build
     permissions:
       contents: write
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build-artifacts
-          path: build/libs
+          name: jar-files
+          path: artifacts
 
       - name: Create GitHub Release
         id: create_release
@@ -66,11 +63,11 @@ jobs:
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body: |
-            Automated release for ${{ github.ref_name }}.
+          body: "Automated release for ${{ github.ref_name }}"
           draft: false
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
             artifacts/traffic-hunter-agent-*.jar
             artifacts/traffic-hunter-server-*.jar
+
