@@ -1,2 +1,1 @@
 rootProject.name = 'traffic_hunter'
-include('java-agent', 'server')
