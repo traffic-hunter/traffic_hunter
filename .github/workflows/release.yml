@@ -10,7 +10,7 @@ name: Java CI/CD with Gradle
 on:
   push:
     branches:
-      - 'v*'
+      - 'master'
 
 jobs:
   build:
