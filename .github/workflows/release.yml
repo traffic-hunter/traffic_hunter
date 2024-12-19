@@ -90,8 +90,6 @@ jobs:
             - We plan to transition from WebSocket to gRPC.
             - Additional language support for Python and Node.js agents.
 
-            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ env.previous_tag }}...${{ env.current_tag }}.
-
           draft: false
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
