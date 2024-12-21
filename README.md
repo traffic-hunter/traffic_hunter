@@ -1,4 +1,4 @@
-![Traffic Hunter_Logo_2](https://github.com/user-attachments/assets/9a9536db-12c9-405f-b83f-6a61afdda0d2)
+![Traffic Hunter_Logo_2_배경](https://github.com/user-attachments/assets/43779ef6-f4f8-40f5-98b5-447754bfd2a4)
 
 ## Latest Release 🚀
 
