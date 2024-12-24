@@ -32,7 +32,7 @@ The pre-release version is v1.0.0.
 
 ## Getting Started
 
-- [**Quick-start**](https://github.com/yungwangoh/traffic_hunter/wiki/Quick%E2%80%90Start) - Quick-start and installation guide.
+- [**Quick-start**](https://traffic-hunter.gitbook.io/traffic-hunter) - Quick-start and installation guide.
 
 ## Overview 👀
 
