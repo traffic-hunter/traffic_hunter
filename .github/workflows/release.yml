@@ -91,7 +91,7 @@ jobs:
             - Additional language support for Python and Node.js agents.
 
           draft: false
-          prerelease: true
+          prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
             **/traffic-hunter-*.jar
