@@ -3,17 +3,16 @@ name: "[BUG] ISSUE"
 about: Bug issue.
 title: "[BUG]"
 labels: bug
-assignees: yungwangoh, gusdn3477, JuSeong1130, GyeongHyeonKim
+assignees: gusdn3477, GyeongHyeonKim, JuSeong1130, yungwangoh
 
 ---
 
-## 제목
-- issue number.
+## Description
 
-## [BUG] 이유.
+## Reason.
 - [ ]
 
-## [BUG] 트러블 슈팅.
+## Trouble shooting.
 - [ ]
 
-## 하고싶은 말.
+## Opinion.

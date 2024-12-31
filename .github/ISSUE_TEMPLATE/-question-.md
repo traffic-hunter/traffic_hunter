@@ -3,8 +3,8 @@ name: "[QUESTION]"
 about: What question??
 title: "[QUESTION]"
 labels: question
-assignees: yungwangoh, gusdn3477, JuSeong1130, GyeongHyeonKim
+assignees: gusdn3477, GyeongHyeonKim, JuSeong1130, yungwangoh
 
 ---
 
-## 제목
+## Desription.
