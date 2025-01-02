@@ -57,9 +57,9 @@ import ygo.traffichunter.agent.engine.env.Environment;
 import ygo.traffichunter.agent.engine.instrument.annotation.AnnotationPath;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
-import ygo.traffichunter.agent.trace.opentelemetry.TraceExporter;
-import ygo.traffichunter.agent.trace.opentelemetry.TraceManager;
-import ygo.traffichunter.agent.trace.opentelemetry.TraceManager.SpanScope;
+import ygo.traffichunter.trace.opentelemetry.TraceExporter;
+import ygo.traffichunter.trace.opentelemetry.TraceManager;
+import ygo.traffichunter.trace.opentelemetry.TraceManager.SpanScope;
 import ygo.traffichunter.util.UUIDGenerator;
 
 /**

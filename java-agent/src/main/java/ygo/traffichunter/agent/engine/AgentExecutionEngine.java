@@ -40,7 +40,7 @@ import ygo.traffichunter.agent.engine.queue.SyncQueue;
 import ygo.traffichunter.agent.engine.sender.manager.MetricSendSessionManager;
 import ygo.traffichunter.agent.engine.metric.metadata.AgentMetadata;
 import ygo.traffichunter.agent.property.TrafficHunterAgentProperty;
-import ygo.traffichunter.agent.trace.opentelemetry.TraceManager;
+import ygo.traffichunter.trace.opentelemetry.TraceManager;
 
 /**
  * <p>
