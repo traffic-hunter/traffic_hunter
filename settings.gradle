@@ -1,2 +1,12 @@
 rootProject.name = 'traffic_hunter'
-include('java-agent', 'server')
+include(':java-agent')
+include(':server')
+include(':java-agent:plugin')
+include(':java-agent:plugin:plugin-sdk')
+include(':java-agent:plugin:spring-webmvc')
+include(':java-agent:java-agent-trace')
+include(':java-agent:java-agent-retry')
+include(':java-agent:java-agent-websocket')
+include(':java-agent:java-agent-commons')
+include(':java-agent:java-agent-bootstrap')
+include(':java-agent:java-agent-event')
