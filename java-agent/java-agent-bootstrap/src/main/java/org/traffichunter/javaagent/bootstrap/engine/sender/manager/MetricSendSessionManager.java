@@ -35,11 +35,12 @@ import org.traffichunter.javaagent.bootstrap.engine.context.AgentExecutableConte
 import org.traffichunter.javaagent.bootstrap.engine.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.bootstrap.engine.sender.websocket.AgentSystemMetricSender;
 import org.traffichunter.javaagent.bootstrap.engine.sender.websocket.AgentTransactionMetricSender;
-import org.traffichunter.javaagent.commons.dto.metadata.AgentMetadata;
+import org.traffichunter.javaagent.bootstrap.metadata.AgentMetadata;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.commons.util.AgentUtil;
 import org.traffichunter.javaagent.retry.RetryHelper;
 import org.traffichunter.javaagent.websocket.MetricWebSocketClient;
+import org.traffichunter.javaagent.websocket.metadata.Metadata;
 
 /**
  * The {@code MetricSendSessionManager} class manages the session for sending
@@ -109,7 +110,7 @@ public class MetricSendSessionManager {
                                     final AgentExecutableContext context,
                                     final AgentMetadata metadata) {
 
-        this.client = new MetricWebSocketClient(AgentUtil.WEBSOCKET_URL.getUri(property.serverUri()), metadata);
+        this.client = initializeWebsocket(property, metadata);
         this.client.connect();
         this.metadata = metadata;
         this.context = context;
@@ -169,6 +170,20 @@ public class MetricSendSessionManager {
         client.close();
         executor.shutdown();
         schedule.shutdown();
+    }
+
+    private static MetricWebSocketClient initializeWebsocket(final TrafficHunterAgentProperty property,
+                                                             final AgentMetadata metadata) {
+        return new MetricWebSocketClient(
+                AgentUtil.WEBSOCKET_URL.getUri(property.serverUri()),
+                Metadata.builder()
+                        .agentId(metadata.agentId())
+                        .agentVersion(metadata.agentVersion())
+                        .agentName(metadata.agentName())
+                        .startTime(metadata.startTime())
+                        .status(metadata.status().get())
+                        .build()
+        );
     }
 
     private ThreadFactory getThreadFactory(final String threadName) {

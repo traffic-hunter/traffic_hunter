@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'org.traffichunter.javaagent.bootstrap'
+version = '1.0-SNAPSHOT'
+
+apply from: '../versions.gradle'
+
+repositories {
+    mavenCentral()
+}
+
+shadowJar {
+
+    manifest {
+        attributes(
+                'Premain-Class': 'org.traffichunter.javaagent.bootstrap.BootstrapMain',
+                'Can-Redefine-Classes': 'true',
+                'Can-Retransform-Classes': 'true',
+                'Permissions': 'all-permissions'
+        )
+    }
+
+    archiveFileName.set("traffic-hunter-agent-${AgentReleaseVersion}.jar")
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation project(':java-apm-agent:java-agent-event')
+    implementation project(':java-apm-agent:java-agent-commons')
+    implementation project(':java-apm-agent:java-agent-websocket')
+    implementation project(':java-apm-agent:java-agent-trace')
+    implementation project(':java-apm-agent:java-agent-retry')
+    implementation project(':java-apm-agent:java-agent-jmx')
+    implementation project(':java-apm-agent:plugin')
+
+    implementation 'io.opentelemetry:opentelemetry-api:1.45.0'
+    implementation 'io.opentelemetry:opentelemetry-sdk:1.45.0'
+
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'org.slf4j:slf4j-simple:2.0.7'
+    implementation 'org.yaml:snakeyaml:2.3'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.7'
+    implementation 'io.github.resilience4j:resilience4j-retry:2.2.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.18.0'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.0'
+    implementation 'net.bytebuddy:byte-buddy:1.15.5'
+}
+
+test {
+    useJUnitPlatform()
+}

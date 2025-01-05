@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.traffichunter.javaagent.plugin.spring-webmvc'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':java-apm-agent:plugin:plugin-sdk')
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,12 +1,18 @@
 rootProject.name = 'traffic_hunter'
-include(':java-agent')
+
+// agent
+include(':java-apm-agent')
+include(':java-apm-agent:plugin')
+include(':java-apm-agent:plugin:plugin-sdk')
+include(':java-apm-agent:plugin:spring-webmvc')
+include(':java-apm-agent:java-agent-trace')
+include(':java-apm-agent:java-agent-retry')
+include(':java-apm-agent:java-agent-websocket')
+include(':java-apm-agent:java-agent-commons')
+include(':java-apm-agent:java-agent-bootstrap')
+include(':java-apm-agent:java-agent-event')
+include(':java-apm-agent:java-agent-jmx')
+
+// server
 include(':server')
-include(':java-agent:plugin')
-include(':java-agent:plugin:plugin-sdk')
-include(':java-agent:plugin:spring-webmvc')
-include(':java-agent:java-agent-trace')
-include(':java-agent:java-agent-retry')
-include(':java-agent:java-agent-websocket')
-include(':java-agent:java-agent-commons')
-include(':java-agent:java-agent-bootstrap')
-include(':java-agent:java-agent-event')
+
