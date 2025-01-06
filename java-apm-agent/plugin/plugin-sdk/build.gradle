@@ -10,7 +10,6 @@ repositories {
 }
 
 dependencies {
-
 }
 
 test {
