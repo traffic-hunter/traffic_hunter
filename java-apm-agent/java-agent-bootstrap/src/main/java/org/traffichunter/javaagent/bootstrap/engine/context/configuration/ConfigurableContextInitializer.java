@@ -27,15 +27,10 @@ import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
-import io.opentelemetry.context.Scope;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
@@ -99,6 +94,10 @@ public class ConfigurableContextInitializer {
         return env.load(is);
     }
 
+    public TraceManager setTraceManager(final TraceExporter exporter) {
+        return new TraceManager(exporter);
+    }
+
     public void retransform(final Instrumentation inst) {
         new Default()
                 .ignore(ignoreMatchPackage())
@@ -149,41 +148,13 @@ public class ConfigurableContextInitializer {
      */
     public static class TransactionAdvise {
 
-        public static final Tracer tracer = TraceManager.configure(new TraceExporter());
-
         @OnMethodEnter
-        public static SpanScope enter(@Origin final String method) {
-
-            Span currentSpan = Span.current();
-
-            Span span = tracer.spanBuilder(method)
-                    .setParent(Context.current().with(currentSpan))
-                    .setAttribute("method.name", method)
-                    .setStartTimestamp(Instant.now())
-                    .startSpan();
-
-            Scope scope = span.makeCurrent();
-
-            return new SpanScope(span, scope);
+        public static SpanScope enter(@Origin final Method method) {
+            return null;
         }
 
         @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
         public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
-
-            if (Objects.nonNull(throwable)) {
-
-                String exception = throwable.getClass().getName()
-                        + " "
-                        + "("
-                        + throwable.getMessage()
-                        + ")";
-
-                spanScope.span().recordException(throwable);
-                spanScope.span().setStatus(StatusCode.ERROR, exception);
-            }
-
-            spanScope.span().end(Instant.now());
-            spanScope.scope().close();
         }
     }
 }

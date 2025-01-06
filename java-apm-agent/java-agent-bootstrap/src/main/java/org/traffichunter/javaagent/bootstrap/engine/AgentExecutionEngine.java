@@ -39,6 +39,7 @@ import org.traffichunter.javaagent.bootstrap.engine.property.TrafficHunterAgentP
 import org.traffichunter.javaagent.bootstrap.engine.sender.manager.MetricSendSessionManager;
 import org.traffichunter.javaagent.bootstrap.metadata.AgentMetadata;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
+import org.traffichunter.javaagent.trace.exporter.TraceExporter;
 import org.traffichunter.javaagent.trace.manager.TraceManager;
 import org.traffichunter.javaagent.trace.queue.TraceQueue;
 
@@ -111,6 +112,7 @@ public final class AgentExecutionEngine {
             shutdownHook.enableShutdownHook();
         }
         ConfigurableContextInitializer configurableContextInitializer = context.init();
+        TraceManager traceManager = configurableContextInitializer.setTraceManager(new TraceExporter());
         configurableContextInitializer.retransform(inst);
         TrafficHunterAgentProperty property = configurableContextInitializer.property();
         AgentMetadata metadata = configurableContextInitializer.setAgentMetadata(
@@ -125,7 +127,7 @@ public final class AgentExecutionEngine {
         if(context.isInit()) {
             log.info("Agent initialization completed.");
             runnerThread.start();
-            registryShutdownHook(context, runner);
+            registryShutdownHook(context, runner, traceManager);
             context.close();
         }
 
@@ -137,9 +139,13 @@ public final class AgentExecutionEngine {
      *
      * @param context The execution context of the agent.
      * @param runner  The agent runner instance responsible for managing execution.
+     * @param traceManager The trace manager manages a trace's lifecycle.
      */
-    private void registryShutdownHook(final AgentExecutableContext context, final AgentRunner runner) {
-        shutdownHook.addRuntimeShutdownHook(TraceManager::close);
+    private void registryShutdownHook(final AgentExecutableContext context,
+                                      final AgentRunner runner,
+                                      final TraceManager traceManager) {
+
+        shutdownHook.addRuntimeShutdownHook(traceManager::close);
         shutdownHook.addRuntimeShutdownHook(TraceQueue.INSTANCE::removeAll);
         shutdownHook.addRuntimeShutdownHook(context::removeAllAgentStateEventListeners);
         shutdownHook.addRuntimeShutdownHook(runner::close);

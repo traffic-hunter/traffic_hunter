@@ -23,6 +23,7 @@
  */
 package org.traffichunter.javaagent.trace.manager;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -30,9 +31,9 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Objects;
+import org.traffichunter.javaagent.trace.exporter.TraceExporter;
 
 /**
  * @author yungwang-o
@@ -40,32 +41,31 @@ import java.util.Objects;
  */
 public class TraceManager {
 
-    private static final String INSTRUMENTATION_SCOPE_NAME = "instrument-transaction-scope";
+    private final OpenTelemetrySdk openTelemetrySdk;
 
-    private static volatile SdkTracerProvider provider;
+    public TraceManager(final TraceExporter exporter) {
 
-    private static volatile OpenTelemetrySdk openTelemetrySdk;
-
-    public static Tracer configure(final SpanExporter exporter) {
-
-        provider = SdkTracerProvider.builder()
+        SdkTracerProvider provider = SdkTracerProvider.builder()
                 .addSpanProcessor(SimpleSpanProcessor.create(exporter))
                 .setIdGenerator(IdGenerator.random())
                 .setSampler(Sampler.alwaysOn())
                 .build();
 
-        openTelemetrySdk = OpenTelemetrySdk.builder()
+        this.openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(provider)
-                .build();
-
-        return openTelemetrySdk.getTracer(INSTRUMENTATION_SCOPE_NAME);
+                .buildAndRegisterGlobal();
     }
 
-    public static void close() {
-        if (Objects.nonNull(provider) && Objects.nonNull(openTelemetrySdk)) {
-            provider.close();
-            openTelemetrySdk.close();
+    public static Tracer getTracer(final String instrumentationName) {
+        if(Objects.isNull(GlobalOpenTelemetry.get())) {
+            throw new IllegalStateException("OpenTelemetry is not configured. Call configure() first.");
         }
+
+        return GlobalOpenTelemetry.getTracer(instrumentationName);
+    }
+
+    public void close() {
+        openTelemetrySdk.close();
     }
 
     public record SpanScope(Span span, Scope scope) { }
