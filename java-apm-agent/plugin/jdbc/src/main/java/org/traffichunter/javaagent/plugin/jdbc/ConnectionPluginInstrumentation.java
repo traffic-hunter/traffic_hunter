@@ -18,6 +18,10 @@ import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractTypeMatche
 import org.traffichunter.javaagent.plugin.sdk.instrumentation.PluginInstrumentation;
 import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
+/**
+ * @author yungwang-o
+ * @version 1.1.0
+ */
 public class ConnectionPluginInstrumentation extends AbstractTypeMatcherInstrumentation implements PluginInstrumentation {
 
     public ConnectionPluginInstrumentation() {
