@@ -23,13 +23,9 @@
  */
 package org.traffichunter.javaagent.plugin.sdk.instrumentation;
 
-import net.bytebuddy.agent.builder.AgentBuilder;
-
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
 public interface PluginInstrumentation {
-
-    AgentBuilder.Transformer transform();
 }

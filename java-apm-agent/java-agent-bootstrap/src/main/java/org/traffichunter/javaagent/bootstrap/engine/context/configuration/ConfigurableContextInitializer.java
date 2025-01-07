@@ -23,39 +23,27 @@
  */
 package org.traffichunter.javaagent.bootstrap.engine.context.configuration;
 
-import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
-import static net.bytebuddy.matcher.ElementMatchers.isMethod;
-import static net.bytebuddy.matcher.ElementMatchers.named;
-
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Method;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
-import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.Advice.Enter;
-import net.bytebuddy.asm.Advice.OnMethodEnter;
-import net.bytebuddy.asm.Advice.OnMethodExit;
-import net.bytebuddy.asm.Advice.Origin;
-import net.bytebuddy.asm.Advice.Thrown;
-import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.matcher.ElementMatcher.Junction;
-import net.bytebuddy.matcher.ElementMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traffichunter.javaagent.bootstrap.engine.env.ConfigurableEnvironment;
 import org.traffichunter.javaagent.bootstrap.engine.env.Environment;
-import org.traffichunter.javaagent.bootstrap.engine.instrument.annotation.AnnotationPath;
 import org.traffichunter.javaagent.bootstrap.engine.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.bootstrap.metadata.AgentMetadata;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.commons.util.UUIDGenerator;
+import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.plugin.sdk.loader.PluginLoader;
+import org.traffichunter.javaagent.plugin.sdk.loader.TrafficHunterPluginLoader;
 import org.traffichunter.javaagent.trace.exporter.TraceExporter;
 import org.traffichunter.javaagent.trace.manager.TraceManager;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
 /**
  * The {@code ConfigurableContextInitializer} class is responsible for initializing the environment,
@@ -98,13 +86,23 @@ public class ConfigurableContextInitializer {
         return new TraceManager(exporter);
     }
 
+    /**
+     * Load all plugins to manipulate the target application's bytecode.
+     */
     public void retransform(final Instrumentation inst) {
-        new Default()
-                .ignore(ignoreMatchPackage())
-                .type(getSpringComponentMatcher())
-                .transform((builder, typeDescription, classLoader, module, protectionDomain) ->
-                        builder.visit(Advice.to(TransactionAdvise.class).on(isMethod()))
-                ).installOn(inst);
+
+        List<AbstractPluginInstrumentation> plugins =
+                loadPlugins(ConfigurableContextInitializer.class.getClassLoader());
+
+        AgentBuilder.Default agentBuilder = new AgentBuilder.Default();
+
+        for(AbstractPluginInstrumentation plugin : plugins) {
+            agentBuilder = (Default) agentBuilder
+                    .type(plugin.typeMatcher())
+                    .transform(plugin.transform());
+        }
+
+        agentBuilder.installOn(inst);
     }
 
     public AgentMetadata setAgentMetadata(final Instant startTime, final AgentStatus status) {
@@ -120,41 +118,10 @@ public class ConfigurableContextInitializer {
         );
     }
 
-    private Junction<TypeDescription> ignoreMatchPackage() {
-        return ElementMatchers.nameStartsWith("java.")
-                .or(ElementMatchers.nameStartsWith("sun."))
-                .or(ElementMatchers.nameStartsWith("jdk."));
-    }
+    private List<AbstractPluginInstrumentation> loadPlugins(final ClassLoader classLoader) {
 
-    private ElementMatcher<TypeDescription> getSpringComponentMatcher() {
-        return isAnnotatedWith(named(AnnotationPath.SERVICE.getPath()))
-                .or(isAnnotatedWith(named(AnnotationPath.REST_CONTROLLER.getPath())))
-                .or(isAnnotatedWith(named(AnnotationPath.CONTROLLER.getPath())))
-                .or(isAnnotatedWith(named(AnnotationPath.REPOSITORY.getPath())));
-    }
+        PluginLoader<AbstractPluginInstrumentation> pluginLoader = new TrafficHunterPluginLoader();
 
-    /**
-     * <p>
-     * Intercepts method execution to create a span for tracing.
-     * Handles span lifecycle, recording exceptions, and closing the scope.
-     * </p>
-     *
-     * <p><b>Note:</b> Ensure the class has a <code>public</code> access modifier to avoid
-     * visibility issues when used with external components or frameworks like ByteBuddy.
-     * Using a private or package-private access modifier may result in runtime errors
-     * due to restricted access.</p>
-     *
-     * @see TraceManager
-     */
-    public static class TransactionAdvise {
-
-        @OnMethodEnter
-        public static SpanScope enter(@Origin final Method method) {
-            return null;
-        }
-
-        @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
-        public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
-        }
+        return pluginLoader.loadModules(classLoader);
     }
 }

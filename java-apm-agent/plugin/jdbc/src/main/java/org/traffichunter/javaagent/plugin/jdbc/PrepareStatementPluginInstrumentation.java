@@ -37,16 +37,14 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.traffichunter.javaagent.plugin.jdbc.helper.JdbcInstrumentationHelper;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractTypeMatcherInstrumentation;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.PluginInstrumentation;
+import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public class PrepareStatementPluginInstrumentation extends AbstractTypeMatcherInstrumentation
-        implements PluginInstrumentation {
+public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrumentation {
 
     public PrepareStatementPluginInstrumentation() {
         super("jdbc", PrepareStatementPluginInstrumentation.class.getSimpleName(), "");

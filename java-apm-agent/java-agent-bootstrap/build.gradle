@@ -36,7 +36,7 @@ dependencies {
     implementation project(':java-apm-agent:java-agent-trace')
     implementation project(':java-apm-agent:java-agent-retry')
     implementation project(':java-apm-agent:java-agent-jmx')
-    implementation project(':java-apm-agent:plugin')
+    implementation project(':java-apm-agent:plugin:plugin-sdk')
 
     implementation 'io.opentelemetry:opentelemetry-api:1.45.0'
     implementation 'io.opentelemetry:opentelemetry-sdk:1.45.0'

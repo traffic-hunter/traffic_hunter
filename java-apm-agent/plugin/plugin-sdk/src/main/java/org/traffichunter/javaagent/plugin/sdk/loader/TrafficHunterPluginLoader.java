@@ -26,22 +26,23 @@ package org.traffichunter.javaagent.plugin.sdk.loader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.PluginInstrumentation;
+import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public class TrafficHunterPluginLoader implements PluginLoader<PluginInstrumentation> {
+public class TrafficHunterPluginLoader implements PluginLoader<AbstractPluginInstrumentation> {
 
     @Override
-    public List<PluginInstrumentation> loadModules(final ClassLoader classLoader) {
+    public List<AbstractPluginInstrumentation> loadModules(final ClassLoader classLoader) {
 
-        List<PluginInstrumentation> loadPlugIn = new ArrayList<>();
+        List<AbstractPluginInstrumentation> loadPlugIn = new ArrayList<>();
 
-        ServiceLoader<PluginInstrumentation> loader = ServiceLoader.load(PluginInstrumentation.class, classLoader);
+        ServiceLoader<AbstractPluginInstrumentation> loader =
+                ServiceLoader.load(AbstractPluginInstrumentation.class, classLoader);
 
-        for(PluginInstrumentation plugIn : loader) {
+        for(AbstractPluginInstrumentation plugIn : loader) {
             loadPlugIn.add(plugIn);
         }
 

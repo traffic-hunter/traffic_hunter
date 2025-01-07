@@ -25,6 +25,7 @@ package org.traffichunter.javaagent.plugin.sdk.instrumentation;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
 
+import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -34,7 +35,7 @@ import net.bytebuddy.matcher.ElementMatcher.Junction;
  * @author yungwang-o
  * @version 1.1.0
  */
-public abstract class AbstractTypeMatcherInstrumentation {
+public abstract class AbstractPluginInstrumentation {
 
     private final String pluginName;
 
@@ -42,17 +43,19 @@ public abstract class AbstractTypeMatcherInstrumentation {
 
     private final String pluginModuleVersion;
 
-    public AbstractTypeMatcherInstrumentation(final String pluginName,
-                                              final String pluginDetailName,
-                                              final String pluginModuleVersion) {
+    public AbstractPluginInstrumentation(final String pluginName,
+                                         final String pluginDetailName,
+                                         final String pluginModuleVersion) {
         this.pluginName = pluginName;
         this.pluginDetailName = pluginDetailName;
         this.pluginModuleVersion = pluginModuleVersion;
     }
 
-    protected Junction<ClassLoader> classLoaderMatcher() { return any(); }
+    public abstract Transformer transform();
 
     public abstract ElementMatcher<TypeDescription> typeMatcher();
+
+    protected Junction<ClassLoader> classLoaderMatcher() { return any(); }
 
     public Junction<TypeDescription> ignorePackage() {
         return null;

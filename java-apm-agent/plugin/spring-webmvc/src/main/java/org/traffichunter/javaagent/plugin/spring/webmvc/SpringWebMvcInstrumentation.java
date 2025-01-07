@@ -39,8 +39,7 @@ import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractTypeMatcherInstrumentation;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.PluginInstrumentation;
+import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.spring.webmvc.helper.SpringWebMvcInstrumentationHelper;
 import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
@@ -48,7 +47,7 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
  * @author yungwang-o
  * @version 1.1.0
  */
-public class SpringWebMvcInstrumentation extends AbstractTypeMatcherInstrumentation implements PluginInstrumentation {
+public class SpringWebMvcInstrumentation extends AbstractPluginInstrumentation {
 
     public SpringWebMvcInstrumentation() {
         super("spring-webmvc", SpringWebMvcInstrumentation.class.getSimpleName(),"spring-webmvc-6.2.0");
