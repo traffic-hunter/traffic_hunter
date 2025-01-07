@@ -11,14 +11,19 @@ public abstract class AbstractTypeMatcherInstrumentation {
 
     private final String pluginName;
 
+    private final String pluginDetailName;
+
     private final String pluginModuleVersion;
 
-    public AbstractTypeMatcherInstrumentation(final String pluginName, final String pluginModuleVersion) {
+    public AbstractTypeMatcherInstrumentation(final String pluginName,
+                                              final String pluginDetailName,
+                                              final String pluginModuleVersion) {
         this.pluginName = pluginName;
+        this.pluginDetailName = pluginDetailName;
         this.pluginModuleVersion = pluginModuleVersion;
     }
 
-    protected ElementMatcher.Junction<ClassLoader> classLoaderMatcher() { return any(); }
+    protected Junction<ClassLoader> classLoaderMatcher() { return any(); }
 
     public abstract ElementMatcher<TypeDescription> typeMatcher();
 
@@ -27,4 +32,16 @@ public abstract class AbstractTypeMatcherInstrumentation {
     }
 
     protected abstract ElementMatcher<? super MethodDescription> isMethod();
+
+    public String getPluginName() {
+        return pluginName;
+    }
+
+    public String getPluginDetailName() {
+        return pluginDetailName;
+    }
+
+    public String getPluginModuleVersion() {
+        return pluginModuleVersion;
+    }
 }

@@ -24,7 +24,7 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 public class SpringWebMvcInstrumentation extends AbstractTypeMatcherInstrumentation implements PluginInstrumentation {
 
     public SpringWebMvcInstrumentation() {
-        super("spring-webmvc", "spring-webmvc-6.2.0");
+        super("spring-webmvc", SpringWebMvcInstrumentation.class.getSimpleName(),"spring-webmvc-6.2.0");
     }
 
     @Override
@@ -43,6 +43,7 @@ public class SpringWebMvcInstrumentation extends AbstractTypeMatcherInstrumentat
         return named("doDispatch");
     }
 
+    @SuppressWarnings("unused")
     public static class SpringWebMvcDispatcherServletAdvice {
 
         @OnMethodEnter
@@ -53,7 +54,7 @@ public class SpringWebMvcInstrumentation extends AbstractTypeMatcherInstrumentat
             return SpringWebMvcInstrumentationHelper.start(method, request);
         }
 
-        @OnMethodExit(onThrowable = Throwable.class)
+        @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
         public static void end(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
             SpringWebMvcInstrumentationHelper.end(spanScope, throwable);
         }
