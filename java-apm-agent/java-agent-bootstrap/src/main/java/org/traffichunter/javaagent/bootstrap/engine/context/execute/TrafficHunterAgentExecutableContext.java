@@ -23,9 +23,12 @@
  */
 package org.traffichunter.javaagent.bootstrap.engine.context.execute;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traffichunter.javaagent.bootstrap.engine.TrafficHunterAgentShutdownHook;
 import org.traffichunter.javaagent.bootstrap.engine.context.AgentExecutableContext;
 import org.traffichunter.javaagent.bootstrap.engine.context.configuration.ConfigurableContextInitializer;
@@ -79,6 +82,8 @@ import org.traffichunter.javaagent.event.store.AgentStateEventStore;
  */
 public class TrafficHunterAgentExecutableContext extends AgentStateEventStore implements AgentExecutableContext {
 
+    private static final Logger log = LoggerFactory.getLogger(TrafficHunterAgentExecutableContext.class);
+
     private final ConfigurableEnvironment environment;
 
     private final AtomicReference<AgentStatus> status = new AtomicReference<>(AgentStatus.INITIALIZED);
@@ -87,7 +92,7 @@ public class TrafficHunterAgentExecutableContext extends AgentStateEventStore im
 
     private final ReentrantLock shutdownLock = new ReentrantLock();
 
-    private final AtomicBoolean isShutdown = new AtomicBoolean(false);
+    private boolean isShutdown = false;
 
     public TrafficHunterAgentExecutableContext(final ConfigurableEnvironment environment,
                                                final TrafficHunterAgentShutdownHook shutdownHook) {
@@ -127,27 +132,27 @@ public class TrafficHunterAgentExecutableContext extends AgentStateEventStore im
     @Override
     public void close() {
 
-        if(isStopped()) {
-            return;
-        }
+        shutdownLock.lock();
 
-        if(this.shutdownHook.isEnabledShutdownHook() && this.isShutdown.compareAndSet(false, true)) {
-            Thread shutdownHookThread;
-            shutdownLock.lock();
-            try {
-                shutdownHookThread = new Thread(this.shutdownHook, "TrafficHunterAgentShutdownHook");
-                shutdownHookThread.start();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                shutdownLock.unlock();
+        try {
+            if (isStopped() && !isShutdown) {
+                return;
             }
+
+            if (this.shutdownHook.isEnabledShutdownHook()) {
+                Thread shutdownHookThread = new Thread(this.shutdownHook, "TrafficHunterAgentShutdownHook");
+                shutdownHookThread.setUncaughtExceptionHandler(registerThreadExceptionHandler());
+                shutdownHookThread.start();
+                isShutdown = true;
+            }
+        } finally {
+            shutdownLock.unlock();
         }
     }
 
     @Override
     public ConfigurableEnvironment getEnvironment() {
-        return environment;
+        return this.environment;
     }
 
     @Override
@@ -187,5 +192,10 @@ public class TrafficHunterAgentExecutableContext extends AgentStateEventStore im
         for(AgentStateEventListener listener : super.getListeners()) {
             listener.onEvent(event);
         }
+    }
+
+    private UncaughtExceptionHandler registerThreadExceptionHandler() {
+        return (thread, throwable) ->
+                log.error("Unhandled exception in {} : {}", thread.getName(), throwable.getMessage());
     }
 }
