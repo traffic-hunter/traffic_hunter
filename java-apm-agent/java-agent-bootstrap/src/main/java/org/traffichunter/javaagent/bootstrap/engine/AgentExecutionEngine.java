@@ -112,8 +112,6 @@ public final class AgentExecutionEngine {
             shutdownHook.enableShutdownHook();
         }
         ConfigurableContextInitializer configurableContextInitializer = context.init();
-        TraceManager traceManager = configurableContextInitializer.setTraceManager(new TraceExporter());
-        configurableContextInitializer.retransform(inst);
         TrafficHunterAgentProperty property = configurableContextInitializer.property();
         AgentMetadata metadata = configurableContextInitializer.setAgentMetadata(
                 startTime,
@@ -121,6 +119,8 @@ public final class AgentExecutionEngine {
         );
         context.addAgentStateEventListener(metadata);
         asciiBanner.print(metadata);
+        TraceManager traceManager = configurableContextInitializer.setTraceManager(new TraceExporter());
+        configurableContextInitializer.retransform(inst);
         AgentRunner runner = new AgentRunner(property, context, metadata);
         Thread runnerThread = new Thread(runner);
         runnerThread.setName("TrafficHunterAgentRunnerThread");
