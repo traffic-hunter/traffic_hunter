@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.AgentBuilder.Default;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traffichunter.javaagent.bootstrap.engine.env.ConfigurableEnvironment;
@@ -83,6 +82,7 @@ public class ConfigurableContextInitializer {
     }
 
     public TraceManager setTraceManager(final TraceExporter exporter) {
+        log.info("Setting trace manager [{}]", exporter.getClass().getSimpleName());
         return new TraceManager(exporter);
     }
 
@@ -91,13 +91,19 @@ public class ConfigurableContextInitializer {
      */
     public void retransform(final Instrumentation inst) {
 
-        List<AbstractPluginInstrumentation> plugins =
-                loadPlugins(ConfigurableContextInitializer.class.getClassLoader());
+        List<AbstractPluginInstrumentation> plugins = loadPlugins(ConfigurableContextInitializer.class.getClassLoader());
 
-        AgentBuilder.Default agentBuilder = new AgentBuilder.Default();
+        AgentBuilder agentBuilder = new AgentBuilder.Default();
 
         for(AbstractPluginInstrumentation plugin : plugins) {
-            agentBuilder = (Default) agentBuilder
+
+            log.info("detected plugin: {}, {}, {}",
+                    plugin.getPluginName(),
+                    plugin.getPluginDetailName(),
+                    plugin.getPluginModuleVersion()
+            );
+
+            agentBuilder = agentBuilder
                     .type(plugin.typeMatcher())
                     .transform(plugin.transform());
         }

@@ -13,6 +13,7 @@ repositories {
 }
 
 shadowJar {
+    mergeServiceFiles()
 
     manifest {
         attributes(

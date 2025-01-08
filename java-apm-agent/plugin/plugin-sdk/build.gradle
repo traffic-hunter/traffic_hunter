@@ -10,6 +10,9 @@ repositories {
 }
 
 dependencies {
+
+    runtimeOnly project(":java-apm-agent:plugin:jdbc")
+    runtimeOnly project(":java-apm-agent:plugin:spring-webmvc")
 }
 
 test {

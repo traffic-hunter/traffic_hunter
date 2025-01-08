@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'org.traffichunter.javaagent.plugin'
+group = 'org.traffichunter.javaagent.plugin.jdbc'
 version = '1.0-SNAPSHOT'
 
 repositories {
