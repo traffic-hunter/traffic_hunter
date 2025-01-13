@@ -1,0 +1,4 @@
+org.traffichunter.javaagent.plugin.hibernate.HibernateQueryInstrumentation
+org.traffichunter.javaagent.plugin.hibernate.HibernateSessionFactoryInstrumentation
+org.traffichunter.javaagent.plugin.hibernate.HibernateSessionInstrumentation
+org.traffichunter.javaagent.plugin.hibernate.HibernateTransactionInstrumentation
