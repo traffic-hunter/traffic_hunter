@@ -23,6 +23,7 @@
  */
 package org.traffichunter.javaagent.plugin.jdbc;
 
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
@@ -58,7 +59,7 @@ public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrum
 
     @Override
     public ElementMatcher<TypeDescription> typeMatcher() {
-        return named("java.sql.PreparedStatement");
+        return hasSuperType(named("java.sql.PreparedStatement"));
     }
 
     @Override
