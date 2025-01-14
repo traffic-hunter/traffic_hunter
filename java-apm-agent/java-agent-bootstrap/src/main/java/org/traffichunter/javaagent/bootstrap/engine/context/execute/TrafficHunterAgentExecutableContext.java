@@ -27,8 +27,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.engine.TrafficHunterAgentShutdownHook;
 import org.traffichunter.javaagent.bootstrap.engine.context.AgentExecutableContext;
 import org.traffichunter.javaagent.bootstrap.engine.context.configuration.ConfigurableContextInitializer;
@@ -82,7 +81,7 @@ import org.traffichunter.javaagent.event.store.AgentStateEventStore;
  */
 public class TrafficHunterAgentExecutableContext extends AgentStateEventStore implements AgentExecutableContext {
 
-    private static final Logger log = LoggerFactory.getLogger(TrafficHunterAgentExecutableContext.class);
+    private static final Logger log = Logger.getLogger(TrafficHunterAgentExecutableContext.class.getName());
 
     private final ConfigurableEnvironment environment;
 
@@ -196,6 +195,6 @@ public class TrafficHunterAgentExecutableContext extends AgentStateEventStore im
 
     private UncaughtExceptionHandler registerThreadExceptionHandler() {
         return (thread, throwable) ->
-                log.error("Unhandled exception in {} : {}", thread.getName(), throwable.getMessage());
+                log.warning("Unhandled exception in " + thread.getName() + " : " + throwable.getMessage());
     }
 }

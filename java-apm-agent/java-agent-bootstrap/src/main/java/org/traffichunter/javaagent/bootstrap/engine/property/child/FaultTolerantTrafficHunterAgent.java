@@ -56,7 +56,9 @@ import org.traffichunter.javaagent.retry.backoff.BackOffPolicy;
 public class FaultTolerantTrafficHunterAgent extends TrafficHunterAgent {
 
     private static final Logger log = Logger.getLogger(FaultTolerantTrafficHunterAgent.class.getName());
+
     private BackOffPolicy backOffPolicy;
+
     private int maxAttempt;
 
     public FaultTolerantTrafficHunterAgent(final TrafficHunterAgent trafficHunterAgent) {

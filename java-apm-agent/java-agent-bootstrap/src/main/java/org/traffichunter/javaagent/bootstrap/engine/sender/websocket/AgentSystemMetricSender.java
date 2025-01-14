@@ -23,8 +23,7 @@
  */
 package org.traffichunter.javaagent.bootstrap.engine.sender.websocket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.engine.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.bootstrap.engine.sender.MetricSender;
 import org.traffichunter.javaagent.bootstrap.metadata.AgentMetadata;
@@ -54,7 +53,7 @@ import org.traffichunter.javaagent.websocket.converter.SerializationByteArrayCon
  */
 public class AgentSystemMetricSender implements MetricSender {
 
-    private static final Logger log = LoggerFactory.getLogger(AgentSystemMetricSender.class);
+    private static final Logger log = Logger.getLogger(AgentSystemMetricSender.class.getName());
 
     private final MetricWebSocketClient client;
 

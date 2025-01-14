@@ -23,6 +23,9 @@
  */
 package org.traffichunter.javaagent.retry.backoff;
 
+import org.traffichunter.javaagent.retry.backoff.policy.ExponentialBackOffPolicy;
+import org.traffichunter.javaagent.retry.backoff.policy.FixedBackOffPolicy;
+
 /**
  * The {@code BackOffPolicy} class serves as the base class for defining backoff strategies
  * used in retry mechanisms. It provides common properties such as the interval and multiplier,

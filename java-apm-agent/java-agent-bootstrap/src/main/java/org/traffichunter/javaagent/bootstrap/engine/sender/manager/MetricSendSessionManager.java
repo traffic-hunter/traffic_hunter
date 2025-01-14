@@ -29,8 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.engine.context.AgentExecutableContext;
 import org.traffichunter.javaagent.bootstrap.engine.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.bootstrap.engine.sender.websocket.AgentSystemMetricSender;
@@ -88,7 +87,7 @@ import org.traffichunter.javaagent.websocket.metadata.Metadata;
  */
 public class MetricSendSessionManager {
 
-    private static final Logger log = LoggerFactory.getLogger(MetricSendSessionManager.class);
+    private static final Logger log = Logger.getLogger(MetricSendSessionManager.class.getName());
 
     private final TrafficHunterAgentProperty property;
 
@@ -124,12 +123,12 @@ public class MetricSendSessionManager {
     public void run() {
 
         if(context.isStopped()) {
-            log.error("MetricSendSessionManager is stopped");
+            log.warning("MetricSendSessionManager is stopped");
             return;
         }
 
         if(context.isRunning()) {
-            log.error("MetricSendSessionManager is already running");
+            log.warning("MetricSendSessionManager is already running");
             return;
         }
 
@@ -150,7 +149,7 @@ public class MetricSendSessionManager {
         retry.getEventPublisher()
                         .onRetry(event -> {
                             client.reconnect();
-                            log.info("{} retry {} attempts...", event.getName(), event.getNumberOfRetryAttempts());
+                            log.info(event.getName() + " retry " + event.getNumberOfRetryAttempts() + " attempts...");
                         });
 
         context.setStatus(AgentStatus.RUNNING);

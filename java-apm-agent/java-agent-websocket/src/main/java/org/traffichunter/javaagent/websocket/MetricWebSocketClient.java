@@ -30,10 +30,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traffichunter.javaagent.websocket.converter.SerializationByteArrayConverter;
 import org.traffichunter.javaagent.websocket.converter.SerializationByteArrayConverter.MetricType;
 import org.traffichunter.javaagent.websocket.metadata.Metadata;
@@ -59,7 +58,7 @@ import org.traffichunter.javaagent.websocket.metadata.Metadata;
  */
 public class MetricWebSocketClient extends WebSocketClient {
 
-    private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);
+    private static final Logger log = Logger.getLogger(MetricWebSocketClient.class.getName());
 
     private final SerializationByteArrayConverter converter;
 
@@ -84,9 +83,8 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(final String s) {
-        log.info("websocket client received = {}", s);
+        log.info("websocket client received = " + s);
     }
-
 
     @Override
     public void onClose(final int i, final String s, final boolean b) {
@@ -95,7 +93,7 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     @Override
     public void onError(final Exception e) {
-        log.error("websocket client error = {}", e.getMessage());
+        log.warning("websocket client error = " + e.getMessage());
     }
 
     public boolean isConnected() {

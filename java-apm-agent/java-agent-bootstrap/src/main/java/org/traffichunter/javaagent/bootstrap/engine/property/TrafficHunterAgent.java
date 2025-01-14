@@ -24,7 +24,6 @@
 package org.traffichunter.javaagent.bootstrap.engine.property;
 
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.engine.property.child.FaultTolerantTrafficHunterAgent;
 
 /**
@@ -55,8 +54,6 @@ import org.traffichunter.javaagent.bootstrap.engine.property.child.FaultTolerant
  * @version 1.0.0
  */
 public class TrafficHunterAgent {
-
-    private static final Logger log = Logger.getLogger(TrafficHunterAgent.class.getName());
 
     protected int scheduleInterval;
 
