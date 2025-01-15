@@ -23,6 +23,7 @@
  */
 package ygo.traffic_hunter.presentation.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,13 +48,13 @@ public class ServerSentEvnetController {
 
     @GetMapping(path = "/metrics/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public SseEmitter subscribe() {
-        return metricService.register(new SseEmitter());
+    public SseEmitter subscribe(HttpServletRequest request) {
+        return metricService.register(request.getSession().getId(), new SseEmitter());
     }
 
     @PostMapping("/metrics/broadcast/{interval}")
     @ResponseStatus(HttpStatus.OK)
-    public void broadcast(@PathVariable(name = "interval") final TimeInterval interval) {
-        metricService.scheduleBroadcast(interval);
+    public void broadcast(HttpServletRequest request, @PathVariable(name = "interval") final TimeInterval interval) {
+        metricService.scheduleBroadcast(request.getSession().getId(), interval);
     }
 }
