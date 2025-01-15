@@ -26,6 +26,7 @@ package ygo.traffic_hunter.core.sse;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -55,6 +56,7 @@ public class ServerSentEventManager {
     private final String id;
     private final SseEmitter emitter;
     private final ScheduledExecutorService schedule;
+    private ScheduledFuture<?> currentTask;
 
     public ServerSentEventManager(String id, SseEmitter emitter, ScheduledExecutorService schedule) {
         this.id = id;
@@ -63,8 +65,10 @@ public class ServerSentEventManager {
     }
 
     public <T> void scheduleBroadcast(TimeInterval interval, Runnable runnable) {
-        schedule.shutdownNow();
-        schedule.scheduleWithFixedDelay(runnable ,
+        if (currentTask != null && !currentTask.isCancelled()) {
+            currentTask.cancel(true); // 이전 작업 취소
+        }
+        currentTask = schedule.scheduleWithFixedDelay(runnable ,
                 0,
                 interval.getDelayMillis(),
                 TimeUnit.MILLISECONDS
