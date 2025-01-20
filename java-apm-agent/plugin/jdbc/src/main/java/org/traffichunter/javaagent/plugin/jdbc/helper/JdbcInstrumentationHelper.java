@@ -27,6 +27,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseRequest;
 import org.traffichunter.javaagent.trace.manager.TraceManager;
 import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
@@ -38,28 +39,20 @@ public class JdbcInstrumentationHelper {
 
     private static final String JDBC_INSTRUMENTATION_SCOPE_NAME = "jdbc-tracer";
 
-    public static class ConnectionInstrumentation {
-
-        public static SpanScope start(final String sql, final Context parentContext) {
-
-            Span span = TraceManager.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
-                    .spanBuilder("connectionSpan")
-                    .setParent(parentContext)
-                    .setAttribute("sql", sql)
-                    .startSpan();
-
-            return new SpanScope(span, span.makeCurrent());
-        }
-    }
-
     public static class StatementInstrumentation {
 
-        public static SpanScope start(final String sql, final Context parentContext) {
+        public static SpanScope start(final DatabaseRequest request, final Context parentContext) {
 
             Span span = TraceManager.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
                     .spanBuilder("statementSpan")
                     .setParent(parentContext)
-                    .setAttribute("sql", sql)
+                    .setAttribute("sql", request.getStatementString())
+                    .setAttribute("system", request.getDatabaseInfo().getSystem())
+                    .setAttribute("user", request.getDatabaseInfo().getUser())
+                    .setAttribute("url", request.getDatabaseInfo().getUrl())
+                    .setAttribute("db", request.getDatabaseInfo().getDb())
+                    .setAttribute("port", request.getDatabaseInfo().getDb())
+                    .setAttribute("host", request.getDatabaseInfo().getHost())
                     .startSpan();
 
             return new SpanScope(span, span.makeCurrent());
@@ -68,11 +61,18 @@ public class JdbcInstrumentationHelper {
 
     public static class PreparedStatementInstrumentation {
 
-        public static SpanScope start(final Context parentContext) {
+        public static SpanScope start(final Context parentContext, final DatabaseRequest request) {
 
             Span span = TraceManager.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
                     .spanBuilder("preparedStatementSpan")
                     .setParent(parentContext)
+                    .setAttribute("sql", request.getStatementString())
+                    .setAttribute("system", request.getDatabaseInfo().getSystem())
+                    .setAttribute("user", request.getDatabaseInfo().getUser())
+                    .setAttribute("url", request.getDatabaseInfo().getUrl())
+                    .setAttribute("db", request.getDatabaseInfo().getDb())
+                    .setAttribute("port", request.getDatabaseInfo().getDb())
+                    .setAttribute("host", request.getDatabaseInfo().getHost())
                     .startSpan();
 
             return new SpanScope(span, span.makeCurrent());

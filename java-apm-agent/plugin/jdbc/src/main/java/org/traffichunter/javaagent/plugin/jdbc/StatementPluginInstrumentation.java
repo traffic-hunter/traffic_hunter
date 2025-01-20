@@ -24,21 +24,26 @@
 package org.traffichunter.javaagent.plugin.jdbc;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import io.opentelemetry.context.Context;
+import java.sql.Statement;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
+import net.bytebuddy.asm.Advice.This;
 import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.traffichunter.javaagent.plugin.jdbc.helper.JdbcInstrumentationHelper;
+import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseRequest;
 import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
@@ -65,21 +70,26 @@ public class StatementPluginInstrumentation extends AbstractPluginInstrumentatio
 
     @Override
     protected ElementMatcher<? super MethodDescription> isMethod() {
-        return nameStartsWith("execute");
+        return nameStartsWith("execute")
+                .and(takesArgument(0, String.class))
+                .and(isPublic());
     }
 
     @SuppressWarnings("unused")
     public static class StatementAdvice {
 
-        @OnMethodEnter
-        public static SpanScope enter(@Argument(0) final String sql) {
+        @OnMethodEnter(suppress = Throwable.class)
+        public static SpanScope enter(@Argument(0) String sql, @This Statement statement) {
+
+            DatabaseRequest databaseRequest = DatabaseRequest.create(statement, sql);
+
             Context parentContext = Context.current();
 
-            return JdbcInstrumentationHelper.StatementInstrumentation.start(sql, parentContext);
+            return JdbcInstrumentationHelper.StatementInstrumentation.start(databaseRequest, parentContext);
         }
 
         @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
-        public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
+        public static void exit(@Enter SpanScope spanScope, @Thrown Throwable throwable) {
             JdbcInstrumentationHelper.end(spanScope, throwable);
         }
     }

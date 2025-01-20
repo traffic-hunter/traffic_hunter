@@ -27,7 +27,9 @@ import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
+import org.traffichunter.javaagent.trace.attribute.AttributesParser;
 
 /**
  * @author yungwang-o
@@ -43,6 +45,10 @@ public record TraceInfo(
 
         String spanId,
 
+        Map<String, String> attributes,
+
+        int attributesCount,
+
         Instant startTime,
 
         Instant endTime,
@@ -54,6 +60,7 @@ public record TraceInfo(
         boolean ended
 ) {
 
+
     public static TraceInfo translate(final SpanData spanData) {
 
         Instant startTime = Instant.EPOCH.plusNanos(spanData.getStartEpochNanos());
@@ -62,11 +69,15 @@ public record TraceInfo(
 
         Duration between = Duration.between(startTime, endTime);
 
+        Map<String, String> map = AttributesParser.doParse(spanData.getAttributes());
+
         return new TraceInfo(
                 spanData.getName(),
                 spanData.getTraceId(),
                 spanData.getParentSpanId(),
                 spanData.getSpanId(),
+                map,
+                map.size(),
                 startTime,
                 endTime,
                 between.toMillis(),

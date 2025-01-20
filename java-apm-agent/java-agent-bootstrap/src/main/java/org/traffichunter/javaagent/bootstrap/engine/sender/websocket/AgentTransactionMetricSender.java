@@ -23,8 +23,7 @@
  */
 package org.traffichunter.javaagent.bootstrap.engine.sender.websocket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.engine.sender.MetricSender;
 import org.traffichunter.javaagent.bootstrap.metadata.AgentMetadata;
 import org.traffichunter.javaagent.bootstrap.metadata.MetadataWrapper;
@@ -55,7 +54,7 @@ import org.traffichunter.javaagent.websocket.converter.SerializationByteArrayCon
  */
 public class AgentTransactionMetricSender implements MetricSender {
 
-    public static final Logger log = LoggerFactory.getLogger(AgentTransactionMetricSender.class);
+    public static final Logger log = Logger.getLogger(AgentTransactionMetricSender.class.getName());
 
     private final MetricWebSocketClient client;
 
@@ -79,7 +78,7 @@ public class AgentTransactionMetricSender implements MetricSender {
                 Thread.currentThread().interrupt();
                 break;
             } catch (IllegalStateException e) {
-                log.error("exception while sending transaction metric = {}", e.getMessage());
+                log.warning("exception while sending transaction metric = " + e.getMessage());
                 throw new RuntimeException(e);
             }
         }

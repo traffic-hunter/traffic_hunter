@@ -13,7 +13,7 @@ dependencies {
     implementation project(':java-apm-agent:plugin:plugin-sdk')
     implementation project(':java-apm-agent:java-agent-trace')
 
-    implementation 'org.springframework:spring-webmvc:6.2.0'
+    compileOnly 'org.springframework:spring-webmvc:6.2.0'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 }
 

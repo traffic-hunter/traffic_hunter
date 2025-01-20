@@ -23,37 +23,21 @@
  */
 package org.traffichunter.javaagent.bootstrap.engine.instrument.classloading;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+
 /**
  * @author yungwang-o
  * @version 1.0.0
  */
-public class THAgentClassLoader extends ClassLoader {
+public class AgentClassLoader extends URLClassLoader {
 
-    public THAgentClassLoader(final ClassLoader parent) {
-        super(parent);
+    public AgentClassLoader(final URL[] urls, final ClassLoader parent) {
+        super(urls, parent);
     }
 
     @Override
     protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-        synchronized (getClassLoadingLock(name)) {
-            Class<?> clazz = findLoadedClass(name);
-
-            if(clazz == null) {
-                try {
-                    clazz = findClass(name);
-                } catch (ClassNotFoundException ignored) {
-                }
-
-                if(clazz == null) {
-                    clazz = getParent().loadClass(name);
-                }
-            }
-            if(resolve) {
-                resolveClass(clazz);
-            }
-            return clazz;
-        }
+        return super.loadClass(name, resolve);
     }
-
-
 }

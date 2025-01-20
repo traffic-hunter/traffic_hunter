@@ -24,20 +24,27 @@
 package org.traffichunter.javaagent.plugin.jdbc;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import io.opentelemetry.context.Context;
+import java.sql.PreparedStatement;
+import java.util.Objects;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
+import net.bytebuddy.asm.Advice.This;
 import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.traffichunter.javaagent.plugin.jdbc.helper.JdbcInstrumentationHelper;
+import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseRequest;
+import org.traffichunter.javaagent.plugin.jdbc.library.JdbcData;
 import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
@@ -64,21 +71,32 @@ public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrum
 
     @Override
     protected ElementMatcher<? super MethodDescription> isMethod() {
-        return nameStartsWith("execute");
+        return nameStartsWith("execute")
+                .and(takesArguments(0))
+                .and(isPublic());
     }
 
     @SuppressWarnings("unused")
     public static class PrepareStatementAdvice {
 
-        @OnMethodEnter
-        public static SpanScope enter() {
+        @OnMethodEnter(suppress = Throwable.class)
+        public static SpanScope enter(@This PreparedStatement statement) {
+
+            if(Objects.isNull(JdbcData.prepareStatementInfo.get(statement))) {
+                return SpanScope.NOOP;
+            }
+
+            DatabaseRequest dbRequest = DatabaseRequest.create(statement);
+
             Context parentContext = Context.current();
 
-            return JdbcInstrumentationHelper.PreparedStatementInstrumentation.start(parentContext);
+            return JdbcInstrumentationHelper.PreparedStatementInstrumentation
+                    .start(parentContext, dbRequest);
         }
 
         @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
-        public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
+        public static void exit(@Enter SpanScope spanScope, @Thrown Throwable throwable) {
+
             JdbcInstrumentationHelper.end(spanScope, throwable);
         }
     }

@@ -39,7 +39,6 @@ import org.traffichunter.javaagent.bootstrap.engine.property.TrafficHunterAgentP
 import org.traffichunter.javaagent.bootstrap.engine.sender.manager.MetricSendSessionManager;
 import org.traffichunter.javaagent.bootstrap.metadata.AgentMetadata;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
-import org.traffichunter.javaagent.trace.exporter.TraceExporter;
 import org.traffichunter.javaagent.trace.manager.TraceManager;
 import org.traffichunter.javaagent.trace.queue.TraceQueue;
 
@@ -119,7 +118,6 @@ public final class AgentExecutionEngine {
         );
         context.addAgentStateEventListener(metadata);
         asciiBanner.print(metadata);
-        TraceManager traceManager = configurableContextInitializer.setTraceManager(new TraceExporter());
         configurableContextInitializer.retransform(inst);
         AgentRunner runner = new AgentRunner(property, context, metadata);
         Thread runnerThread = new Thread(runner);
@@ -127,7 +125,7 @@ public final class AgentExecutionEngine {
         if(context.isInit()) {
             log.info("Agent initialization completed.");
             runnerThread.start();
-            registryShutdownHook(context, runner, traceManager);
+            registryShutdownHook(context, runner);
             context.close();
         }
 
@@ -142,10 +140,9 @@ public final class AgentExecutionEngine {
      * @param traceManager The trace manager manages a trace's lifecycle.
      */
     private void registryShutdownHook(final AgentExecutableContext context,
-                                      final AgentRunner runner,
-                                      final TraceManager traceManager) {
+                                      final AgentRunner runner) {
 
-        shutdownHook.addRuntimeShutdownHook(traceManager::close);
+        shutdownHook.addRuntimeShutdownHook(TraceManager::close);
         shutdownHook.addRuntimeShutdownHook(TraceQueue.INSTANCE::removeAll);
         shutdownHook.addRuntimeShutdownHook(context::removeAllAgentStateEventListeners);
         shutdownHook.addRuntimeShutdownHook(runner::close);

@@ -41,8 +41,6 @@ import org.traffichunter.javaagent.commons.util.UUIDGenerator;
 import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.sdk.loader.PluginLoader;
 import org.traffichunter.javaagent.plugin.sdk.loader.TrafficHunterPluginLoader;
-import org.traffichunter.javaagent.trace.exporter.TraceExporter;
-import org.traffichunter.javaagent.trace.manager.TraceManager;
 
 /**
  * The {@code ConfigurableContextInitializer} class is responsible for initializing the environment,
@@ -81,11 +79,6 @@ public class ConfigurableContextInitializer {
         return env.load(is);
     }
 
-    public TraceManager setTraceManager(final TraceExporter exporter) {
-        log.info("Setting trace manager [{}]", exporter.getClass().getSimpleName());
-        return new TraceManager(exporter);
-    }
-
     /**
      * Load all plugins to manipulate the target application's bytecode.
      */
@@ -97,7 +90,7 @@ public class ConfigurableContextInitializer {
 
         for(AbstractPluginInstrumentation plugin : plugins) {
 
-            log.info("detected plugin: {}, {}, {}",
+            log.info("detected plugin -> name : {} detail name : {} ver : {}",
                     plugin.getPluginName(),
                     plugin.getPluginDetailName(),
                     plugin.getPluginModuleVersion()

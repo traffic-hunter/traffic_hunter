@@ -23,7 +23,6 @@
  */
 package org.traffichunter.javaagent.trace.manager;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -41,32 +40,34 @@ import org.traffichunter.javaagent.trace.exporter.TraceExporter;
  */
 public class TraceManager {
 
-    private final OpenTelemetrySdk openTelemetrySdk;
+    private static final OpenTelemetrySdk openTelemetrySdk;
 
-    public TraceManager(final TraceExporter exporter) {
-
+    static {
         SdkTracerProvider provider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+                .addSpanProcessor(SimpleSpanProcessor.create(new TraceExporter()))
                 .setIdGenerator(IdGenerator.random())
                 .setSampler(Sampler.alwaysOn())
                 .build();
 
-        this.openTelemetrySdk = OpenTelemetrySdk.builder()
+        openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(provider)
                 .buildAndRegisterGlobal();
     }
 
     public static Tracer getTracer(final String instrumentationName) {
-        if(Objects.isNull(GlobalOpenTelemetry.get())) {
+        if(Objects.isNull(openTelemetrySdk)) {
             throw new IllegalStateException("OpenTelemetry is not configured. Call configure() first.");
         }
 
-        return GlobalOpenTelemetry.getTracer(instrumentationName);
+        return openTelemetrySdk.getTracer(instrumentationName);
     }
 
-    public void close() {
+    public static void close() {
         openTelemetrySdk.close();
     }
 
-    public record SpanScope(Span span, Scope scope) { }
+    public record SpanScope(Span span, Scope scope) {
+
+        public static final SpanScope NOOP = new SpanScope(Span.current(), Scope.noop());
+    }
 }
