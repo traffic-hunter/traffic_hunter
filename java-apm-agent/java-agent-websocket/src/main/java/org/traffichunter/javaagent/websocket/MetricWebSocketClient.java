@@ -59,7 +59,7 @@ import org.traffichunter.javaagent.websocket.metadata.Metadata;
  */
 public class MetricWebSocketClient extends WebSocketClient {
 
-    private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);
 
     private final SerializationByteArrayConverter converter;
 
@@ -84,8 +84,9 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(final String s) {
-        log.info("websocket client received = {} ", s);
+        log.info("websocket client received = {}", s);
     }
+
 
     @Override
     public void onClose(final int i, final String s, final boolean b) {
@@ -94,7 +95,7 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     @Override
     public void onError(final Exception e) {
-        log.error("websocket client error = {} ", e.getMessage());
+        log.error("websocket client error = {}", e.getMessage());
     }
 
     public boolean isConnected() {
