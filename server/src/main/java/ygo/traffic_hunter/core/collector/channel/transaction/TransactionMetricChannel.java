@@ -63,7 +63,7 @@ public class TransactionMetricChannel implements MetricChannel {
     @Override
     public void open(final byte[] payload) {
 
-        MetadataWrapper<TraceInfo> object = processor.processTransactionInfo(payload);
+        MetadataWrapper<TraceInfo> object = processor.processTraceInfo(payload);
 
         log.info("Transaction metric data: {}", object);
 

@@ -24,6 +24,7 @@
 package ygo.traffic_hunter.domain.metric;
 
 import java.time.Instant;
+import java.util.Map;
 
 /**
  * @author yungwang-o
@@ -38,6 +39,10 @@ public record TraceInfo(
         String parentSpanId,
 
         String spanId,
+
+        Map<String, String> attributes,
+
+        int attributesCount,
 
         Instant startTime,
 

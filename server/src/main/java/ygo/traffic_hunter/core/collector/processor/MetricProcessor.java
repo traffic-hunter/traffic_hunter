@@ -65,7 +65,7 @@ public class MetricProcessor {
         }
     }
 
-    public MetadataWrapper<TraceInfo> processTransactionInfo(final byte[] data) {
+    public MetadataWrapper<TraceInfo> processTraceInfo(final byte[] data) {
 
         byte[] unzipped = decompressor.unzip(data);
 

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 
 import java.time.Instant;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,6 +47,8 @@ class TransactionMapperTest {
                 "test-trace-id",
                 "test-parent-span-id",
                 "test-span-id",
+                Map.of(),
+                0,
                 Instant.now(),
                 Instant.now().plusMillis(50),
                 50,
@@ -90,6 +93,8 @@ class TransactionMapperTest {
                 "test-trace-id",
                 "test-parent-span-id",
                 "test-span-id",
+                Map.of(),
+                0,
                 Instant.now(),
                 Instant.now().plusMillis(50),
                 50,
