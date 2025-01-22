@@ -24,6 +24,8 @@
 package ygo.traffic_hunter.core.dto.response;
 
 import java.time.Instant;
+
+import ygo.traffic_hunter.domain.metric.MetricData;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
 /**
@@ -36,4 +38,12 @@ public record TransactionMetricResponse(
         String agentVersion,
         TransactionData transactionData
 ) {
+    public static TransactionMetricResponse create(
+                                              final String agentName,
+                                              final Instant agentBootTime,
+                                              final String agentVersion,
+                                              final TransactionData transactionData) {
+
+        return new TransactionMetricResponse(agentName, agentBootTime, agentVersion, transactionData);
+    }
 }

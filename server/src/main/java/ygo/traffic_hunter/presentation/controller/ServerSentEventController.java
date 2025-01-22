@@ -42,14 +42,14 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
  */
 @RestController
 @RequiredArgsConstructor
-public class ServerSentEvnetController {
+public class ServerSentEventController {
 
     private final MetricService metricService;
 
     @GetMapping(path = "/metrics/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public SseEmitter subscribe(HttpServletRequest request) {
-        return metricService.register(request.getSession().getId(), new SseEmitter());
+        return metricService.register(request.getSession().getId(), new SseEmitter(3600000L));
     }
 
     @PostMapping("/metrics/broadcast/{interval}")

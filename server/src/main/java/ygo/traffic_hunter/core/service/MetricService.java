@@ -26,10 +26,9 @@ package ygo.traffic_hunter.core.service;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -38,7 +37,6 @@ import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager;
-import ygo.traffic_hunter.core.sse.ServerSentEventManagers;
 import ygo.traffic_hunter.core.websocket.handler.MetricWebSocketHandler;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
@@ -53,13 +51,13 @@ public class MetricService {
 
     private final MetricRepository metricRepository;
 
-    private final ServerSentEventManagers sseManagers;
+    private final ServerSentEventManager sseManagers;
 
     private final MetricWebSocketHandler webSocketHandler;
 
     private final ScheduledExecutorService schedule = Executors.newSingleThreadScheduledExecutor();
 
-    public MetricService(ServerSentEventManagers sseManagers,
+    public MetricService(ServerSentEventManager sseManagers,
                          final MetricWebSocketHandler webSocketHandler,
                          final MetricRepository metricRepository) {
 
@@ -103,7 +101,8 @@ public class MetricService {
     private void processMetrics(String id, TimeInterval interval, AgentMetadata metadata) {
         List<SystemMetricResponse> metrics = findMetricsByRecentTimeAndAgentName(interval, metadata.agentName());
         List<TransactionMetricResponse> txMetrics = findTxMetricsByRecentTimeAndAgentName(interval, metadata.agentName());
-
+        log.info("metrics: {}", metrics);
+        log.info("txMetrics: {}", txMetrics);
         sseManagers.send(id, metrics);
         sseManagers.send(id, txMetrics);
     }
