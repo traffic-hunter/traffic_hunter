@@ -29,7 +29,10 @@ import java.sql.SQLException;
 import java.util.List;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
+import ygo.traffic_hunter.domain.metric.MetricData;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
 /**
@@ -37,17 +40,18 @@ import ygo.traffic_hunter.domain.metric.TransactionData;
  * @version 1.0.0
  */
 @Component
-public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionData> implements RowMapper<TransactionMeasurement> {
+public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionData> implements RowMapper<TransactionMetricResponse> {
 
     public TransactionMeasurementRowMapper(final ObjectMapper objectMapper) {
         super(objectMapper);
     }
 
     @Override
-    public TransactionMeasurement mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-        return new TransactionMeasurement(
-                rs.getTimestamp("time").toInstant(),
-                rs.getInt("agent_id"),
+    public TransactionMetricResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+        return TransactionMetricResponse.create(
+                rs.getString("agent_name"),
+                rs.getTimestamp("agent_boot_time").toInstant(),
+                rs.getString("agent_version"),
                 deserialize(rs.getString("transaction_data"), TransactionData.class)
         );
     }

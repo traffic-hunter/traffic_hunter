@@ -26,10 +26,9 @@ package ygo.traffic_hunter.core.service;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -52,19 +51,19 @@ public class MetricService {
 
     private final MetricRepository metricRepository;
 
-    private final ServerSentEventManager sseManager;
+    private final ServerSentEventManager sseManagers;
 
     private final MetricWebSocketHandler webSocketHandler;
 
     private final ScheduledExecutorService schedule = Executors.newSingleThreadScheduledExecutor();
 
-    public MetricService(@Qualifier("serverSentEventViewManager") final ServerSentEventManager sseManager,
+    public MetricService(ServerSentEventManager sseManagers,
                          final MetricWebSocketHandler webSocketHandler,
                          final MetricRepository metricRepository) {
 
         this.webSocketHandler = webSocketHandler;
         this.metricRepository = metricRepository;
-        this.sseManager = sseManager;
+        this.sseManagers = sseManagers;
     }
 
     public List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval,
@@ -79,38 +78,32 @@ public class MetricService {
         return metricRepository.findTxMetricsByRecentTimeAndAgentName(interval, agentName);
     }
 
-    public SseEmitter register(final SseEmitter sseEmitter) {
-        return sseManager.register(sseEmitter);
+    public SseEmitter register(final String id, final SseEmitter sseEmitter) {
+        return sseManagers.register(id, sseEmitter);
     }
 
     public void asyncBroadcast(final TimeInterval interval) {
 
     }
 
-    public void scheduleBroadcast(@NonNull final TimeInterval interval) {
-        schedule.scheduleWithFixedDelay(() -> broadcast(interval),
-                0,
-                interval.getDelayMillis(),
-                TimeUnit.MILLISECONDS
-        );
+    public void scheduleBroadcast(final String id, @NonNull final TimeInterval interval) {
+        sseManagers.scheduleBroadcast(id, interval, () -> broadcast(id, interval));
     }
 
-    private void broadcast(final TimeInterval interval) {
+    private void broadcast(final String id, final TimeInterval interval) {
+        List<AgentMetadata> agents = webSocketHandler.getAgents();
 
-        for (AgentMetadata metadata : webSocketHandler.getAgents()) {
-
-            List<SystemMetricResponse> metrics = findMetricsByRecentTimeAndAgentName(
-                    interval,
-                    metadata.agentName()
-            );
-
-            List<TransactionMetricResponse> txMetrics = findTxMetricsByRecentTimeAndAgentName(
-                    interval,
-                    metadata.agentName()
-            );
-
-            sseManager.send(metrics);
-            sseManager.send(txMetrics);
+        for (AgentMetadata metadata : agents) {
+            processMetrics(id, interval, metadata);
         }
+    }
+
+    private void processMetrics(String id, TimeInterval interval, AgentMetadata metadata) {
+        List<SystemMetricResponse> metrics = findMetricsByRecentTimeAndAgentName(interval, metadata.agentName());
+        List<TransactionMetricResponse> txMetrics = findTxMetricsByRecentTimeAndAgentName(interval, metadata.agentName());
+        log.info("metrics: {}", metrics);
+        log.info("txMetrics: {}", txMetrics);
+        sseManagers.send(id, metrics);
+        sseManagers.send(id, txMetrics);
     }
 }

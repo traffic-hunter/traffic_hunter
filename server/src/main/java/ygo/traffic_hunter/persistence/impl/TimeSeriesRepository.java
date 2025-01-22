@@ -189,7 +189,15 @@ public class TimeSeriesRepository implements MetricRepository {
     public List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval,
                                                                                  final String agentName) {
 
-        return null;
+        String sql = "select a.agent_name, a.agent_boot_time, a.agent_version, t.transaction_data "
+                + "from transaction_measurement t "
+                + "join agent a on t.agent_id = a.id "
+                + "where t.time > now() - ?::interval "
+                + "and a.agent_name = ? "
+                + "order by t.time desc "
+                + "limit 20";
+
+        return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName);
     }
 
     @Transactional
