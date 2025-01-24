@@ -14,10 +14,10 @@ public final class SpanAssembler implements Assembler<List<TransactionData>, Spa
     public SpanTreeNode assemble(final List<TransactionData> transactions) {
 
         if(transactions == null || transactions.isEmpty()) {
-            throw new IllegalArgumentException("transactions is null or empty");
+            return SpanTreeNode.NO_OP;
         }
 
-        SpanTreeNode root = null;
+        SpanTreeNode root = SpanTreeNode.NO_OP;
 
         for(TransactionData data : transactions) {
             if(data.parentSpanId().equals(SPAN_ROOT_PARENT_ID)) {
@@ -31,7 +31,7 @@ public final class SpanAssembler implements Assembler<List<TransactionData>, Spa
         return root;
     }
 
-    private void build(SpanTreeNode parent, List<TransactionData> transactions) {
+    private void build(final SpanTreeNode parent, final List<TransactionData> transactions) {
 
         for(TransactionData data : transactions) {
 

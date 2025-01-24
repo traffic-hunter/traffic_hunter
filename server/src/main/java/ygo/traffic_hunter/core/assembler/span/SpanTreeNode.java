@@ -10,6 +10,8 @@ import ygo.traffic_hunter.domain.metric.TransactionData;
 @ToString
 public class SpanTreeNode {
 
+    public static final SpanTreeNode NO_OP = new SpanTreeNode(null);
+
     private final TransactionData data;
 
     private final List<SpanTreeNode> children = new ArrayList<>();
