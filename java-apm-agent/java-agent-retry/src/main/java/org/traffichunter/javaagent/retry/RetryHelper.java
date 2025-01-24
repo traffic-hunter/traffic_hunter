@@ -23,7 +23,6 @@
  */
 package org.traffichunter.javaagent.retry;
 
-import io.github.resilience4j.core.IntervalFunction;
 import io.github.resilience4j.retry.RetryConfig;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -154,16 +153,5 @@ public class RetryHelper {
 
     public boolean isCheck() {
         return isCheck;
-    }
-
-    public RetryConfig configureRetry() {
-        return RetryConfig.custom()
-                .maxAttempts(maxAttempts)
-                .retryOnException(retryPredicate)
-                .failAfterMaxAttempts(isCheck)
-                .intervalFunction(IntervalFunction.ofExponentialRandomBackoff(
-                        backOffPolicy.getIntervalMillis(),
-                        backOffPolicy.getMultiplier()
-                )).build();
     }
 }

@@ -23,8 +23,6 @@
  */
 package org.traffichunter.javaagent.bootstrap.engine.sender.manager;
 
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,6 +36,7 @@ import org.traffichunter.javaagent.bootstrap.metadata.AgentMetadata;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.commons.util.AgentUtil;
 import org.traffichunter.javaagent.retry.RetryHelper;
+import org.traffichunter.javaagent.retry.executor.RetryExecutor;
 import org.traffichunter.javaagent.websocket.MetricWebSocketClient;
 import org.traffichunter.javaagent.websocket.metadata.Metadata;
 
@@ -59,7 +58,7 @@ import org.traffichunter.javaagent.websocket.metadata.Metadata;
  * <ul>
  *     <li>{@code run()} - Starts the metric sending session, ensuring retries and scheduling are properly configured.</li>
  *     <li>{@code close()} - Safely shuts down the session, releasing all resources.</li>
- *     <li>Integrates with {@link Retry} to handle WebSocket reconnections in case of failures.</li>
+ *     <li>Integrates with {@link RetryExecutor} to handle WebSocket reconnections in case of failures.</li>
  * </ul>
  *
  * <p>Thread Management:</p>
@@ -75,7 +74,7 @@ import org.traffichunter.javaagent.websocket.metadata.Metadata;
  *     <li>Retries only handle specific exceptions, as configured in the {@link RetryHelper}.</li>
  * </ul>
  *
- * @see Retry
+ * @see RetryExecutor
  * @see ScheduledExecutorService
  * @see MetricWebSocketClient
  * @see TrafficHunterAgentProperty
@@ -142,21 +141,18 @@ public class MetricSendSessionManager {
                 .retryPredicate(throwable -> throwable instanceof IllegalStateException)
                 .build();
 
-        RetryConfig retryConfig = retryHelper.configureRetry();
+        RetryExecutor retryExecutor = RetryExecutor.of(retryHelper);
 
-        Retry retry = Retry.of(retryHelper.getRetryName(), retryConfig);
-
-        retry.getEventPublisher()
-                        .onRetry(event -> {
-                            client.reconnect();
-                            log.info(event.getName() + " retry " + event.getNumberOfRetryAttempts() + " attempts...");
-                        });
+        retryExecutor.retryEventPublisher(event -> {
+                    client.reconnect();
+                    log.info(event.eventName() + " retry " + event.numberOfAttempts() + " attempts...");
+            });
 
         context.setStatus(AgentStatus.RUNNING);
 
-        executor.execute(Retry.decorateRunnable(retry, () -> transactionMetricSender.toSend(metadata)));
+        executor.execute(retryExecutor.execute(() -> transactionMetricSender.toSend(metadata)));
 
-        schedule.scheduleWithFixedDelay(Retry.decorateRunnable(retry, () -> systemMetricSender.toSend(metadata)),
+        schedule.scheduleWithFixedDelay(retryExecutor.execute(() -> systemMetricSender.toSend(metadata)),
                 0,
                 property.scheduleInterval(),
                 property.timeUnit()
