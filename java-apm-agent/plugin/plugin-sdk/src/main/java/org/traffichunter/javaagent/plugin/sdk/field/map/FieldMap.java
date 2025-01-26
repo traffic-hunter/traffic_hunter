@@ -35,7 +35,7 @@ import java.util.function.Function;
 public interface FieldMap<K, V> {
 
     static <K, V> FieldMap<K, V> weak() {
-        return new LockFreeFieldMap<>();
+        return new LockFieldMap<>();
     }
 
     void put(K key, V value);
