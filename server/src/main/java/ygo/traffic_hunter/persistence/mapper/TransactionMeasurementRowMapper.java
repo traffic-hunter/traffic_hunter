@@ -18,8 +18,6 @@
  */
 package ygo.traffic_hunter.persistence.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,32 +39,24 @@ import ygo.traffic_hunter.domain.metric.TransactionData;
 @Component
 public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionData> implements
         RowMapper<TransactionMetricResponse> {
-    private final ObjectMapper objectMapper;
 
     public TransactionMeasurementRowMapper(final ObjectMapper objectMapper) {
         super(objectMapper);
-        this.objectMapper = objectMapper;
     }
 
     @Override
     public TransactionMetricResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-        try {
-            return TransactionMetricResponse.create(
-                    rs.getString("agent_name"),
-                    rs.getTimestamp("agent_boot_time").toInstant(),
-                    rs.getString("agent_version"),
-                    getSpanTreeNode(rs)
-            );
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return TransactionMetricResponse.create(
+                rs.getString("agent_name"),
+                rs.getTimestamp("agent_boot_time").toInstant(),
+                rs.getString("agent_version"),
+                getSpanTreeNode(rs)
+        );
     }
 
-    private SpanTreeNode getSpanTreeNode(final ResultSet rs) throws SQLException, JsonProcessingException {
+    private SpanTreeNode getSpanTreeNode(final ResultSet rs) throws SQLException {
         String transactionDataJson = rs.getString("transaction_datas");
-        List<TransactionData> transactionData = objectMapper.readValue(transactionDataJson,
-                new TypeReference<List<TransactionData>>() {
-                });
+        List<TransactionData> transactionData = deserializeList(transactionDataJson, TransactionData.class);
         Assembler<List<TransactionData>, SpanTreeNode> assembler = new SpanAssembler();
         return assembler.assemble(transactionData);
     }
