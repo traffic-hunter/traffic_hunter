@@ -1,29 +1,35 @@
 package ygo.traffic_hunter.core.sse;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import ygo.traffic_hunter.domain.interval.TimeInterval;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import ygo.traffic_hunter.core.identification.Identification;
+import ygo.traffic_hunter.core.schedule.Scheduler;
+import ygo.traffic_hunter.domain.interval.TimeInterval;
+
+/**
+ * @author JuSeong
+ * @version 1.1.0
+ */
 
 @Slf4j
 @Component
 public class ServerSentEventManager {
 
-    Map<String, Client> clients = new ConcurrentHashMap<>();
+    private final Map<Identification, Client> clients = new ConcurrentHashMap<>();
 
-    public SseEmitter register(String id, SseEmitter emitter) {
-
+    public SseEmitter register(final Identification identification, final SseEmitter emitter) {
         log.info("registering sse emitter {}", emitter);
-        Client client = new Client(id, emitter, Executors.newSingleThreadScheduledExecutor());
-        clients.put(id, client);
+        Client client = new Client(identification, emitter,
+                new Scheduler(Executors.newSingleThreadScheduledExecutor()));
+        clients.put(identification, client);
         client.send("connect");
         emitter.onCompletion(() -> {
             log.info("completed sse emitter {}", emitter);
-            clients.remove(id);
+            clients.remove(identification);
         });
 
         emitter.onTimeout(() -> {
@@ -33,13 +39,16 @@ public class ServerSentEventManager {
         return emitter;
     }
 
-    public void scheduleBroadcast(String id, TimeInterval timeInterval, Runnable runnable) {
-        Client client = clients.get(id);
+    public void scheduleBroadcast(final Identification identification, final TimeInterval timeInterval,
+                                  final Runnable runnable) {
+        log.info("schedule broadcasting sse emitter {}", timeInterval);
+
+        Client client = clients.get(identification);
         client.scheduleBroadcast(timeInterval, runnable);
     }
 
-    public <T> void send(final String id, final T data) {
-        Client client = clients.get(id);
+    public <T> void send(final Identification identification, final T data) {
+        Client client = clients.get(identification);
         client.send(data);
     }
 }

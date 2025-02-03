@@ -1,25 +1,20 @@
 /**
  * The MIT License
- *
+ * <p>
  * Copyright (c) 2024 yungwang-o
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package ygo.traffic_hunter.persistence.impl;
 
@@ -45,8 +40,8 @@ import ygo.traffic_hunter.persistence.mapper.SystemMeasurementRowMapper;
 import ygo.traffic_hunter.persistence.mapper.TransactionMeasurementRowMapper;
 
 /**
- * @author yungwang-o
- * @version 1.0.0
+ * @author yungwang-o, JuSeong
+ * @version 1.1.0
  */
 @Slf4j
 @Repository
@@ -172,7 +167,7 @@ public class TimeSeriesRepository implements MetricRepository {
 
     @Override
     public List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                          final String agentName) {
+                                                                          final String agentName, final Integer limit) {
 
         String sql = "select m.time, a.agent_name, a.agent_boot_time, a.agent_version, m.metric_data "
                 + "from metric_measurement m "
@@ -180,24 +175,24 @@ public class TimeSeriesRepository implements MetricRepository {
                 + "where m.time > now() - ?::interval "
                 + "and a.agent_name = ? "
                 + "order by m.time desc "
-                + "limit 20";
+                + "limit ?";
 
-        return jdbcTemplate.query(sql, systemMeasurementRowMapper, interval.getInterval(), agentName);
+        return jdbcTemplate.query(sql, systemMeasurementRowMapper, interval.getInterval(), agentName, limit);
     }
 
     @Override
     public List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                                 final String agentName) {
-
-        String sql = "select a.agent_name, a.agent_boot_time, a.agent_version, t.transaction_data "
-                + "from transaction_measurement t "
-                + "join agent a on t.agent_id = a.id "
-                + "where t.time > now() - ?::interval "
-                + "and a.agent_name = ? "
-                + "order by t.time desc "
-                + "limit 20";
-
-        return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName);
+                                                                                 final String agentName,
+                                                                                 final Integer limit) {
+        String sql =
+                "SELECT a.agent_name, a.agent_boot_time, a.agent_version, JSON_AGG(t.transaction_data) AS transaction_datas "
+                        + "FROM transaction_measurement t "
+                        + "JOIN agent a ON t.agent_id = a.id "
+                        + "WHERE t.time > now() - ?::interval "
+                        + "AND a.agent_name = ? "
+                        + "GROUP BY a.agent_name, a.agent_boot_time, a.agent_version, t.transaction_data->>'traceId' "
+                        + "LIMIT ?";
+        return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName, limit);
     }
 
     @Transactional
