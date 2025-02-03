@@ -314,12 +314,6 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
     }
 
     private Instant getInstant(String dateStr) {
-        /*// 날짜 문자열을 OffsetDateTime으로 파싱
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS Z");
-        OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateStr, formatter);
-
-        // OffsetDateTime을 Instant로 변환
-        return offsetDateTime.toInstant();*/
         // 날짜 문자열을 LocalDateTime으로 파싱
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
         LocalDateTime localDateTime = LocalDateTime.parse(dateStr, formatter);
@@ -338,8 +332,6 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
         List<TransactionData> datas = new ArrayList<>();
 
         datas.add(createTransactionData("0000000000000000", "a"));
-        //datas.add(createTransactionData("a", "b"));
-
         Assembler<List<TransactionData>, SpanTreeNode> assembler = new SpanAssembler();
 
         return assembler.assemble(datas);
@@ -352,8 +344,9 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                 .traceId("traceId")
                 .ended(true)
                 .name("test")
-                .attributesCount(4)
-                .attributes(Map.of())
+                .attributesCount(2)
+                .attributes(Map.of("http.method", "GET",
+                        "http.requestURI", "/test"))
                 .endTime(Instant.now())
                 .startTime(Instant.now())
                 .exception("exception")
