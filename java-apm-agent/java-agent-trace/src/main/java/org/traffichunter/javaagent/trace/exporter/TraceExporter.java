@@ -28,6 +28,8 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
 import java.util.logging.Logger;
+import org.traffichunter.javaagent.trace.dto.TraceInfo;
+import org.traffichunter.javaagent.trace.queue.TraceQueue;
 
 /**
  * @author yungwang-o
@@ -48,6 +50,10 @@ public class TraceExporter implements SpanExporter {
 
         try {
             log.info("exporting = " + spans);
+
+            spans.stream()
+                    .map(TraceInfo::translate)
+                    .forEach(TraceQueue.INSTANCE::add);
 
             return CompletableResultCode.ofSuccess();
         } catch (RuntimeException e) {
