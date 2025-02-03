@@ -63,7 +63,7 @@ public class RowMapSupport<T> {
         }
     }
 
-    protected <C> List<C> deserializeList(final String json, Class<C> clazz) {
+    protected <C> List<C> deserializeList(final String json, final Class<C> clazz) {
         try {
 
             if(json == null || json.isEmpty()) {
