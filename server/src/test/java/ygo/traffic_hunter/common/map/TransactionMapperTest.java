@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ygo.traffic_hunter.common.map.impl.transaction.TransactionMapperImpl;
+import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
@@ -118,6 +119,6 @@ class TransactionMapperTest {
         assertEquals(mockAgent.agentName(), response.agentName());
         assertEquals(mockAgent.agentBootTime(), response.agentBootTime());
         assertEquals(mockAgent.agentVersion(), response.agentVersion());
-        assertEquals(transactionData, response.transactionData());
+        assertEquals(SpanTreeNode.NO_OP, response.spanTreeNode());
     }
 }
