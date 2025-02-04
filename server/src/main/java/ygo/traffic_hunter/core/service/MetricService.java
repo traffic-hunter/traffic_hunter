@@ -20,6 +20,7 @@ package ygo.traffic_hunter.core.service;
 
 import java.util.List;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @Slf4j
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class MetricService {
 
     private final MetricRepository metricRepository;
@@ -49,17 +51,9 @@ public class MetricService {
 
     private final MetricWebSocketHandler webSocketHandler;
 
-    public MetricService(ServerSentEventManager sseManager,
-                         final MetricWebSocketHandler webSocketHandler,
-                         final MetricRepository metricRepository) {
-
-        this.webSocketHandler = webSocketHandler;
-        this.metricRepository = metricRepository;
-        this.sseManager = sseManager;
-    }
-
     public List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                          final String agentName, final Integer limit) {
+                                                                          final String agentName,
+                                                                          final Integer limit) {
 
         return metricRepository.findMetricsByRecentTimeAndAgentName(interval, agentName, limit);
     }
@@ -72,6 +66,7 @@ public class MetricService {
     }
 
     public SseEmitter register(final Identification identification, final SseEmitter sseEmitter) {
+
         return sseManager.register(identification, sseEmitter);
     }
 
@@ -79,28 +74,39 @@ public class MetricService {
 
     }
 
-    public void scheduleBroadcast(final Identification identification, @NonNull final TimeInterval interval,
+    public void scheduleBroadcast(final Identification identification,
+                                  @NonNull final TimeInterval interval,
                                   final Integer limit) {
+
         sseManager.scheduleBroadcast(identification, interval, () -> broadcast(identification, interval, limit));
     }
 
     private void broadcast(final Identification identification, final TimeInterval interval, final Integer limit) {
-        try {
-            List<AgentMetadata> agents = webSocketHandler.getAgents();
-            for (AgentMetadata metadata : agents) {
-                processMetrics(identification, interval, metadata, limit);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+
+        List<AgentMetadata> agents = webSocketHandler.getAgents();
+
+        for (AgentMetadata metadata : agents) {
+            processMetrics(identification, interval, metadata, limit);
         }
     }
 
-    private void processMetrics(final Identification identification, final TimeInterval interval,
-                                final AgentMetadata metadata, final Integer limit) {
-        List<SystemMetricResponse> metrics = findMetricsByRecentTimeAndAgentName(interval, metadata.agentName(), limit);
-        List<TransactionMetricResponse> txMetrics = findTxMetricsByRecentTimeAndAgentName(interval,
-                metadata.agentName(), limit);
+    private void processMetrics(final Identification identification,
+                                final TimeInterval interval,
+                                final AgentMetadata metadata,
+                                final Integer limit) {
+
+        List<SystemMetricResponse> metrics = findMetricsByRecentTimeAndAgentName(
+                interval,
+                metadata.agentName(),
+                limit
+        );
+
+        List<TransactionMetricResponse> txMetrics = findTxMetricsByRecentTimeAndAgentName(
+                interval,
+                metadata.agentName(),
+                limit
+        );
+
         sseManager.send(identification, new RealTimeMonitoringResponse(metrics, txMetrics));
     }
-
 }

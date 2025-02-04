@@ -37,7 +37,9 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 public class Client {
 
     private final Identification identification;
+
     private final SseEmitter emitter;
+
     private final Scheduler scheduler;
 
     public void scheduleBroadcast(final TimeInterval interval, final Runnable runnable) {
@@ -53,6 +55,7 @@ public class Client {
     }
 
     private <T> void sendAll(final List<T> data, final SseEmitter emitter) {
+
         SseEmitter.SseEventBuilder sseBuilder = SseEmitter.event()
                 .name(emitter.toString())
                 .data(data);
@@ -64,12 +67,15 @@ public class Client {
     }
 
     private <T> void send(final T data, final SseEmitter emitter) {
+
         if (data == null) {
             return;
         }
+
         SseEmitter.SseEventBuilder sseBuilder = SseEmitter.event()
                 .name(emitter.toString())
                 .data(data);
+
         try {
             emitter.send(sseBuilder);
         } catch (IOException e) {

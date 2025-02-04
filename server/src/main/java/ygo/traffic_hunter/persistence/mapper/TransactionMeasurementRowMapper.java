@@ -46,6 +46,7 @@ public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionDa
 
     @Override
     public TransactionMetricResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
         return TransactionMetricResponse.create(
                 rs.getString("agent_name"),
                 rs.getTimestamp("agent_boot_time").toInstant(),
@@ -55,9 +56,13 @@ public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionDa
     }
 
     private SpanTreeNode getSpanTreeNode(final ResultSet rs) throws SQLException {
+
         String transactionDataJson = rs.getString("transaction_datas");
+
         List<TransactionData> transactionData = deserializeList(transactionDataJson, TransactionData.class);
+
         Assembler<List<TransactionData>, SpanTreeNode> assembler = new SpanAssembler();
+
         return assembler.assemble(transactionData);
     }
 

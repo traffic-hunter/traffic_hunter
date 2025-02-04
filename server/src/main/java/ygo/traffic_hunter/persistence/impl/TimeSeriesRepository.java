@@ -167,7 +167,8 @@ public class TimeSeriesRepository implements MetricRepository {
 
     @Override
     public List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                          final String agentName, final Integer limit) {
+                                                                          final String agentName,
+                                                                          final Integer limit) {
 
         String sql = "select m.time, a.agent_name, a.agent_boot_time, a.agent_version, m.metric_data "
                 + "from metric_measurement m "
@@ -192,6 +193,7 @@ public class TimeSeriesRepository implements MetricRepository {
                         + "AND a.agent_name = ? "
                         + "GROUP BY a.agent_name, a.agent_boot_time, a.agent_version, t.transaction_data->>'traceId' "
                         + "LIMIT ?";
+
         return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName, limit);
     }
 

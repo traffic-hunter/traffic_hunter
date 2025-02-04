@@ -22,11 +22,16 @@ public class ServerSentEventManager {
     private final Map<Identification, Client> clients = new ConcurrentHashMap<>();
 
     public SseEmitter register(final Identification identification, final SseEmitter emitter) {
+
         log.info("registering sse emitter {}", emitter);
+
         Client client = new Client(identification, emitter,
                 new Scheduler(Executors.newSingleThreadScheduledExecutor()));
+
         clients.put(identification, client);
+
         client.send("connect");
+
         emitter.onCompletion(() -> {
             log.info("completed sse emitter {}", emitter);
             clients.remove(identification);
@@ -36,11 +41,14 @@ public class ServerSentEventManager {
             log.info("timed out sse emitter {}", emitter);
             emitter.complete();
         });
+
         return emitter;
     }
 
-    public void scheduleBroadcast(final Identification identification, final TimeInterval timeInterval,
+    public void scheduleBroadcast(final Identification identification,
+                                  final TimeInterval timeInterval,
                                   final Runnable runnable) {
+
         log.info("schedule broadcasting sse emitter {}", timeInterval);
 
         Client client = clients.get(identification);
@@ -48,6 +56,7 @@ public class ServerSentEventManager {
     }
 
     public <T> void send(final Identification identification, final T data) {
+
         Client client = clients.get(identification);
         client.send(data);
     }

@@ -44,6 +44,7 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
 
     @Override
     public SystemMetricResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
         return SystemMetricResponse.create(
                 rs.getTimestamp("time").toInstant(),
                 rs.getString("agent_name"),

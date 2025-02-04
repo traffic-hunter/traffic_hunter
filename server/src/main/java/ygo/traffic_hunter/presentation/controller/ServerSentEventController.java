@@ -42,13 +42,14 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 public class ServerSentEventController {
 
     private static final long TIMEOUT = 3600000L;
+
     private final MetricService metricService;
 
     @GetMapping(path = "/metrics/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public SseEmitter subscribe(final HttpServletRequest request) {
-        return metricService.register(new SessionIdentification(request.getSession().getId()),
-                new SseEmitter(TIMEOUT));
+
+        return metricService.register(new SessionIdentification(request.getSession().getId()), new SseEmitter(TIMEOUT));
     }
 
     @PostMapping("/metrics/broadcast/{interval}")
@@ -56,6 +57,7 @@ public class ServerSentEventController {
     public void broadcast(final HttpServletRequest request,
                           @PathVariable(name = "interval") final TimeInterval interval,
                           @RequestParam(defaultValue = "20") final Integer limit) {
+
         metricService.scheduleBroadcast(new SessionIdentification(request.getSession().getId()), interval, limit);
     }
 }
