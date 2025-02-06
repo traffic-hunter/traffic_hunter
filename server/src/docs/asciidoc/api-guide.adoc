@@ -1,0 +1,23 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+:operation-http-request-title: Request
+:operation-http-response-title: Response
+
+[[resources]]
+= SSE
+
+[[resources-user]]
+== subscribe
+
+operation::metrics-subscribe[snippets='http-request,http-response']
+
+== broadcast
+
+operation::metrics-broadcast[snippets='http-request,http-response,response-fields']

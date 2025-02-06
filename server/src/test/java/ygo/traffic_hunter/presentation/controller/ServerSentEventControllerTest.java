@@ -266,7 +266,7 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                                 fieldWithPath("transactionMetricResponses[].spanTreeNode.data.spanId").description(
                                         "현재 메서드의 ID"),
                                 fieldWithPath("transactionMetricResponses[].spanTreeNode.data.attributes").description(
-                                        "메서드의 세부 정보"),
+                                        "메서드의 세부 정보 ex) { http.method : GET }"),
                                 fieldWithPath(
                                         "transactionMetricResponses[].spanTreeNode.data.attributesCount").description(
                                         "세부 정보 개수"),
@@ -345,8 +345,7 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                 .ended(true)
                 .name("test")
                 .attributesCount(2)
-                .attributes(Map.of("http.method", "GET",
-                        "http.requestURI", "/test"))
+                .attributes(Map.of())
                 .endTime(Instant.now())
                 .startTime(Instant.now())
                 .exception("exception")
