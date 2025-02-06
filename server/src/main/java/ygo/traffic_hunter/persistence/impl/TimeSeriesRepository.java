@@ -19,18 +19,26 @@
 package ygo.traffic_hunter.persistence.impl;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.config.cache.CacheConfig.CacheType;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
+import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
 import ygo.traffic_hunter.domain.entity.Agent;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
@@ -38,6 +46,9 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.persistence.mapper.AgentRowMapper;
 import ygo.traffic_hunter.persistence.mapper.SystemMeasurementRowMapper;
 import ygo.traffic_hunter.persistence.mapper.TransactionMeasurementRowMapper;
+import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsMetricAvgRowMapper;
+import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsMetricMaxRowMapper;
+import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsServiceTransactionRowMapper;
 
 /**
  * @author yungwang-o, JuSeong
@@ -200,5 +211,89 @@ public class TimeSeriesRepository implements MetricRepository {
     @Transactional
     public void clear() {
         jdbcTemplate.update("truncate table metric_measurement");
+    }
+
+    @Override
+    public Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(final Instant begin,
+                                                                                final Instant end,
+                                                                                final Pageable pageable) {
+
+        String sql = "select "
+                + " transaction_data->'attributes'->>'http.requestURI' as url, "
+                + " count(*) as count, "
+                + " sum(case when (transaction_data->>'ended')::boolean = false then 1 else 0 end) as err_count, "
+                + " avg((transaction_data->>'duration')::bigint) as avg_execution_time, "
+                + " sum((transaction_data->>'duration')::bigint) as sum_execution_time, "
+                + " max((transaction_data->>'duration')::bigint) as max_execution_time "
+                + "from transaction_measurement "
+                + "where"
+                + " transaction_data->'attributes'->>'http.requestURI' is not null"
+                + " and time >= ? "
+                + " and time <= ? "
+                + "group by transaction_data->'attributes'->>'http.requestURI', time "
+                + "order by time desc "
+                + "limit ? offset ?";
+
+        int pageSize = pageable.getPageSize();
+        int offset = pageable.getPageNumber() * pageSize;
+
+        List<ServiceTransactionResponse> results = jdbcTemplate.query(
+                sql,
+                new StatisticsServiceTransactionRowMapper(),
+                Timestamp.from(begin),
+                Timestamp.from(end),
+                pageSize + 1,
+                offset
+        );
+
+        boolean hasNext = results.size() > pageSize;
+
+        return new SliceImpl<>(results, pageable, hasNext);
+    }
+
+    @Override
+    public StatisticsMetricMaxResponse findMaxMetricByTimeInterval(final StatisticsMetricTimeRange timeRange) {
+
+        String sql = "select "
+                + "time_bucket(?::interval, time) as period, "
+                + "max(round((metric_data->'cpuMetric'->>'systemCpuLoad')::numeric, 1)) as max_system_cpu_usage, "
+                + "max(round((metric_data->'cpuMetric'->>'systemCpuLoad')::numeric, 1)) as max_process_cpu_usage, "
+                + "max(round((metric_data->'memoryMetric'->'heapMemoryUsage'->>'used')::numeric / 1000000, 1)) as max_heap_memory_usage, "
+                + "max((metric_data->'threadMetric'->>'threadCount')::integer) as max_thread_count, "
+                + "max((metric_data->'threadMetric'->>'getPeekThreadCount')::integer) as max_peak_thread_count, "
+                + "max((metric_data->'webServerMetric'->'tomcatWebServerRequestMeasurement'->>'requestCount')::integer) as max_web_request_count, "
+                + "max((metric_data->'webServerMetric'->'tomcatWebServerRequestMeasurement'->>'errorCount')::integer) as max_web_error_count, "
+                + "max((metric_data->'webServerMetric'->'tomcatWebServerThreadPoolMeasurement'->>'currentThreads')::integer) as max_web_thread_count, "
+                + "max((metric_data->'dbcpMetric'->>'activeConnections')::integer) as max_db_connection_count "
+                + "from metric_measurement "
+                + "group by period "
+                + "order by period desc "
+                + "limit 1";
+
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new StatisticsMetricMaxRowMapper(), timeRange.getLatestRange()))
+                .orElseThrow(() -> new IllegalArgumentException("not found max metric"));
+    }
+
+    @Override
+    public StatisticsMetricAvgResponse findAvgMetricByTimeInterval(final StatisticsMetricTimeRange timeRange) {
+
+        String sql = "select "
+                + "time_bucket(?::interval, time) as period, "
+                + "round(avg((metric_data->'cpuMetric'->>'systemCpuLoad')::numeric), 1) as avg_system_cpu_usage, "
+                + "round(avg((metric_data->'cpuMetric'->>'systemCpuLoad')::numeric), 1) as avg_process_cpu_usage, "
+                + "round(avg((metric_data->'memoryMetric'->'heapMemoryUsage'->>'used')::bigint / 1000000), 1) as avg_heap_memory_usage, "
+                + "round(avg((metric_data->'threadMetric'->>'threadCount')::integer), 1) as avg_thread_count, "
+                + "round(avg((metric_data->'threadMetric'->>'getPeekThreadCount')::integer), 1) as avg_peak_thread_count, "
+                + "round(avg((metric_data->'webServerMetric'->'tomcatWebServerRequestMeasurement'->>'requestCount')::integer), 1) as avg_web_request_count, "
+                + "round(avg((metric_data->'webServerMetric'->'tomcatWebServerRequestMeasurement'->>'errorCount')::integer), 1) as avg_web_error_count, "
+                + "round(avg((metric_data->'webServerMetric'->'tomcatWebServerThreadPoolMeasurement'->>'currentThreads')::integer), 1) as avg_web_thread_count, "
+                + "round(avg((metric_data->'dbcpMetric'->>'activeConnections')::integer), 1) as avg_db_connection_count "
+                + "from metric_measurement "
+                + "group by period "
+                + "order by period desc "
+                + "limit 1";
+
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new StatisticsMetricAvgRowMapper(), timeRange.getLatestRange()))
+                .orElseThrow(() -> new IllegalArgumentException("not found avg metric"));
     }
 }

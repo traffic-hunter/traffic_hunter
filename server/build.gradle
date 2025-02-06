@@ -30,6 +30,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.data:spring-data-commons'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.assertj:assertj-core'
     compileOnly 'org.projectlombok:lombok'
@@ -62,4 +64,11 @@ bootJar {
     from ("${asciidoctor.outputDir}/html5") {
         into 'static/docs'
     }
+}
+
+tasks.withType(Test) {
+    environment("DB_IP", project.findProperty("DB_IP"))
+    environment("DB_NAME", project.findProperty("DB_NAME"))
+    environment("USER_NAME", project.findProperty("USER_NAME"))
+    environment("PASSWORD", project.findProperty("PASSWORD"))
 }

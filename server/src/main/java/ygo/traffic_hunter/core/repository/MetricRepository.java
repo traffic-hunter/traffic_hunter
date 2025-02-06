@@ -18,9 +18,16 @@
  */
 package ygo.traffic_hunter.core.repository;
 
+import java.time.Instant;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
+import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
@@ -35,9 +42,13 @@ public interface MetricRepository extends AgentRepository {
 
     void save(TransactionMeasurement metric);
 
-    List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval, final String agentName,
-                                                                   final Integer limit);
+    List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName, Integer limit);
 
-    List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                          final String agentName, final Integer limit);
+    List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName, Integer limit);
+
+    Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(Instant begin, Instant end, Pageable pageable);
+
+    StatisticsMetricMaxResponse findMaxMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
+
+    StatisticsMetricAvgResponse findAvgMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
 }
