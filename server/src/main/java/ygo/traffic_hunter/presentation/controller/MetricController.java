@@ -27,8 +27,10 @@ import jakarta.validation.Valid;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,20 +51,23 @@ import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/traffic-hunter/v1.1.0/statistics")
+@RequestMapping("/statistics")
 @Validated
 public class MetricController {
 
     private final MetricStatisticsService metricStatisticsService;
 
-    @GetMapping("/transaction/range")
+    @GetMapping("/transaction")
     public Slice<ServiceTransactionResponse> retrieveServiceTransactionApi(@RequestBody @Valid final StatisticsRequest request,
-                                                                           final PageRequest pageRequest) {
+                                                                           @PageableDefault(
+                                                                                   sort = "count",
+                                                                                   direction = Direction.DESC
+                                                                           ) final Pageable pageable) {
 
         if(Objects.isNull(request.end())) {
-            return metricStatisticsService.retrieveServiceTransactions(request.begin(), pageRequest);
+            return metricStatisticsService.retrieveServiceTransactions(request.begin(), pageable);
         } else {
-            return metricStatisticsService.retrieveServiceTransactions(request.begin(), request.end(), pageRequest);
+            return metricStatisticsService.retrieveServiceTransactions(request.begin(), request.end(), pageable);
         }
     }
 
