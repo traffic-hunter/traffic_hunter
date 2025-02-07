@@ -49,6 +49,7 @@ import ygo.traffic_hunter.persistence.mapper.TransactionMeasurementRowMapper;
 import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsMetricAvgRowMapper;
 import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsMetricMaxRowMapper;
 import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsServiceTransactionRowMapper;
+import ygo.traffic_hunter.persistence.query.QuerySupport;
 
 /**
  * @author yungwang-o, JuSeong
@@ -231,22 +232,24 @@ public class TimeSeriesRepository implements MetricRepository {
                 + " and time >= ? "
                 + " and time <= ? "
                 + "group by transaction_data->'attributes'->>'http.requestURI', time "
-                + "order by time desc "
-                + "limit ? offset ?";
+                + QuerySupport.orderByClause(pageable) + " "
+                + "limit ?";
+
 
         int pageSize = pageable.getPageSize();
-        int offset = pageable.getPageNumber() * pageSize;
 
         List<ServiceTransactionResponse> results = jdbcTemplate.query(
                 sql,
                 new StatisticsServiceTransactionRowMapper(),
                 Timestamp.from(begin),
                 Timestamp.from(end),
-                pageSize + 1,
-                offset
+                pageSize + 1
         );
 
         boolean hasNext = results.size() > pageSize;
+        if(hasNext) {
+            results = results.subList(0, pageSize);
+        }
 
         return new SliceImpl<>(results, pageable, hasNext);
     }
