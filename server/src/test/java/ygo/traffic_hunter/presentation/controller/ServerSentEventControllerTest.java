@@ -6,6 +6,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +15,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -39,6 +41,7 @@ import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.core.service.MetricService;
+import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.domain.metric.MetricData;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 import ygo.traffic_hunter.domain.metric.cpu.CpuMetricMeasurement;
@@ -102,12 +105,13 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                                     .writeValueAsString(realTimeMonitoringResponse));
                 })
                 .andDo(document("metrics-broadcast"
-                        , RequestDocumentation.queryParameters(
+                        , queryParameters(
                                 parameterWithName("limit").optional().description("조회할 개수(기본값 20)")
                         )
                         , pathParameters(
-                                parameterWithName("interval").description(
-                                        "The interval at which the operation will be executed.")
+                                parameterWithName("interval")
+                                        .description(Arrays.stream(TimeInterval.values()).map(Enum::name).collect(
+                                                Collectors.joining(", ")))
                         )
                         , responseFields(
                                 fieldWithPath("systemMetricResponses").description("시스템 메트릭 응답 목록"),
