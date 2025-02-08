@@ -18,12 +18,31 @@
  */
 package ygo.traffic_hunter.persistence.impl;
 
+import static org.jooq.impl.DSL.asterisk;
+import static org.jooq.impl.DSL.avg;
+import static org.jooq.impl.DSL.count;
+import static org.jooq.impl.DSL.inline;
+import static org.jooq.impl.DSL.jsonbGetAttribute;
+import static org.jooq.impl.DSL.jsonbGetAttributeAsText;
+import static org.jooq.impl.DSL.max;
+import static org.jooq.impl.DSL.sum;
+import static org.jooq.impl.DSL.when;
+import static org.traffichunter.query.jooq.Tables.TRANSACTION_MEASUREMENT;
+
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.JSONB;
+import org.jooq.Record6;
+import org.jooq.SelectLimitPercentStep;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -68,6 +87,8 @@ public class TimeSeriesRepository implements MetricRepository {
     private final TransactionMeasurementRowMapper txMeasurementRowMapper;
 
     private final AgentRowMapper agentRowMapper;
+
+    private final DSLContext dsl;
 
     @Override
     @Transactional
@@ -219,31 +240,39 @@ public class TimeSeriesRepository implements MetricRepository {
                                                                                 final Instant end,
                                                                                 final Pageable pageable) {
 
-        String sql = "select "
-                + " transaction_data->'attributes'->>'http.requestURI' as url, "
-                + " count(*) as count, "
-                + " sum(case when (transaction_data->>'ended')::boolean = false then 1 else 0 end) as err_count, "
-                + " avg((transaction_data->>'duration')::bigint) as avg_execution_time, "
-                + " sum((transaction_data->>'duration')::bigint) as sum_execution_time, "
-                + " max((transaction_data->>'duration')::bigint) as max_execution_time "
-                + "from transaction_measurement "
-                + "where"
-                + " transaction_data->'attributes'->>'http.requestURI' is not null"
-                + " and time >= ? "
-                + " and time <= ? "
-                + "group by transaction_data->'attributes'->>'http.requestURI', time "
-                + QuerySupport.orderByClause(pageable) + " "
-                + "limit ?";
+        org.traffichunter.query.jooq.tables.TransactionMeasurement tm = TRANSACTION_MEASUREMENT;
 
+        Field<JSONB> attributes = jsonbGetAttribute(tm.TRANSACTION_DATA, inline("attributes"));
+
+        Field<String> urlField = jsonbGetAttributeAsText(attributes, inline("http.requestURI"));
+
+        Field<Boolean> ended = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("ended")).cast(Boolean.class);
+
+        Field<Long> duration = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("duration")).cast(Long.class);
+
+        SelectLimitPercentStep<Record6<String, Integer, BigDecimal, BigDecimal, BigDecimal, Long>> result =
+                dsl.select(
+                        urlField.as("url"),
+                        count(asterisk()).as("count"),
+                        sum(when(ended.eq(inline(false)), inline(1)).otherwise(inline(0))).as("err_count"),
+                        avg(duration).as("avg_execution_time"),
+                        sum(duration).as("sum_execution_time"),
+                        max(duration).as("max_execution_time")
+                )
+                .from(tm)
+                .where(urlField.isNotNull())
+                .and(tm.TIME.gt(OffsetDateTime.ofInstant(begin, ZoneOffset.UTC)))
+                .and(tm.TIME.lt(OffsetDateTime.ofInstant(end, ZoneOffset.UTC)))
+                .groupBy(urlField, tm.TIME)
+                .orderBy(QuerySupport.orderByClause(pageable))
+                .limit(pageable.getPageSize() + 1);
 
         int pageSize = pageable.getPageSize();
 
         List<ServiceTransactionResponse> results = jdbcTemplate.query(
-                sql,
+                result.getSQL(),
                 new StatisticsServiceTransactionRowMapper(),
-                Timestamp.from(begin),
-                Timestamp.from(end),
-                pageSize + 1
+                result.getBindValues().toArray()
         );
 
         boolean hasNext = results.size() > pageSize;

@@ -1,22 +1,22 @@
 package ygo.traffic_hunter.persistence.query;
 
+import static org.jooq.impl.DSL.name;
+
+import java.util.List;
+import org.jooq.Field;
+import org.jooq.SortField;
+import org.jooq.impl.DSL;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 public class QuerySupport {
 
-    public static String orderByClause(final Pageable pageable) {
+    public static List<SortField<Object>> orderByClause(final Pageable pageable) {
 
-        StringBuilder sb = new StringBuilder();
+        return pageable.getSort().stream()
+                .map(order -> {
+                    Field<Object> field = DSL.field(name(order.getProperty()));
 
-        pageable.getSort().stream()
-                .map(QuerySupport::orderBy)
-                .forEach(sortName -> sb.append(sortName).append(" "));
-
-        return sb.toString();
-    }
-
-    private static String orderBy(final Sort.Order order) {
-        return "order by" + " " + order.getProperty() + " " + order.getDirection().name();
+                    return order.isAscending() ? field.asc() : field.desc();
+                }).toList();
     }
 }

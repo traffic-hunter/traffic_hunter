@@ -1,12 +1,18 @@
+import nu.studer.gradle.jooq.*
+import org.jooq.meta.jaxb.Logging
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id "org.asciidoctor.jvm.convert" version "3.3.2"
+    id 'nu.studer.jooq' version '9.0'
 }
+
 configurations {
     asciidoctorExt
 }
+
 group = 'ygo'
 version = '0.0.1-SNAPSHOT'
 
@@ -41,6 +47,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
+    jooqGenerator 'org.postgresql:postgresql:42.7.2'
 }
 
 ext {
@@ -66,9 +74,61 @@ bootJar {
     }
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     environment("DB_IP", project.findProperty("DB_IP"))
     environment("DB_NAME", project.findProperty("DB_NAME"))
     environment("USER_NAME", project.findProperty("USER_NAME"))
     environment("PASSWORD", project.findProperty("PASSWORD"))
+    environment("DB_URL", project.findProperty("DB_URL"))
+}
+
+jooq {
+    version = '3.19.15'  // default (can be omitted)
+    edition = JooqEdition.OSS  // default (can be omitted)
+
+    configurations {
+        main {  // name of the jOOQ configuration
+            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+
+            generationTool {
+                logging = Logging.WARN
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = System.getenv("DB_URL") ?: 'jdbc:postgresql://localhost:5432/postgres'
+                    user = System.getenv("DB_USER") ?: 'postgres'
+                    password = System.getenv("DB_PASSWORD") ?: 'qwer1234'
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = 'public'
+                        forcedTypes {
+                            forcedType {
+                                name = 'JSONB'
+                                includeExpression = '.*'
+                                includeTypes = 'JSONB'
+                            }
+                            forcedType {
+                                name = 'varchar'
+                                includeExpression = '.*'
+                                includeTypes = 'INET'
+                            }
+                        }
+                    }
+                    generate {
+                        deprecated = false
+                        records = true
+                        immutablePojos = true
+                        fluentSetters = true
+                    }
+                    target {
+                        packageName = 'org.traffichunter.query.jooq'
+                        directory = 'build/generated-src/jooq/main'  // default (can be omitted)
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
 }
