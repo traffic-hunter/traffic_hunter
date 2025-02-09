@@ -10,8 +10,10 @@ endif::[]
 :operation-http-request-title: Request
 :operation-http-response-title: Response
 
-[[resources]]
-= SSE
+[[Traffic-hunter-API]]
+= Traffic-hunter-API docs
+
+include::statistics.adoc[]
 
 [[resources-user]]
 == subscribe
