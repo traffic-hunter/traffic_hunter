@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -92,7 +93,7 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
         RealTimeMonitoringResponse realTimeMonitoringResponse = new RealTimeMonitoringResponse(
                 List.of(getSystemMetricResponse()), List.of(getTransactionMetricResponse()));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/metrics/broadcast/{interval}", "REAL_TIME")
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/metrics/broadcast/{interval}", TimeInterval.REAL_TIME)
                         .param("limit", "20")
                         .accept(MediaType.APPLICATION_JSON))
 
