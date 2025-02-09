@@ -41,7 +41,7 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @RequiredArgsConstructor
 public class ServerSentEventController {
 
-    private static final long TIMEOUT = 3600000L;
+    private static final long TIMEOUT = 3_600_000L;
 
     private final MetricService metricService;
 
