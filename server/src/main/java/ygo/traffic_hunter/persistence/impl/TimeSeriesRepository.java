@@ -51,6 +51,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.config.cache.CacheConfig.CacheType;
+import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
@@ -228,6 +229,14 @@ public class TimeSeriesRepository implements MetricRepository {
                         + "LIMIT ?";
 
         return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName, limit);
+    }
+
+    @Override
+    public List<RealTimeMonitoringResponse> findRealtimeMonitoringByTimeInterval(final TimeInterval timeInterval,
+                                                                                 final String agentName,
+                                                                                 final Integer limit) {
+
+        return List.of();
     }
 
     @Transactional

@@ -22,6 +22,7 @@ import java.time.Instant;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
 import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
@@ -51,4 +52,6 @@ public interface MetricRepository extends AgentRepository {
     StatisticsMetricMaxResponse findMaxMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
 
     StatisticsMetricAvgResponse findAvgMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
+
+    List<RealTimeMonitoringResponse> findRealtimeMonitoringByTimeInterval(TimeInterval timeInterval, String agentName, Integer limit);
 }
