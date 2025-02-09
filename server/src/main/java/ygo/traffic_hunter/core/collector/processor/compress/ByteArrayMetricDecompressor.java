@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import org.springframework.stereotype.Component;
+import ygo.traffic_hunter.core.collector.processor.MetricProcessor.ChannelProcessException;
 
 /**
  * unzip metric binary data.
@@ -55,7 +56,7 @@ public class ByteArrayMetricDecompressor {
 
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ChannelProcessException(e.getMessage(), e);
         }
     }
 }
