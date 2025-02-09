@@ -76,9 +76,9 @@ import ygo.traffic_hunter.core.collector.validator.MetricValidator;
  *    ↓
  * [Processor]
  *    ↓
- * [Event]
- *    ↓
  * [Validator]
+ *    ↓
+ * [Event]
  *    ↓
  * [Repository]
  * </pre>
