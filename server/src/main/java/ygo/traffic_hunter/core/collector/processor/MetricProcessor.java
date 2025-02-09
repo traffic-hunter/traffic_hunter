@@ -28,10 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import ygo.traffic_hunter.core.annotation.Processor;
+import ygo.traffic_hunter.core.collector.channel.MetricChannel.ChannelException;
 import ygo.traffic_hunter.core.collector.processor.compress.ByteArrayMetricDecompressor;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
-import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
-import ygo.traffic_hunter.domain.metric.TraceInfo;
 
 /**
  * <p>
@@ -51,31 +50,40 @@ public class MetricProcessor {
 
     private final ObjectMapper objectMapper;
 
-    public MetadataWrapper<SystemInfo> processSystemInfo(final byte[] data) {
+    public <C> MetadataWrapper<C> process(final byte[] data, final Class<C> clazz) {
 
         byte[] unzipped = decompressor.unzip(data);
 
         JavaType javaType = objectMapper.getTypeFactory()
-                .constructParametricType(MetadataWrapper.class, SystemInfo.class);
+                .constructParametricType(MetadataWrapper.class, clazz);
 
         try {
             return objectMapper.readValue(unzipped, javaType);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ChannelProcessException(e.getMessage(), e);
         }
     }
 
-    public MetadataWrapper<TraceInfo> processTraceInfo(final byte[] data) {
+    public static final class ChannelProcessException extends ChannelException {
 
-        byte[] unzipped = decompressor.unzip(data);
+        public ChannelProcessException() {
+        }
 
-        JavaType javaType = objectMapper.getTypeFactory()
-                .constructParametricType(MetadataWrapper.class, TraceInfo.class);
+        public ChannelProcessException(final String message) {
+            super(message);
+        }
 
-        try {
-            return objectMapper.readValue(unzipped, javaType);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        public ChannelProcessException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        public ChannelProcessException(final Throwable cause) {
+            super(cause);
+        }
+
+        public ChannelProcessException(final String message, final Throwable cause, final boolean enableSuppression,
+                                       final boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
         }
     }
 }

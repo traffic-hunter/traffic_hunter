@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ygo.traffic_hunter.common.exception.TrafficHunterException;
+import ygo.traffic_hunter.core.collector.channel.MetricChannel.ChannelException;
 
 /**
  * @author yungwang-o
@@ -56,6 +57,12 @@ public class MetricControllerAdvice {
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeException(final RuntimeException e) {
+        return ErrorResponse.create(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+
+    @ExceptionHandler(ChannelException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleChannelException(final ChannelException e) {
         return ErrorResponse.create(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 

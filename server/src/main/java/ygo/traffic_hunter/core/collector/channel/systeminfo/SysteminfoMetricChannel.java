@@ -29,6 +29,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel;
 import ygo.traffic_hunter.core.collector.processor.MetricProcessor;
+import ygo.traffic_hunter.core.collector.validator.MetricValidator;
+import ygo.traffic_hunter.core.collector.validator.MetricValidator.ChannelValidatedException;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.event.channel.ChannelEventHandler;
@@ -53,6 +55,8 @@ public class SysteminfoMetricChannel implements MetricChannel {
 
     private final MetricProcessor processor;
 
+    private final MetricValidator validator;
+
     private final ApplicationEventPublisher publisher;
 
     @Override
@@ -63,9 +67,13 @@ public class SysteminfoMetricChannel implements MetricChannel {
     @Override
     public void open(final byte[] payload) {
 
-        MetadataWrapper<SystemInfo> object = processor.processSystemInfo(payload);
+        MetadataWrapper<SystemInfo> object = processor.process(payload, SystemInfo.class);
 
         log.info("process system info: {}", object);
+
+        if(validator.validate(object)){
+            throw new ChannelValidatedException("The input does not meet the required validation criteria.");
+        }
 
         publisher.publishEvent(new SystemInfoMetricEvent(object));
     }

@@ -80,4 +80,27 @@ public interface MetricChannel {
             return this.header == header;
         }
     }
+
+    class ChannelException extends RuntimeException {
+
+        public ChannelException() {
+        }
+
+        public ChannelException(final String message) {
+            super(message);
+        }
+
+        public ChannelException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        public ChannelException(final Throwable cause) {
+            super(cause);
+        }
+
+        public ChannelException(final String message, final Throwable cause, final boolean enableSuppression,
+                                final boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
+    }
 }
