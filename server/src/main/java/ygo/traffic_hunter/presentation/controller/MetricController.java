@@ -31,11 +31,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ygo.traffic_hunter.core.dto.request.statistics.StatisticsRequest;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
@@ -58,6 +60,7 @@ public class MetricController {
     private final MetricStatisticsService metricStatisticsService;
 
     @GetMapping("/transaction")
+    @ResponseStatus(HttpStatus.OK)
     public Slice<ServiceTransactionResponse> retrieveServiceTransactionApi(@RequestBody @Valid final StatisticsRequest request,
                                                                            @PageableDefault(
                                                                                    sort = "count",
@@ -72,12 +75,14 @@ public class MetricController {
     }
 
     @GetMapping("/metric/max/{timeRange}")
+    @ResponseStatus(HttpStatus.OK)
     public StatisticsMetricMaxResponse retrieveMaxMetricApi(@PathVariable final StatisticsMetricTimeRange timeRange) {
 
         return metricStatisticsService.retrieveStatisticsMaxMetric(timeRange);
     }
 
     @GetMapping("/metric/avg/{timeRange}")
+    @ResponseStatus(HttpStatus.OK)
     public StatisticsMetricAvgResponse retrieveAvgMetricApi(@PathVariable final StatisticsMetricTimeRange timeRange) {
 
         return metricStatisticsService.retrieveStatisticsAvgMetric(timeRange);
