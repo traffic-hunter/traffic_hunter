@@ -40,7 +40,7 @@ public class StatisticsMetricMaxRowMapper implements RowMapper<StatisticsMetricM
                 rs.getTimestamp("period").toInstant(),
                 rs.getDouble("max_system_cpu_usage"),
                 rs.getDouble("max_process_cpu_usage"),
-                rs.getDouble("max_heap_memory_usage"),
+                rs.getInt("max_heap_memory_usage"),
                 rs.getInt("max_thread_count"),
                 rs.getInt("max_peak_thread_count"),
                 rs.getInt("max_web_request_count"),

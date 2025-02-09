@@ -9,7 +9,7 @@ public record StatisticsMetricMaxResponse(
         double maxSystemCpuUsage,
         double maxProcessCpuUsage,
 
-        double maxHeapMemoryUsage,
+        int maxHeapMemoryUsage,
 
         int maxThreadCount,
         int maxPeakThreadCount,
