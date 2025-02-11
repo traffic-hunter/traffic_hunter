@@ -1,7 +1,13 @@
 package ygo.traffic_hunter.presentation.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -24,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.restdocs.RestDocumentationContextProvider;
@@ -56,9 +63,11 @@ import ygo.traffic_hunter.domain.metric.thread.ThreadMetricMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.TomcatWebServerMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.request.TomcatWebServerRequestMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.thread.TomcatWebServerThreadPoolMeasurement;
+import ygo.traffic_hunter.presentation.advice.MetricControllerAdvice;
 
 @ExtendWith(RestDocumentationExtension.class)
 @WebMvcTest(controllers = ServerSentEventController.class)
+@EnableAspectJAutoProxy
 class ServerSentEventControllerTest extends AbstractTestConfiguration {
 
     @Autowired
@@ -76,6 +85,7 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
     void setUp(RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.standaloneSetup(new ServerSentEventController(metricService))
                 .apply(documentationConfiguration(restDocumentation))
+                .setControllerAdvice(new MetricControllerAdvice())
                 .build();
     }
 
@@ -356,6 +366,25 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                 .exception("exception")
                 .duration(30)
                 .build();
+    }
+
+    @Test
+    void BROADCAST_API_요청시_구독을_하지_않았다면_예외가_발생한다_400() throws Exception {
+
+        // given
+        willThrow(new IllegalStateException(
+                "The client with the given identification does not exist. Please subscribe first."))
+                .given(metricService)
+                .scheduleBroadcast(any(), any(), anyInt());
+
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/metrics/broadcast/{interval}", TimeInterval.REAL_TIME)
+                        .param("limit", "20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(document("400-error-metrics-broadcast"
+                        , preprocessRequest(prettyPrint())
+                        , preprocessResponse(prettyPrint())
+                ));
     }
 
 }
