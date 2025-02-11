@@ -1,0 +1,21 @@
+[[ServerSentEvent-API]]
+== ServerSentEvent-API
+
+[[success]]
+== Success
+
+=== /metrics/subscribe
+
+operation::metrics-subscribe[snippets='http-request,http-response']
+
+=== /metrics/broadcast/{interval}
+
+operation::metrics-broadcast[snippets='http-request,query-parameters,path-parameters,http-response,response-fields']
+
+[[failed]]
+== Failed
+
+=== /metrics/broadcast/{interval}
+
+operation::400-error-service-transaction[snippets='curl-request,http-request,http-response']
+
