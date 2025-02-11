@@ -18,4 +18,5 @@ spring:
 
 webhook:
   discord-url: ${DISCORD_WEB_HOOK_URL}
+  slack-url: ${SLACK_WEB_HOOK_URL}
 

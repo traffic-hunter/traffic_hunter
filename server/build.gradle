@@ -38,6 +38,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.data:spring-data-commons'
+    implementation 'com.slack.api:slack-api-client:1.45.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.assertj:assertj-core'
     compileOnly 'org.projectlombok:lombok'
@@ -81,6 +82,7 @@ tasks.withType(Test).configureEach {
     environment("PASSWORD", project.findProperty("PASSWORD"))
     environment("DB_URL", project.findProperty("DB_URL"))
     environment("DISCORD_WEB_HOOK_URL", project.findProperty("DISCORD_WEB_HOOK_URL"))
+    environment("SLACK_WEB_HOOK_URL", project.findProperty("SLACK_WEB_HOOK_URL"))
 }
 
 ext {
