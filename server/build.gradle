@@ -80,6 +80,7 @@ tasks.withType(Test).configureEach {
     environment("USER_NAME", project.findProperty("USER_NAME"))
     environment("PASSWORD", project.findProperty("PASSWORD"))
     environment("DB_URL", project.findProperty("DB_URL"))
+    environment("DISCORD_WEB_HOOK_URL", project.findProperty("DISCORD_WEB_HOOK_URL"))
 }
 
 ext {

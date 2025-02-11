@@ -16,3 +16,6 @@ spring:
   jooq:
     sql-dialect: postgres
 
+webhook:
+  discord-url: ${DISCORD_WEB_HOOK_URL}
+
