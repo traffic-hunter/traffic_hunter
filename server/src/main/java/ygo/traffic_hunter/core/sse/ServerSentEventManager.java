@@ -72,6 +72,11 @@ public class ServerSentEventManager {
                                   final TimeInterval timeInterval,
                                   final Runnable runnable) {
 
+        if (!clients.containsKey(identification)) {
+            throw new IllegalStateException(
+                    "The client with the given identification does not exist. Please subscribe first.");
+        }
+
         log.info("schedule broadcasting sse emitter {}", timeInterval);
 
         Client client = clients.get(identification);

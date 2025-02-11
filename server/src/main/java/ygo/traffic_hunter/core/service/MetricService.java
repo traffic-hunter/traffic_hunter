@@ -50,6 +50,8 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @RequiredArgsConstructor
 public class MetricService {
 
+    private static final TimeInterval DEFAULT_BROADCAST_INTERVAL = TimeInterval.REAL_TIME;
+
     private final MetricRepository metricRepository;
 
     private final ServerSentEventManager sseManager;
@@ -83,7 +85,8 @@ public class MetricService {
                                   @NonNull final TimeInterval interval,
                                   final Integer limit) {
 
-        sseManager.scheduleBroadcast(identification, interval, () -> broadcast(identification, interval, limit));
+        sseManager.scheduleBroadcast(identification, DEFAULT_BROADCAST_INTERVAL,
+                () -> broadcast(identification, interval, limit));
     }
 
     private void broadcast(final Identification identification, final TimeInterval interval, final Integer limit) {
