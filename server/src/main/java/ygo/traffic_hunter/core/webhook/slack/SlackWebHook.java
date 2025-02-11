@@ -3,7 +3,6 @@ package ygo.traffic_hunter.core.webhook.slack;
 import com.slack.api.Slack;
 import com.slack.api.webhook.Payload;
 import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,7 +25,7 @@ public class SlackWebHook implements AlarmSender {
         try {
             slack.send(properties.slackUrl(), Payload.builder()
                             .text(message.getContent())
-                    .build())
+                    .build());
         } catch (IOException e) {
             throw new AlarmException(e.getMessage(), e);
         }
