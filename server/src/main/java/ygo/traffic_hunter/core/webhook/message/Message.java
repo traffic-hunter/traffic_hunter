@@ -99,7 +99,6 @@ public class Message {
         }
     }
 
-    // Embed 클래스
     @Getter
     public static class Embed {
 
@@ -118,7 +117,6 @@ public class Message {
             this.color = color;
         }
 
-        // Fluent Builder for Embed
         public static EmbedBuilder builder() {
             return new EmbedBuilder();
         }

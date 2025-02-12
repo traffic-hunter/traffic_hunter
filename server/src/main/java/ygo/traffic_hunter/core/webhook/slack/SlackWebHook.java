@@ -24,13 +24,20 @@
 package ygo.traffic_hunter.core.webhook.slack;
 
 import com.slack.api.Slack;
+import com.slack.api.model.Attachment;
+import com.slack.api.model.Field;
 import com.slack.api.webhook.Payload;
+import com.slack.api.webhook.WebhookResponse;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.webhook.message.Message;
+import ygo.traffic_hunter.core.webhook.message.library.MessageMaker.Color;
 import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 
 /**
@@ -50,11 +57,45 @@ public class SlackWebHook implements AlarmSender {
     public void send(final Message message) {
 
         try {
-            slack.send(properties.slackUrl(), Payload.builder()
-                            .text(message.getContent())
-                    .build());
+            WebhookResponse response = slack.send(
+                    properties.slackUrl(),
+                    Payload.builder()
+                            .attachments(Collections.singletonList(getAttachment(message)))
+                            .build()
+            );
+
+            HttpStatus httpStatus = HttpStatus.valueOf(response.getCode());
+
+            if(httpStatus.is2xxSuccessful()) {
+                log.info("http status code = {}", httpStatus.value());
+            } else if(httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
+                log.error("http status code = {}", httpStatus.value());
+            }
         } catch (IOException e) {
             throw new AlarmException(e.getMessage(), e);
         }
+    }
+
+    private Attachment getAttachment(final Message message) {
+
+        return Attachment.builder()
+                .color(Color.RED.getStringValue())
+                .authorName(message.getUsername())
+                .title(message.getContent())
+                .fields(getFields(message))
+                .build();
+    }
+
+    private List<Field> getFields(final Message message) {
+
+        return message.getEmbeds()
+                .getFirst()
+                .getFields()
+                .stream()
+                .map(field -> Field.builder()
+                        .title(field.getName())
+                        .value(field.getValue())
+                        .build()
+                ).toList();
     }
 }

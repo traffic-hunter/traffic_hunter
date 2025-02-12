@@ -113,10 +113,10 @@ public class MessageMaker {
                 .content(content)
                 .addEmbed(
                         Embed.builder()
-                                .title(title)
                                 .color(color.getValue())
-                                .description(bodyMessage)
-                                .addField(Field.of("ip", inetAddress.getHostAddress(), true))
+                                .addField(Field.of("title", title, false))
+                                .addField(Field.of("message", bodyMessage, false))
+                                .addField(Field.of("ip", inetAddress.getHostAddress(), false))
                                 .build()
                 ).build();
     }
@@ -125,15 +125,18 @@ public class MessageMaker {
 
     @Getter
     public enum Color {
-        RED(0xFF0000),
-        BLUE(0x0000FF),
-        GREEN(0x00FF00),
+        RED(0xFF0000, "FF0000"),
+        BLUE(0x0000FF, "0000FF"),
+        GREEN(0x00FF00, "00FF00"),
         ;
 
         private final int value;
 
-        Color(final int value) {
+        private final String stringValue;
+
+        Color(final int value, final String stringValue) {
             this.value = value;
+            this.stringValue = stringValue;
         }
     }
 }

@@ -48,7 +48,7 @@ public class Scheduler {
         }
         currentTask = executor.scheduleWithFixedDelay(runnable,
                 0,
-                interval.getDelayMillis(),
+                3000,
                 TimeUnit.MILLISECONDS
         );
     }
