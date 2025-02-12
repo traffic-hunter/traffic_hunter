@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.identification.Identification;
 import ygo.traffic_hunter.core.schedule.Scheduler;
-import ygo.traffic_hunter.domain.interval.TimeInterval;
 
 /**
  * @author yungwang-o, JuSeong
@@ -36,14 +35,16 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @RequiredArgsConstructor
 public class Client {
 
+    private static final int DEFAULT_INTERVAL = 5000;
+
     private final Identification identification;
 
     private final SseEmitter emitter;
 
     private final Scheduler scheduler;
 
-    public void scheduleBroadcast(final TimeInterval interval, final Runnable runnable) {
-        scheduler.schedule(interval, runnable);
+    public void scheduleBroadcast(final Runnable runnable) {
+        scheduler.schedule(DEFAULT_INTERVAL, runnable);
     }
 
     public <T> void send(final T data) {

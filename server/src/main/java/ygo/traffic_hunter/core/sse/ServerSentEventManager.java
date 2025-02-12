@@ -57,7 +57,7 @@ public class ServerSentEventManager {
         log.info("schedule broadcasting sse emitter {}", timeInterval);
 
         Client client = clients.get(identification);
-        client.scheduleBroadcast(timeInterval, runnable);
+        client.scheduleBroadcast(runnable);
     }
 
     public <T> void send(final Identification identification, final T data) {
