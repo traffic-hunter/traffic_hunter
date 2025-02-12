@@ -25,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -55,9 +54,9 @@ public class ServerSentEventController {
     @PostMapping("/metrics/broadcast/{interval}")
     @ResponseStatus(HttpStatus.OK)
     public void broadcast(final HttpServletRequest request,
-                          @PathVariable(name = "interval") final TimeInterval interval,
-                          @RequestParam(defaultValue = "20") final Integer limit) {
+                          @PathVariable(name = "interval") final TimeInterval interval) {
 
-        metricService.scheduleBroadcast(new SessionIdentification(request.getSession().getId()), interval, limit);
+        metricService.scheduleBroadcast(new SessionIdentification(request.getSession().getId()), interval,
+                interval.getLimit());
     }
 }

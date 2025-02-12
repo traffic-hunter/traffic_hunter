@@ -12,7 +12,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,11 +53,8 @@ import ygo.traffic_hunter.domain.metric.MetricData;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 import ygo.traffic_hunter.domain.metric.cpu.CpuMetricMeasurement;
 import ygo.traffic_hunter.domain.metric.dbcp.hikari.HikariCPMeasurement;
-import ygo.traffic_hunter.domain.metric.gc.GCMetricMeasurement;
-import ygo.traffic_hunter.domain.metric.gc.time.GCMetricCollectionTime;
 import ygo.traffic_hunter.domain.metric.memory.MemoryMetricMeasurement;
 import ygo.traffic_hunter.domain.metric.memory.usage.MemoryMetricUsage;
-import ygo.traffic_hunter.domain.metric.runtime.RuntimeMetricMeasurement;
 import ygo.traffic_hunter.domain.metric.thread.ThreadMetricMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.TomcatWebServerMeasurement;
 import ygo.traffic_hunter.domain.metric.web.tomcat.request.TomcatWebServerRequestMeasurement;
@@ -100,12 +96,16 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
     @Test
     void BROADCAST_API_요청과_응답에_대한_테스트를_진행한다_200() throws Exception {
 
-        RealTimeMonitoringResponse realTimeMonitoringResponse = new RealTimeMonitoringResponse(
-                List.of(getSystemMetricResponse()), List.of(getTransactionMetricResponse()));
+        String agentName = "myAgent";
+        Instant agentBootTime = getInstant("2025-01-21 18:20:18.933976");
+        String agentVersion = "1.0.0";
 
-        mockMvc.perform(RestDocumentationRequestBuilders.post("/metrics/broadcast/{interval}", TimeInterval.REAL_TIME)
-                        .param("limit", "20")
-                        .accept(MediaType.APPLICATION_JSON))
+        RealTimeMonitoringResponse realTimeMonitoringResponse = new RealTimeMonitoringResponse(agentName, agentBootTime,
+                agentVersion, List.of(getSystemMetricResponse()));
+
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.post("/metrics/broadcast/{interval}", TimeInterval.REAL_TIME)
+                                .accept(MediaType.APPLICATION_JSON))
 
                 .andExpect(status().isOk())
                 .andDo(result -> {
@@ -116,27 +116,27 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                                     .writeValueAsString(realTimeMonitoringResponse));
                 })
                 .andDo(document("metrics-broadcast"
-                        , queryParameters(
-                                parameterWithName("limit").optional().description("조회할 개수(기본값 20)")
-                        )
                         , pathParameters(
                                 parameterWithName("interval")
-                                        .description(Arrays.stream(TimeInterval.values()).map(Enum::name).collect(
-                                                Collectors.joining(", ")))
+                                        .description(
+                                                Arrays.stream(TimeInterval.values()).map(Enum::name).collect(
+                                                        Collectors.joining(", ")))
                         )
                         , responseFields(
-                                fieldWithPath("systemMetricResponses").description("시스템 메트릭 응답 목록"),
-                                fieldWithPath("systemMetricResponses[].time").description("응답 수집 시간 (ISO 8601 형식)"),
-                                fieldWithPath("systemMetricResponses[].agentName").description("에이전트 이름"),
-                                fieldWithPath("systemMetricResponses[].agentBootTime").description(
+                                fieldWithPath("agentName").description("에이전트 이름"),
+                                fieldWithPath("agentBootTime").description(
                                         "에이전트 시작 시간"),
-                                fieldWithPath("systemMetricResponses[].agentVersion").description("에이전트 버전"),
+                                fieldWithPath("agentVersion").description("에이전트 버전"),
+                                fieldWithPath("systemMetricResponses").description("시스템 메트릭 응답 목록"),
+                                fieldWithPath("systemMetricResponses[].time").description(
+                                        "응답 수집 시간 (ISO 8601 형식)"),
                                 fieldWithPath("systemMetricResponses[].metricData").description("시스템 메트릭 데이터"),
 
                                 // CPU 메트릭
                                 fieldWithPath("systemMetricResponses[].metricData.cpuMetric").description(
                                         "CPU 메트릭 데이터"),
-                                fieldWithPath("systemMetricResponses[].metricData.cpuMetric.systemCpuLoad").description(
+                                fieldWithPath(
+                                        "systemMetricResponses[].metricData.cpuMetric.systemCpuLoad").description(
                                         "시스템 CPU 사용량"),
                                 fieldWithPath(
                                         "systemMetricResponses[].metricData.cpuMetric.processCpuLoad").description(
@@ -144,18 +144,6 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                                 fieldWithPath(
                                         "systemMetricResponses[].metricData.cpuMetric.availableProcessors").description(
                                         "사용 가능한 프로세서 수"),
-
-                                // GC 메트릭
-                                fieldWithPath("systemMetricResponses[].metricData.gcMetric").description("GC 메트릭 데이터"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.gcMetric.gcMetricCollectionTimes").description(
-                                        "GC 수집 시간 정보 목록"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.gcMetric.gcMetricCollectionTimes[].getCollectionCount").description(
-                                        "GC 호출 횟수"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.gcMetric.gcMetricCollectionTimes[].getCollectionTime").description(
-                                        "GC 총 수집 시간(ms)"),
 
                                 // 메모리 메트릭
                                 fieldWithPath("systemMetricResponses[].metricData.memoryMetric").description(
@@ -175,35 +163,6 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                                 fieldWithPath(
                                         "systemMetricResponses[].metricData.memoryMetric.heapMemoryUsage.max").description(
                                         "힙 메모리 최대 크기"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage").description(
-                                        "논힙 메모리 사용량"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.init").description(
-                                        "논힙 메모리 초기 크기"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.used").description(
-                                        "논힙 메모리 사용량"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.committed").description(
-                                        "논힙 메모리 커밋 크기"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.max").description(
-                                        "논힙 메모리 최대 크기"),
-
-                                // 런타임 메트릭
-                                fieldWithPath("systemMetricResponses[].metricData.runtimeMetric").description(
-                                        "런타임 메트릭 데이터"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.runtimeMetric.getStartTime").description(
-                                        "시작 시간 (타임스탬프)"),
-                                fieldWithPath("systemMetricResponses[].metricData.runtimeMetric.getUpTime").description(
-                                        "업타임(ms)"),
-                                fieldWithPath("systemMetricResponses[].metricData.runtimeMetric.getVmName").description(
-                                        "VM 이름"),
-                                fieldWithPath(
-                                        "systemMetricResponses[].metricData.runtimeMetric.getVmVersion").description(
-                                        "VM 버전"),
 
                                 // 스레드 메트릭
                                 fieldWithPath("systemMetricResponses[].metricData.threadMetric").description(
@@ -266,37 +225,7 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                                         "총 연결 수"),
                                 fieldWithPath(
                                         "systemMetricResponses[].metricData.dbcpMetric.threadsAwaitingConnection").description(
-                                        "연결 대기 중인 스레드 수"),
-
-                                fieldWithPath("transactionMetricResponses[].agentName").description("에이전트의 이름"),
-                                fieldWithPath("transactionMetricResponses[].agentBootTime").description("에이전트 부팅 시간"),
-                                fieldWithPath("transactionMetricResponses[].agentVersion").description("에이전트의 버전"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.name").description(
-                                        "트랜잭션이 수행된 메서드의 이름과 경로"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.traceId").description(
-                                        "트랜잭션의 고유 식별자"),
-                                fieldWithPath(
-                                        "transactionMetricResponses[].spanTreeNode.data.parentSpanId").description(
-                                        "부모 메서드의 ID (루트 Span의 경우 0000000000000000)"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.spanId").description(
-                                        "현재 메서드의 ID"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.attributes").description(
-                                        "메서드의 세부 정보 ex) { http.method : GET }"),
-                                fieldWithPath(
-                                        "transactionMetricResponses[].spanTreeNode.data.attributesCount").description(
-                                        "세부 정보 개수"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.startTime").description(
-                                        "메서드 시작 시간 (ISO 8601 형식)"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.endTime").description(
-                                        "메서드 종료 시간 (ISO 8601 형식)"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.duration").description(
-                                        "메서드 실행 시간 (ms 단위)"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.exception").description(
-                                        "메서드 수행 결과 (예: success 또는 예외 메시지)"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.data.ended").description(
-                                        "메서드 종료 여부 (true: 종료됨)"),
-                                fieldWithPath("transactionMetricResponses[].spanTreeNode.children[]").description(
-                                        "현재 메서드 자식 목록")
+                                        "연결 대기 중인 스레드 수")
                         )
                 ));
     }
@@ -312,19 +241,16 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
 
     private MetricData getMetricData() {
         CpuMetricMeasurement cpuMetric = new CpuMetricMeasurement(0.0, 0.14010085468246197, 12);
-        GCMetricMeasurement gcMetric = new GCMetricMeasurement(
-                List.of(new GCMetricCollectionTime(61, 16), new GCMetricCollectionTime(17, 6)));
+
         MemoryMetricMeasurement memoryMetric = new MemoryMetricMeasurement(
-                new MemoryMetricUsage(536870912L, 78528144L, 113246208L, 8577351680L),
-                new MemoryMetricUsage(2555904L, 103137872L, 105119744L, -1));
-        RuntimeMetricMeasurement runtimeMetric = new RuntimeMetricMeasurement(173748361863L, 9652,
-                "OpenJDK 64-Bit Server VM", "21.0.5+11-LTS");
+                new MemoryMetricUsage(536870912L, 78528144L, 113246208L, 8577351680L)
+        );
         ThreadMetricMeasurement threadMetric = new ThreadMetricMeasurement(35, 35, 40);
         TomcatWebServerMeasurement webServerMetric = new TomcatWebServerMeasurement(
                 new TomcatWebServerRequestMeasurement(0, 0, 0, 0, 0),
                 new TomcatWebServerThreadPoolMeasurement(200, 10, 0));
         HikariCPMeasurement dbcpMetric = new HikariCPMeasurement(10, 10, 0, 0);
-        return new MetricData(cpuMetric, gcMetric, memoryMetric, runtimeMetric, threadMetric, webServerMetric,
+        return new MetricData(cpuMetric, memoryMetric, threadMetric, webServerMetric,
                 dbcpMetric);
     }
 

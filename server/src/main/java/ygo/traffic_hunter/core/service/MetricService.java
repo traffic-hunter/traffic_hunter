@@ -91,10 +91,14 @@ public class MetricService {
 
     private void broadcast(final Identification identification, final TimeInterval interval, final Integer limit) {
 
-        List<AgentMetadata> agents = webSocketHandler.getAgents();
+        try {
+            List<AgentMetadata> agents = webSocketHandler.getAgents();
 
-        for (AgentMetadata metadata : agents) {
-            processMetrics(identification, interval, metadata, limit);
+            for (AgentMetadata metadata : agents) {
+                processMetrics(identification, interval, metadata, limit);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -109,12 +113,6 @@ public class MetricService {
                 limit
         );
 
-        List<TransactionMetricResponse> txMetrics = findTxMetricsByRecentTimeAndAgentName(
-                interval,
-                metadata.agentName(),
-                limit
-        );
-
-        sseManager.send(identification, new RealTimeMonitoringResponse(metrics, txMetrics));
+        sseManager.send(identification, RealTimeMonitoringResponse.create(metrics));
     }
 }
