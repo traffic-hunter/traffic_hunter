@@ -36,9 +36,7 @@ import static org.traffichunter.query.jooq.Tables.TRANSACTION_MEASUREMENT;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -217,7 +215,7 @@ public class TimeSeriesRepository implements MetricRepository {
         org.traffichunter.query.jooq.tables.MetricMeasurement metricMeasurement = METRIC_MEASUREMENT;
 
         Field<Object> timeBucket = field("time_bucket({0}, {1})",
-                inline(TimeInterval.ONE_HOUR.getInterval()),
+                inline(interval.getInterval()),
                 metricMeasurement.TIME);
 
         Field<JSONB> metricData = metricMeasurement.METRIC_DATA;
@@ -322,7 +320,7 @@ public class TimeSeriesRepository implements MetricRepository {
         org.traffichunter.query.jooq.tables.Agent agent = AGENT;
 
         Field<Object> timeBucket = field("time_bucket({0}, {1})",
-                inline(TimeInterval.ONE_HOUR.getInterval()),
+                inline(interval.getInterval()),
                 transactionMeasurement.TIME);
 
         Field<JSONB> traceIdGroupField = jsonbGetAttribute(transactionMeasurement.TRANSACTION_DATA, "traceId");
@@ -460,7 +458,7 @@ public class TimeSeriesRepository implements MetricRepository {
                 .orElseThrow(() -> new IllegalArgumentException("not found avg metric"));
     }
 
-    private Field<BigDecimal> getMetricField(Field<JSONB> metricMeasurement, String... path) {
+    private Field<BigDecimal> getMetricField(final Field<JSONB> metricMeasurement, final String... path) {
         return round(
                 avg(
                         DSL.cast(
@@ -472,7 +470,7 @@ public class TimeSeriesRepository implements MetricRepository {
         );
     }
 
-    private Field<JSONB> createJsonAccessorQuery(Field<JSONB> jsonb, String... args) {
+    private Field<JSONB> createJsonAccessorQuery(final Field<JSONB> jsonb, final String... args) {
 
         Field<JSONB> result = jsonb;
         for (String arg : args) {
