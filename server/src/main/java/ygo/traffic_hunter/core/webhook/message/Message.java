@@ -45,7 +45,12 @@ public class Message {
 
     private final List<Embed> embeds;
 
-    private Message(Instant timestamp, String url, String username, String content, List<Embed> embeds) {
+    private Message(final Instant timestamp,
+                    final String url,
+                    final String username,
+                    final String content,
+                    final List<Embed> embeds) {
+
         this.url = url;
         this.username = username;
         this.content = content;
@@ -69,27 +74,27 @@ public class Message {
 
         private final List<Embed> embeds = new ArrayList<>();
 
-        public Builder url(String url) {
+        public Builder url(final String url) {
             this.url = url;
             return this;
         }
 
-        public Builder time(Instant timestamp) {
+        public Builder time(final Instant timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
-        public Builder username(String username) {
+        public Builder username(final String username) {
             this.username = username;
             return this;
         }
 
-        public Builder content(String content) {
+        public Builder content(final String content) {
             this.content = content;
             return this;
         }
 
-        public Builder addEmbed(Embed embed) {
+        public Builder addEmbed(final Embed embed) {
             this.embeds.add(embed);
             return this;
         }
@@ -110,7 +115,11 @@ public class Message {
 
         private final List<Field> fields;
 
-        private Embed(String title, String description, List<Field> fields, int color) {
+        private Embed(final String title,
+                      final String description,
+                      final List<Field> fields,
+                      final int color) {
+
             this.title = title;
             this.description = description;
             this.fields = fields;
@@ -131,22 +140,22 @@ public class Message {
 
             private final List<Field> fields = new ArrayList<>();
 
-            public EmbedBuilder title(String title) {
+            public EmbedBuilder title(final String title) {
                 this.title = title;
                 return this;
             }
 
-            public EmbedBuilder color(int color) {
+            public EmbedBuilder color(final int color) {
                 this.color = color;
                 return this;
             }
 
-            public EmbedBuilder description(String description) {
+            public EmbedBuilder description(final String description) {
                 this.description = description;
                 return this;
             }
 
-            public EmbedBuilder addField(Field field) {
+            public EmbedBuilder addField(final Field field) {
                 this.fields.add(field);
                 return this;
             }
@@ -166,13 +175,19 @@ public class Message {
 
         private final boolean inline;
 
-        private Field(String name, String value, boolean inline) {
+        private Field(final String name,
+                      final String value,
+                      final boolean inline) {
+
             this.name = name;
             this.value = value;
             this.inline = inline;
         }
 
-        public static Field of(String name, String value, boolean inline) {
+        public static Field of(final String name,
+                               final String value,
+                               final boolean inline) {
+
             return new Field(name, value, inline);
         }
     }
