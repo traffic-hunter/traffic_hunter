@@ -83,4 +83,27 @@ public class ServerSentEventManager {
         Client client = clients.get(identification);
         client.send(data);
     }
+
+    static class ServerSentEventException extends RuntimeException {
+
+        public ServerSentEventException() {
+        }
+
+        public ServerSentEventException(final String message) {
+            super(message);
+        }
+
+        public ServerSentEventException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        public ServerSentEventException(final Throwable cause) {
+            super(cause);
+        }
+
+        public ServerSentEventException(final String message, final Throwable cause, final boolean enableSuppression,
+                                        final boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
+    }
 }

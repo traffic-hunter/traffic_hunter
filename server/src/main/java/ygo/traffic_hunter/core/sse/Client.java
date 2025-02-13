@@ -30,6 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.identification.Identification;
 import ygo.traffic_hunter.core.schedule.Scheduler;
+import ygo.traffic_hunter.core.send.AlarmSender;
+import ygo.traffic_hunter.core.send.ViewSender;
+import ygo.traffic_hunter.core.sse.ServerSentEventManager.ServerSentEventException;
+import ygo.traffic_hunter.core.webhook.message.Message;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
 /**
@@ -39,7 +43,7 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class Client {
+public class Client implements AlarmSender, ViewSender {
 
     private final Identification identification;
 
@@ -51,24 +55,19 @@ public class Client {
         scheduler.schedule(interval, runnable);
     }
 
+    @Override
+    public void send(final Message message) {
+        send(message, emitter);
+    }
+
+    @Override
     public <T> void send(final T data) {
         send(data, emitter);
     }
 
+    @Override
     public <T> void send(final List<T> data) {
-        sendAll(data, emitter);
-    }
-
-    private <T> void sendAll(final List<T> data, final SseEmitter emitter) {
-
-        SseEmitter.SseEventBuilder sseBuilder = SseEmitter.event()
-                .name(emitter.toString())
-                .data(data);
-        try {
-            emitter.send(sseBuilder);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        send(data, emitter);
     }
 
     private <T> void send(final T data, final SseEmitter emitter) {
@@ -78,14 +77,14 @@ public class Client {
         }
 
         SseEmitter.SseEventBuilder sseBuilder = SseEmitter.event()
-                .name(emitter.toString())
+                .name(identification.getId())
                 .data(data);
 
         try {
             emitter.send(sseBuilder);
         } catch (IOException e) {
-            log.error("message send error {}", e.getMessage());
+            log.error("sse message send error {}", e.getMessage());
+            throw new ServerSentEventException(e.getMessage(), e);
         }
     }
-
 }
