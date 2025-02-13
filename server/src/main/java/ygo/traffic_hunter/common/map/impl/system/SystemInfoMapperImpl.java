@@ -119,8 +119,7 @@ public class SystemInfoMapperImpl implements SystemInfoMapper {
 
     private MemoryMetricMeasurement mapToMeasurement(final MemoryStatusInfo memoryStatusInfo) {
         return new MemoryMetricMeasurement(
-                getMemoryUsage(memoryStatusInfo.heapMemoryUsage()),
-                getMemoryUsage(memoryStatusInfo.nonHeapMemoryUsage())
+                getMemoryUsage(memoryStatusInfo.heapMemoryUsage())
         );
     }
 

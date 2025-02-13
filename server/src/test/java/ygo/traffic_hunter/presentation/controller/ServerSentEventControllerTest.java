@@ -1,8 +1,5 @@
 package ygo.traffic_hunter.presentation.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
@@ -45,16 +42,7 @@ import ygo.traffic_hunter.core.assembler.span.SpanAssembler;
 import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
-import ygo.traffic_hunter.core.dto.response.metric.CpuMetricMeasurementResponse;
-import ygo.traffic_hunter.core.dto.response.metric.HikariCPMeasurementResponse;
-import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricMeasurementResponse;
-import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricUsageResponse;
-import ygo.traffic_hunter.core.dto.response.metric.MetricDataResponse;
 import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
-import ygo.traffic_hunter.core.dto.response.metric.ThreadMetricMeasurementResponse;
-import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerMeasurementResponse;
-import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerRequestMeasurementResponse;
-import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerThreadPoolMeasurementResponse;
 import ygo.traffic_hunter.core.service.MetricService;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.domain.metric.TransactionData;
