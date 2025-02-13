@@ -21,6 +21,7 @@ package ygo.traffic_hunter.persistence.impl;
 import static org.jooq.impl.DSL.asterisk;
 import static org.jooq.impl.DSL.avg;
 import static org.jooq.impl.DSL.count;
+import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.jsonArrayAgg;
 import static org.jooq.impl.DSL.jsonbGetAttribute;
@@ -35,6 +36,7 @@ import static org.traffichunter.query.jooq.Tables.TRANSACTION_MEASUREMENT;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -379,18 +381,18 @@ public class TimeSeriesRepository implements MetricRepository {
 
         SelectLimitPercentStep<Record6<String, Integer, BigDecimal, BigDecimal, BigDecimal, Long>> result =
                 dsl.select(
-                        urlField.as("url"),
-                        count(asterisk()).as("count"),
-                        sum(when(ended.eq(inline(false)), inline(1)).otherwise(inline(0))).as("err_count"),
-                        avg(duration).as("avg_execution_time"),
-                        sum(duration).as("sum_execution_time"),
-                        max(duration).as("max_execution_time")
-                )
-                .from(tm)
-                .where(urlField.isNotNull())
-                .groupBy(urlField, tm.TIME)
-                .orderBy(QuerySupport.orderByClause(pageable))
-                .limit(pageable.getPageSize() + 1);
+                                urlField.as("url"),
+                                count(asterisk()).as("count"),
+                                sum(when(ended.eq(inline(false)), inline(1)).otherwise(inline(0))).as("err_count"),
+                                avg(duration).as("avg_execution_time"),
+                                sum(duration).as("sum_execution_time"),
+                                max(duration).as("max_execution_time")
+                        )
+                        .from(tm)
+                        .where(urlField.isNotNull())
+                        .groupBy(urlField, tm.TIME)
+                        .orderBy(QuerySupport.orderByClause(pageable))
+                        .limit(pageable.getPageSize() + 1);
 
         int pageSize = pageable.getPageSize();
 
@@ -401,7 +403,7 @@ public class TimeSeriesRepository implements MetricRepository {
         );
 
         boolean hasNext = results.size() > pageSize;
-        if(hasNext) {
+        if (hasNext) {
             results = results.subList(0, pageSize);
         }
 
@@ -427,7 +429,8 @@ public class TimeSeriesRepository implements MetricRepository {
                 + "order by period desc "
                 + "limit 1";
 
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new StatisticsMetricMaxRowMapper(), timeRange.getLatestRange()))
+        return Optional.ofNullable(
+                        jdbcTemplate.queryForObject(sql, new StatisticsMetricMaxRowMapper(), timeRange.getLatestRange()))
                 .orElseThrow(() -> new IllegalArgumentException("not found max metric"));
     }
 
