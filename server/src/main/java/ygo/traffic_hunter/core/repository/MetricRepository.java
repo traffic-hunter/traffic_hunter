@@ -48,7 +48,7 @@ public interface MetricRepository extends AgentRepository {
     List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
                                                                           Integer limit);
 
-    Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(Pageable pageable);
+    Slice<ServiceTransactionResponse> findServiceTransaction(Pageable pageable);
 
     StatisticsMetricMaxResponse findMaxMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
 

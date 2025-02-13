@@ -367,7 +367,7 @@ public class TimeSeriesRepository implements MetricRepository {
             key = "#{pageable.pageNumber}",
             condition = "#{pageable.pageNumber == 0}"
     )
-    public Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(final Pageable pageable) {
+    public Slice<ServiceTransactionResponse> findServiceTransaction(final Pageable pageable) {
 
         org.traffichunter.query.jooq.tables.TransactionMeasurement tm = TRANSACTION_MEASUREMENT;
 

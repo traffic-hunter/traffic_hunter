@@ -49,7 +49,7 @@ public class MetricStatisticsService {
 
     public Slice<ServiceTransactionResponse> retrieveServiceTransactions(final Pageable pageable) {
 
-        return metricRepository.findServiceTransactionByBeginToEnd(pageable);
+        return metricRepository.findServiceTransaction(pageable);
     }
 
     public StatisticsMetricMaxResponse retrieveStatisticsMaxMetric(final StatisticsMetricTimeRange timeRange) {
