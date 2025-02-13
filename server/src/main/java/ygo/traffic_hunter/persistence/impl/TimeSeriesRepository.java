@@ -245,6 +245,7 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheType.STATISTIC_TRANSACTION_PAGE_CACHE_NAME)
     public Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(final Instant begin,
                                                                                 final Instant end,
                                                                                 final Pageable pageable) {

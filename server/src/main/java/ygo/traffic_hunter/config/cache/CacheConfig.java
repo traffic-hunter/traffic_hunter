@@ -27,6 +27,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -68,9 +69,11 @@ public class CacheConfig {
         );
     }
 
+    @Getter
     public enum CacheType {
 
-        AGENT_CACHE("agent_cache", Integer.MAX_VALUE, 100),
+        AGENT_CACHE("agent_cache", 3600, 100),
+        STATISTIC_TRANSACTION_PAGE_CACHE("statistic_transaction_page_cache", 600, 50),
         ;
 
         private final String cacheName;
@@ -78,6 +81,7 @@ public class CacheConfig {
         private final int maximumSize;
 
         public static final String AGENT_CACHE_NAME = "agent_cache";
+        public static final String STATISTIC_TRANSACTION_PAGE_CACHE_NAME = "statistic_transaction_page_cache";
 
         CacheType(final String cacheName, final int expireAfterWrite, final int maximumSize) {
             this.cacheName = cacheName;
