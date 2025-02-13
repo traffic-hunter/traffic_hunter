@@ -32,8 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 import ygo.traffic_hunter.core.identification.Identification;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager;
@@ -49,6 +49,8 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MetricService {
+
+    private static final TimeInterval DEFAULT_BROADCAST_INTERVAL = TimeInterval.REAL_TIME;
 
     private final MetricRepository metricRepository;
 
@@ -83,7 +85,8 @@ public class MetricService {
                                   @NonNull final TimeInterval interval,
                                   final Integer limit) {
 
-        sseManager.scheduleBroadcast(identification, interval, () -> broadcast(identification, interval, limit));
+        sseManager.scheduleBroadcast(identification, DEFAULT_BROADCAST_INTERVAL,
+                () -> broadcast(identification, interval, limit));
     }
 
     private void broadcast(final Identification identification, final TimeInterval interval, final Integer limit) {
@@ -106,12 +109,6 @@ public class MetricService {
                 limit
         );
 
-        List<TransactionMetricResponse> txMetrics = findTxMetricsByRecentTimeAndAgentName(
-                interval,
-                metadata.agentName(),
-                limit
-        );
-
-        sseManager.send(identification, new RealTimeMonitoringResponse(metrics, txMetrics));
+        sseManager.send(identification, RealTimeMonitoringResponse.create(metrics));
     }
 }

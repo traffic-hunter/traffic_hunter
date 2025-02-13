@@ -1,25 +1,20 @@
 /**
  * The MIT License
- *
- * Copyright (c) 2024 traffic-hunter.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * <p>
+ * Copyright (c) 2024 yungwang-o
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package ygo.traffic_hunter.core.sse;
 
@@ -34,7 +29,6 @@ import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.send.ViewSender;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager.ServerSentEventException;
 import ygo.traffic_hunter.core.webhook.message.Message;
-import ygo.traffic_hunter.domain.interval.TimeInterval;
 
 /**
  * @author yungwang-o, JuSeong
@@ -45,14 +39,16 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @RequiredArgsConstructor
 public class Client implements AlarmSender, ViewSender {
 
+    private static final int DEFAULT_INTERVAL = 5000;
+
     private final Identification identification;
 
     private final SseEmitter emitter;
 
     private final Scheduler scheduler;
 
-    public void scheduleBroadcast(final TimeInterval interval, final Runnable runnable) {
-        scheduler.schedule(interval, runnable);
+    public void scheduleBroadcast(final Runnable runnable) {
+        scheduler.schedule(DEFAULT_INTERVAL, runnable);
     }
 
     @Override
@@ -87,4 +83,5 @@ public class Client implements AlarmSender, ViewSender {
             throw new ServerSentEventException(e.getMessage(), e);
         }
     }
+
 }

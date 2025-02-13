@@ -22,8 +22,8 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
@@ -42,9 +42,11 @@ public interface MetricRepository extends AgentRepository {
 
     void save(TransactionMeasurement metric);
 
-    List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName, Integer limit);
+    List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
+                                                                   Integer limit);
 
-    List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName, Integer limit);
+    List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
+                                                                          Integer limit);
 
     Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(Pageable pageable);
 
@@ -52,5 +54,6 @@ public interface MetricRepository extends AgentRepository {
 
     StatisticsMetricAvgResponse findAvgMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
 
-    List<RealTimeMonitoringResponse> findRealtimeMonitoringByTimeInterval(TimeInterval timeInterval, String agentName, Integer limit);
+    List<RealTimeMonitoringResponse> findRealtimeMonitoringByTimeInterval(TimeInterval timeInterval, String agentName,
+                                                                          Integer limit);
 }

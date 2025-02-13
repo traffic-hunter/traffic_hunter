@@ -1,7 +1,7 @@
 /**
  * The MIT License
  * <p>
- * Copyright (c) 2024 traffic-hunter.org
+ * Copyright (c) 2024 yungwang-o
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -16,17 +16,29 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.send;
+package ygo.traffic_hunter.core.dto.response.metric;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.Instant;
 
 /**
  * @author yungwang-o
- * @version 1.1.0
+ * @version 1.0.0
  */
-public interface ViewSender {
+public record SystemMetricResponse(
+        Instant time,
+        @JsonIgnore String agentName,
+        @JsonIgnore Instant agentBootTime,
+        @JsonIgnore String agentVersion,
+        MetricDataResponse metricData
+) {
 
-    <T> void send(T data);
+    public static SystemMetricResponse create(final Instant time,
+                                              final String agentName,
+                                              final Instant agentBootTime,
+                                              final String agentVersion,
+                                              final MetricDataResponse metricData) {
 
-    <T> void send(List<T> data);
+        return new SystemMetricResponse(time, agentName, agentBootTime, agentVersion, metricData);
+    }
 }

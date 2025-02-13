@@ -21,25 +21,38 @@ package ygo.traffic_hunter.persistence.impl;
 import static org.jooq.impl.DSL.asterisk;
 import static org.jooq.impl.DSL.avg;
 import static org.jooq.impl.DSL.count;
+import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.inline;
+import static org.jooq.impl.DSL.jsonArrayAgg;
 import static org.jooq.impl.DSL.jsonbGetAttribute;
 import static org.jooq.impl.DSL.jsonbGetAttributeAsText;
 import static org.jooq.impl.DSL.max;
+import static org.jooq.impl.DSL.round;
 import static org.jooq.impl.DSL.sum;
 import static org.jooq.impl.DSL.when;
+import static org.traffichunter.query.jooq.Tables.AGENT;
+import static org.traffichunter.query.jooq.Tables.METRIC_MEASUREMENT;
 import static org.traffichunter.query.jooq.Tables.TRANSACTION_MEASUREMENT;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.Field;
+import org.jooq.JSON;
 import org.jooq.JSONB;
+import org.jooq.Record;
+import org.jooq.Record5;
 import org.jooq.Record6;
 import org.jooq.SelectLimitPercentStep;
+import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -49,8 +62,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.config.cache.CacheConfig.CacheType;
 import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
@@ -200,32 +213,141 @@ public class TimeSeriesRepository implements MetricRepository {
     public List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval,
                                                                           final String agentName,
                                                                           final Integer limit) {
+        org.traffichunter.query.jooq.tables.Agent agent = AGENT;
+        org.traffichunter.query.jooq.tables.MetricMeasurement metricMeasurement = METRIC_MEASUREMENT;
 
-        String sql = "select m.time, a.agent_name, a.agent_boot_time, a.agent_version, m.metric_data "
-                + "from metric_measurement m "
-                + "join agent a on m.agent_id = a.id "
-                + "where m.time > now() - ?::interval "
-                + "and a.agent_name = ? "
-                + "order by m.time desc "
-                + "limit ?";
+        Field<Object> timeBucket = field("time_bucket({0}, {1})",
+                inline(TimeInterval.ONE_HOUR.getInterval()),
+                metricMeasurement.TIME);
 
-        return jdbcTemplate.query(sql, systemMeasurementRowMapper, interval.getInterval(), agentName, limit);
+        Field<JSONB> metricData = metricMeasurement.METRIC_DATA;
+        // CPU Metrics
+        Field<BigDecimal> systemCpuLoad = getMetricField(metricData, "cpuMetric", "systemCpuLoad");
+        Field<BigDecimal> processCpuLoad = getMetricField(metricData, "cpuMetric", "processCpuLoad");
+        Field<BigDecimal> availableProcessors = getMetricField(metricData, "cpuMetric", "availableProcessors");
+
+        // Memory Metrics - Heap
+        Field<BigDecimal> heapInit = getMetricField(metricData, "memoryMetric", "heapMemoryUsage", "init");
+        Field<BigDecimal> heapUsed = getMetricField(metricData, "memoryMetric", "heapMemoryUsage", "used");
+        Field<BigDecimal> heapCommitted = getMetricField(metricData, "memoryMetric", "heapMemoryUsage",
+                "committed");
+        Field<BigDecimal> heapMax = getMetricField(metricData, "memoryMetric", "heapMemoryUsage", "max");
+
+        // Thread Metrics
+        Field<BigDecimal> threadCount = getMetricField(metricData, "threadMetric", "threadCount");
+        Field<BigDecimal> peakThreadCount = getMetricField(metricData, "threadMetric", "getPeekThreadCount");
+        Field<BigDecimal> totalStartedThreadCount = getMetricField(metricData, "threadMetric",
+                "getTotalStartThreadCount");
+
+        // Web Server Request Metrics
+        Field<BigDecimal> requestCount = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerRequestMeasurement", "requestCount");
+        Field<BigDecimal> bytesReceived = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerRequestMeasurement", "bytesReceived");
+        Field<BigDecimal> bytesSent = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerRequestMeasurement", "bytesSent");
+        Field<BigDecimal> processingTime = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerRequestMeasurement", "processingTime");
+        Field<BigDecimal> errorCount = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerRequestMeasurement", "errorCount");
+
+        // Thread Pool Metrics
+        Field<BigDecimal> maxThreads = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerThreadPoolMeasurement", "maxThreads");
+        Field<BigDecimal> currentThreads = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerThreadPoolMeasurement", "currentThreads");
+        Field<BigDecimal> currentThreadsBusy = getMetricField(metricData, "webServerMetric",
+                "tomcatWebServerThreadPoolMeasurement", "currentThreadsBusy");
+
+        // DBCP Metrics
+        Field<BigDecimal> activeConnections = getMetricField(metricData, "dbcpMetric", "activeConnections");
+        Field<BigDecimal> idleConnections = getMetricField(metricData, "dbcpMetric", "idleConnections");
+        Field<BigDecimal> totalConnections = getMetricField(metricData, "cpuMetric", "totalConnections");
+        Field<BigDecimal> threadsAwaitingConnection = getMetricField(metricData, "cpuMetric",
+                "threadsAwaitingConnection");
+
+        SelectLimitPercentStep<Record> result = dsl.select(
+                        agent.AGENT_NAME,
+                        agent.AGENT_BOOT_TIME,
+                        agent.AGENT_VERSION,
+                        timeBucket.as("time"),
+                        // CPU Metrics
+                        systemCpuLoad.as("system_cpu_load"),
+                        processCpuLoad.as("process_cpu_load"),
+                        availableProcessors.as("available_processors"),
+                        // Memory Metrics - Heap
+                        heapInit.as("heap_init"),
+                        heapUsed.as("heap_used"),
+                        heapCommitted.as("heap_committed"),
+                        heapMax.as("heap_max"),
+                        // Thread Metrics
+                        threadCount.as("thread_count"),
+                        peakThreadCount.as("peak_thread_count"),
+                        totalStartedThreadCount.as("total_started_thread_count"),
+                        // Web Server Request Metrics
+                        requestCount.as("request_count"),
+                        bytesReceived.as("bytes_received"),
+                        bytesSent.as("bytes_sent"),
+                        processingTime.as("processing_time"),
+                        errorCount.as("error_count"),
+                        // Thread Pool Metrics
+                        maxThreads.as("max_threads"),
+                        currentThreads.as("current_threads"),
+                        currentThreadsBusy.as("current_threads_busy"),
+                        // DBCP Metrics
+                        activeConnections.as("active_connections"),
+                        idleConnections.as("idle_connections"),
+                        totalConnections.as("total_connections"),
+                        threadsAwaitingConnection.as("threads_awaiting_connection")
+                )
+                .from(metricMeasurement)
+                .join(agent)
+                .on(metricMeasurement.AGENT_ID.equal(agent.ID))
+                .groupBy(agent.AGENT_NAME,
+                        agent.AGENT_BOOT_TIME,
+                        agent.AGENT_VERSION,
+                        timeBucket)
+                .limit(limit);
+
+        return jdbcTemplate.query(result.getSQL(), systemMeasurementRowMapper, result.getBindValues().toArray());
     }
 
     @Override
-    public List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval,
-                                                                                 final String agentName,
-                                                                                 final Integer limit) {
-        String sql =
-                "SELECT a.agent_name, a.agent_boot_time, a.agent_version, JSON_AGG(t.transaction_data) AS transaction_datas "
-                        + "FROM transaction_measurement t "
-                        + "JOIN agent a ON t.agent_id = a.id "
-                        + "WHERE t.time > now() - ?::interval "
-                        + "AND a.agent_name = ? "
-                        + "GROUP BY a.agent_name, a.agent_boot_time, a.agent_version, t.transaction_data->>'traceId' "
-                        + "LIMIT ?";
+    public List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(
+            final TimeInterval interval,
+            final String agentName,
+            final Integer limit
+    ) {
+        org.traffichunter.query.jooq.tables.TransactionMeasurement transactionMeasurement = TRANSACTION_MEASUREMENT;
+        org.traffichunter.query.jooq.tables.Agent agent = AGENT;
 
-        return jdbcTemplate.query(sql, txMeasurementRowMapper, interval.getInterval(), agentName, limit);
+        Field<Object> timeBucket = field("time_bucket({0}, {1})",
+                inline(TimeInterval.ONE_HOUR.getInterval()),
+                transactionMeasurement.TIME);
+
+        Field<JSONB> traceIdGroupField = jsonbGetAttribute(transactionMeasurement.TRANSACTION_DATA, "traceId");
+
+        SelectLimitPercentStep<Record5<Object, String, OffsetDateTime, String, JSON>> result = dsl.select(
+                        timeBucket.as("bucket"),
+                        agent.AGENT_NAME,
+                        agent.AGENT_BOOT_TIME,
+                        agent.AGENT_VERSION,
+                        jsonArrayAgg(transactionMeasurement.TRANSACTION_DATA).as("transaction_datas")
+                )
+                .from(transactionMeasurement)
+                .join(agent)
+                .on(transactionMeasurement.AGENT_ID.eq(agent.ID))
+                .where(agent.AGENT_NAME.eq(agentName))
+                .groupBy(agent.AGENT_NAME,
+                        agent.AGENT_BOOT_TIME,
+                        agent.AGENT_VERSION, traceIdGroupField, timeBucket)
+                .limit(limit);
+
+        return jdbcTemplate.query(
+                result.getSQL(),
+                txMeasurementRowMapper,
+                result.getBindValues().toArray()
+        );
     }
 
     @Override
@@ -261,18 +383,18 @@ public class TimeSeriesRepository implements MetricRepository {
 
         SelectLimitPercentStep<Record6<String, Integer, BigDecimal, BigDecimal, BigDecimal, Long>> result =
                 dsl.select(
-                        urlField.as("url"),
-                        count(asterisk()).as("count"),
-                        sum(when(ended.eq(inline(false)), inline(1)).otherwise(inline(0))).as("err_count"),
-                        avg(duration).as("avg_execution_time"),
-                        sum(duration).as("sum_execution_time"),
-                        max(duration).as("max_execution_time")
-                )
-                .from(tm)
-                .where(urlField.isNotNull())
-                .groupBy(urlField, tm.TIME)
-                .orderBy(QuerySupport.orderByClause(pageable))
-                .limit(pageable.getPageSize() + 1);
+                                urlField.as("url"),
+                                count(asterisk()).as("count"),
+                                sum(when(ended.eq(inline(false)), inline(1)).otherwise(inline(0))).as("err_count"),
+                                avg(duration).as("avg_execution_time"),
+                                sum(duration).as("sum_execution_time"),
+                                max(duration).as("max_execution_time")
+                        )
+                        .from(tm)
+                        .where(urlField.isNotNull())
+                        .groupBy(urlField, tm.TIME)
+                        .orderBy(QuerySupport.orderByClause(pageable))
+                        .limit(pageable.getPageSize() + 1);
 
         int pageSize = pageable.getPageSize();
 
@@ -283,7 +405,7 @@ public class TimeSeriesRepository implements MetricRepository {
         );
 
         boolean hasNext = results.size() > pageSize;
-        if(hasNext) {
+        if (hasNext) {
             results = results.subList(0, pageSize);
         }
 
@@ -309,7 +431,8 @@ public class TimeSeriesRepository implements MetricRepository {
                 + "order by period desc "
                 + "limit 1";
 
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new StatisticsMetricMaxRowMapper(), timeRange.getLatestRange()))
+        return Optional.ofNullable(
+                        jdbcTemplate.queryForObject(sql, new StatisticsMetricMaxRowMapper(), timeRange.getLatestRange()))
                 .orElseThrow(() -> new IllegalArgumentException("not found max metric"));
     }
 
@@ -332,7 +455,30 @@ public class TimeSeriesRepository implements MetricRepository {
                 + "order by period desc "
                 + "limit 1";
 
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new StatisticsMetricAvgRowMapper(), timeRange.getLatestRange()))
+        return Optional.ofNullable(
+                        jdbcTemplate.queryForObject(sql, new StatisticsMetricAvgRowMapper(), timeRange.getLatestRange()))
                 .orElseThrow(() -> new IllegalArgumentException("not found avg metric"));
     }
+
+    private Field<BigDecimal> getMetricField(Field<JSONB> metricMeasurement, String... path) {
+        return round(
+                avg(
+                        DSL.cast(
+                                createJsonAccessorQuery(metricMeasurement, path),
+                                SQLDataType.NUMERIC
+                        )
+                ),
+                1
+        );
+    }
+
+    private Field<JSONB> createJsonAccessorQuery(Field<JSONB> jsonb, String... args) {
+
+        Field<JSONB> result = jsonb;
+        for (String arg : args) {
+            result = jsonbGetAttribute(result, arg);
+        }
+        return result;
+    }
+
 }
