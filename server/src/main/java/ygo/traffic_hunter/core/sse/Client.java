@@ -45,14 +45,16 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @RequiredArgsConstructor
 public class Client implements AlarmSender, ViewSender {
 
+    private static final int DEFAULT_INTERVAL = 5000;
+
     private final Identification identification;
 
     private final SseEmitter emitter;
 
     private final Scheduler scheduler;
 
-    public void scheduleBroadcast(final TimeInterval interval, final Runnable runnable) {
-        scheduler.schedule(interval, runnable);
+    public void scheduleBroadcast(final Runnable runnable) {
+        scheduler.schedule(DEFAULT_INTERVAL, runnable);
     }
 
     @Override
@@ -87,4 +89,5 @@ public class Client implements AlarmSender, ViewSender {
             throw new ServerSentEventException(e.getMessage(), e);
         }
     }
+
 }
