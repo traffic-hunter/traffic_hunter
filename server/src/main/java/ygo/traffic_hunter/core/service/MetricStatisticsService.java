@@ -23,7 +23,6 @@
  */
 package ygo.traffic_hunter.core.service;
 
-import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -48,16 +47,9 @@ public class MetricStatisticsService {
 
     private final MetricRepository metricRepository;
 
-    public Slice<ServiceTransactionResponse> retrieveServiceTransactions(final Instant begin,
-                                                                         final Instant end,
-                                                                         final Pageable pageable) {
+    public Slice<ServiceTransactionResponse> retrieveServiceTransactions(final Pageable pageable) {
 
-        return metricRepository.findServiceTransactionByBeginToEnd(begin, end, pageable);
-    }
-
-    public Slice<ServiceTransactionResponse> retrieveServiceTransactions(final Instant begin, final Pageable pageable) {
-
-        return metricRepository.findServiceTransactionByBeginToEnd(begin, Instant.now(), pageable);
+        return metricRepository.findServiceTransactionByBeginToEnd(pageable);
     }
 
     public StatisticsMetricMaxResponse retrieveStatisticsMaxMetric(final StatisticsMetricTimeRange timeRange) {

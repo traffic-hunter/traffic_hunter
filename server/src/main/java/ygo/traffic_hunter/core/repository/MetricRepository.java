@@ -18,7 +18,6 @@
  */
 package ygo.traffic_hunter.core.repository;
 
-import java.time.Instant;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -47,7 +46,7 @@ public interface MetricRepository extends AgentRepository {
 
     List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName, Integer limit);
 
-    Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(Instant begin, Instant end, Pageable pageable);
+    Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(Pageable pageable);
 
     StatisticsMetricMaxResponse findMaxMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
 

@@ -31,9 +31,6 @@ import static org.traffichunter.query.jooq.Tables.TRANSACTION_MEASUREMENT;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -245,10 +242,12 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
-    @Cacheable(cacheNames = CacheType.STATISTIC_TRANSACTION_PAGE_CACHE_NAME)
-    public Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(final Instant begin,
-                                                                                final Instant end,
-                                                                                final Pageable pageable) {
+    @Cacheable(
+            cacheNames = CacheType.STATISTIC_TRANSACTION_PAGE_CACHE_NAME,
+            key = "#{pageable.pageNumber}",
+            condition = "#{pageable.pageNumber == 0}"
+    )
+    public Slice<ServiceTransactionResponse> findServiceTransactionByBeginToEnd(final Pageable pageable) {
 
         org.traffichunter.query.jooq.tables.TransactionMeasurement tm = TRANSACTION_MEASUREMENT;
 
@@ -271,8 +270,6 @@ public class TimeSeriesRepository implements MetricRepository {
                 )
                 .from(tm)
                 .where(urlField.isNotNull())
-                .and(tm.TIME.gt(OffsetDateTime.ofInstant(begin, ZoneOffset.UTC)))
-                .and(tm.TIME.lt(OffsetDateTime.ofInstant(end, ZoneOffset.UTC)))
                 .groupBy(urlField, tm.TIME)
                 .orderBy(QuerySupport.orderByClause(pageable))
                 .limit(pageable.getPageSize() + 1);

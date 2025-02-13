@@ -23,8 +23,6 @@
  */
 package ygo.traffic_hunter.presentation.controller;
 
-import jakarta.validation.Valid;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -35,11 +33,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ygo.traffic_hunter.core.dto.request.statistics.StatisticsRequest;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
@@ -61,17 +57,12 @@ public class MetricController {
 
     @GetMapping("/transaction")
     @ResponseStatus(HttpStatus.OK)
-    public Slice<ServiceTransactionResponse> retrieveServiceTransactionApi(@RequestBody @Valid final StatisticsRequest request,
-                                                                           @PageableDefault(
+    public Slice<ServiceTransactionResponse> retrieveServiceTransactionApi(@PageableDefault(
                                                                                    sort = "count",
                                                                                    direction = Direction.DESC
                                                                            ) final Pageable pageable) {
 
-        if(Objects.isNull(request.end())) {
-            return metricStatisticsService.retrieveServiceTransactions(request.begin(), pageable);
-        } else {
-            return metricStatisticsService.retrieveServiceTransactions(request.begin(), request.end(), pageable);
-        }
+        return metricStatisticsService.retrieveServiceTransactions(pageable);
     }
 
     @GetMapping("/metric/max/{timeRange}")
