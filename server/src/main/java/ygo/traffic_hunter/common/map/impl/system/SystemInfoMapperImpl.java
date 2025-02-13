@@ -35,7 +35,7 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServerInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.request.TomcatRequestInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.thread.TomcatThreadPoolInfo;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 import ygo.traffic_hunter.core.repository.AgentRepository;
 import ygo.traffic_hunter.domain.entity.Agent;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
@@ -78,6 +78,7 @@ public class SystemInfoMapperImpl implements SystemInfoMapper {
         );
     }
 
+    @Deprecated
     @Override
     public SystemMetricResponse map(final MetricMeasurement measurement) {
 
@@ -88,14 +89,16 @@ public class SystemInfoMapperImpl implements SystemInfoMapper {
                 agent.agentName(),
                 agent.agentBootTime(),
                 agent.agentVersion(),
-                measurement.metricData()
+                null
         );
     }
 
     private MetricData getMetricData(final SystemInfo data) {
         return new MetricData(
                 mapToMeasurement(data.cpuStatusInfo()),
+                mapToMeasurement(data.garbageCollectionStatusInfo()),
                 mapToMeasurement(data.memoryStatusInfo()),
+                mapToMeasurement(data.runtimeStatusInfo()),
                 mapToMeasurement(data.threadStatusInfo()),
                 mapToMeasurement(data.tomcatWebServerInfo()),
                 mapToMeasurement(data.hikariDbcpInfo())
@@ -116,7 +119,8 @@ public class SystemInfoMapperImpl implements SystemInfoMapper {
 
     private MemoryMetricMeasurement mapToMeasurement(final MemoryStatusInfo memoryStatusInfo) {
         return new MemoryMetricMeasurement(
-                getMemoryUsage(memoryStatusInfo.heapMemoryUsage())
+                getMemoryUsage(memoryStatusInfo.heapMemoryUsage()),
+                getMemoryUsage(memoryStatusInfo.nonHeapMemoryUsage())
         );
     }
 

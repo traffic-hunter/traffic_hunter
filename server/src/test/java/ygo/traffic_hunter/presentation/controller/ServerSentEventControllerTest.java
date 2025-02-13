@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.restdocs.RestDocumentationContextProvider;
@@ -45,25 +44,24 @@ import ygo.traffic_hunter.core.assembler.Assembler;
 import ygo.traffic_hunter.core.assembler.span.SpanAssembler;
 import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.CpuMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.HikariCPMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricUsageResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MetricDataResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.ThreadMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerRequestMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerThreadPoolMeasurementResponse;
 import ygo.traffic_hunter.core.service.MetricService;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
-import ygo.traffic_hunter.domain.metric.MetricData;
 import ygo.traffic_hunter.domain.metric.TransactionData;
-import ygo.traffic_hunter.domain.metric.cpu.CpuMetricMeasurement;
-import ygo.traffic_hunter.domain.metric.dbcp.hikari.HikariCPMeasurement;
-import ygo.traffic_hunter.domain.metric.memory.MemoryMetricMeasurement;
-import ygo.traffic_hunter.domain.metric.memory.usage.MemoryMetricUsage;
-import ygo.traffic_hunter.domain.metric.thread.ThreadMetricMeasurement;
-import ygo.traffic_hunter.domain.metric.web.tomcat.TomcatWebServerMeasurement;
-import ygo.traffic_hunter.domain.metric.web.tomcat.request.TomcatWebServerRequestMeasurement;
-import ygo.traffic_hunter.domain.metric.web.tomcat.thread.TomcatWebServerThreadPoolMeasurement;
 import ygo.traffic_hunter.presentation.advice.MetricControllerAdvice;
 
 @ExtendWith(RestDocumentationExtension.class)
 @WebMvcTest(controllers = ServerSentEventController.class)
-@EnableAspectJAutoProxy
 class ServerSentEventControllerTest extends AbstractTestConfiguration {
 
     @Autowired
@@ -235,22 +233,22 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
         String agentName = "myAgent";
         Instant agentBootTime = getInstant("2025-01-21 18:20:18.933976");
         String agentVersion = "1.0.0";
-        MetricData metricData = getMetricData();
+        MetricDataResponse metricData = getMetricData();
         return new SystemMetricResponse(time, agentName, agentBootTime, agentVersion, metricData);
     }
 
-    private MetricData getMetricData() {
-        CpuMetricMeasurement cpuMetric = new CpuMetricMeasurement(0.0, 0.14010085468246197, 12);
+    private MetricDataResponse getMetricData() {
+        CpuMetricMeasurementResponse cpuMetric = new CpuMetricMeasurementResponse(0.0, 0.14010085468246197, 12);
 
-        MemoryMetricMeasurement memoryMetric = new MemoryMetricMeasurement(
-                new MemoryMetricUsage(536870912L, 78528144L, 113246208L, 8577351680L)
+        MemoryMetricMeasurementResponse memoryMetric = new MemoryMetricMeasurementResponse(
+                new MemoryMetricUsageResponse(536870912L, 78528144L, 113246208L, 8577351680L)
         );
-        ThreadMetricMeasurement threadMetric = new ThreadMetricMeasurement(35, 35, 40);
-        TomcatWebServerMeasurement webServerMetric = new TomcatWebServerMeasurement(
-                new TomcatWebServerRequestMeasurement(0, 0, 0, 0, 0),
-                new TomcatWebServerThreadPoolMeasurement(200, 10, 0));
-        HikariCPMeasurement dbcpMetric = new HikariCPMeasurement(10, 10, 0, 0);
-        return new MetricData(cpuMetric, memoryMetric, threadMetric, webServerMetric,
+        ThreadMetricMeasurementResponse threadMetric = new ThreadMetricMeasurementResponse(35, 35, 40);
+        TomcatWebServerMeasurementResponse webServerMetric = new TomcatWebServerMeasurementResponse(
+                new TomcatWebServerRequestMeasurementResponse(0, 0, 0, 0, 0),
+                new TomcatWebServerThreadPoolMeasurementResponse(200, 10, 0));
+        HikariCPMeasurementResponse dbcpMetric = new HikariCPMeasurementResponse(10, 10, 0, 0);
+        return new MetricDataResponse(cpuMetric, memoryMetric, threadMetric, webServerMetric,
                 dbcpMetric);
     }
 

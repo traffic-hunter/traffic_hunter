@@ -23,16 +23,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.CpuMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.HikariCPMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricUsageResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MetricDataResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.ThreadMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerRequestMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerThreadPoolMeasurementResponse;
 import ygo.traffic_hunter.domain.metric.MetricData;
-import ygo.traffic_hunter.domain.metric.cpu.CpuMetricMeasurement;
-import ygo.traffic_hunter.domain.metric.dbcp.hikari.HikariCPMeasurement;
-import ygo.traffic_hunter.domain.metric.memory.MemoryMetricMeasurement;
-import ygo.traffic_hunter.domain.metric.memory.usage.MemoryMetricUsage;
-import ygo.traffic_hunter.domain.metric.thread.ThreadMetricMeasurement;
-import ygo.traffic_hunter.domain.metric.web.tomcat.TomcatWebServerMeasurement;
-import ygo.traffic_hunter.domain.metric.web.tomcat.request.TomcatWebServerRequestMeasurement;
-import ygo.traffic_hunter.domain.metric.web.tomcat.thread.TomcatWebServerThreadPoolMeasurement;
 
 /**
  * @author yungwang-o
@@ -57,17 +58,17 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
         );
     }
 
-    private MetricData getMetricData(final ResultSet rs) throws SQLException {
+    private MetricDataResponse getMetricData(final ResultSet rs) throws SQLException {
         // CPU Metric
-        CpuMetricMeasurement cpuMetric = new CpuMetricMeasurement(
+        CpuMetricMeasurementResponse cpuMetric = new CpuMetricMeasurementResponse(
                 rs.getDouble("system_cpu_load"),
                 rs.getDouble("process_cpu_load"),
                 rs.getInt("available_processors")
         );
 
         // Memory Metric
-        MemoryMetricMeasurement memoryMetric = new MemoryMetricMeasurement(
-                new MemoryMetricUsage(
+        MemoryMetricMeasurementResponse memoryMetric = new MemoryMetricMeasurementResponse(
+                new MemoryMetricUsageResponse(
                         rs.getLong("heap_init"),
                         rs.getLong("heap_used"),
                         rs.getLong("heap_committed"),
@@ -76,22 +77,22 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
         );
 
         // Thread Metric
-        ThreadMetricMeasurement threadMetric = new ThreadMetricMeasurement(
+        ThreadMetricMeasurementResponse threadMetric = new ThreadMetricMeasurementResponse(
                 rs.getInt("thread_count"),
                 rs.getInt("peak_thread_count"),
                 rs.getInt("total_started_thread_count")
         );
 
         // Web Server Metric
-        TomcatWebServerMeasurement webServerMetric = new TomcatWebServerMeasurement(
-                new TomcatWebServerRequestMeasurement(
+        TomcatWebServerMeasurementResponse webServerMetric = new TomcatWebServerMeasurementResponse(
+                new TomcatWebServerRequestMeasurementResponse(
                         rs.getLong("request_count"),
                         rs.getLong("bytes_received"),
                         rs.getLong("bytes_sent"),
                         rs.getLong("processing_time"),
                         rs.getLong("error_count")
                 ),
-                new TomcatWebServerThreadPoolMeasurement(
+                new TomcatWebServerThreadPoolMeasurementResponse(
                         rs.getInt("max_threads"),
                         rs.getInt("current_threads"),
                         rs.getInt("current_threads_busy")
@@ -99,14 +100,14 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
         );
 
         // DBCP Metric
-        HikariCPMeasurement dbcpMetric = new HikariCPMeasurement(
+        HikariCPMeasurementResponse dbcpMetric = new HikariCPMeasurementResponse(
                 rs.getInt("active_connections"),
                 rs.getInt("idle_connections"),
                 rs.getInt("total_connections"),
                 rs.getInt("threads_awaiting_connection")
         );
 
-        return new MetricData(
+        return new MetricDataResponse(
                 cpuMetric,
                 memoryMetric,
                 threadMetric,

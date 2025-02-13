@@ -16,11 +16,10 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.dto.response;
+package ygo.traffic_hunter.core.dto.response.metric;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
-import ygo.traffic_hunter.domain.metric.MetricData;
 
 /**
  * @author yungwang-o
@@ -31,14 +30,14 @@ public record SystemMetricResponse(
         @JsonIgnore String agentName,
         @JsonIgnore Instant agentBootTime,
         @JsonIgnore String agentVersion,
-        MetricData metricData
+        MetricDataResponse metricData
 ) {
 
     public static SystemMetricResponse create(final Instant time,
                                               final String agentName,
                                               final Instant agentBootTime,
                                               final String agentVersion,
-                                              final MetricData metricData) {
+                                              final MetricDataResponse metricData) {
 
         return new SystemMetricResponse(time, agentName, agentBootTime, agentVersion, metricData);
     }

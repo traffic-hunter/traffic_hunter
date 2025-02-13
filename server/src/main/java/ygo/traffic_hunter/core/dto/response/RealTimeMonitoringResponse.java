@@ -2,6 +2,7 @@ package ygo.traffic_hunter.core.dto.response;
 
 import java.time.Instant;
 import java.util.List;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 
 /**
  * @author JuSeong

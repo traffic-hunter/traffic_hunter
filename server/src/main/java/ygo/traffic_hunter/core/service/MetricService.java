@@ -32,8 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 import ygo.traffic_hunter.core.identification.Identification;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager;
@@ -91,14 +91,10 @@ public class MetricService {
 
     private void broadcast(final Identification identification, final TimeInterval interval, final Integer limit) {
 
-        try {
-            List<AgentMetadata> agents = webSocketHandler.getAgents();
+        List<AgentMetadata> agents = webSocketHandler.getAgents();
 
-            for (AgentMetadata metadata : agents) {
-                processMetrics(identification, interval, metadata, limit);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        for (AgentMetadata metadata : agents) {
+            processMetrics(identification, interval, metadata, limit);
         }
     }
 

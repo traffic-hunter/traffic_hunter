@@ -58,8 +58,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.config.cache.CacheConfig.CacheType;
 import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
@@ -308,27 +308,6 @@ public class TimeSeriesRepository implements MetricRepository {
         return jdbcTemplate.query(result.getSQL(), systemMeasurementRowMapper, result.getBindValues().toArray());
     }
 
-    private Field<BigDecimal> getMetricField(Field<JSONB> metricMeasurement, String... path) {
-        return round(
-                avg(
-                        DSL.cast(
-                                createJsonAccessorQuery(metricMeasurement, path),
-                                SQLDataType.NUMERIC
-                        )
-                ),
-                1
-        );
-    }
-
-    private Field<JSONB> createJsonAccessorQuery(Field<JSONB> jsonb, String... args) {
-
-        Field<JSONB> result = jsonb;
-        for (String arg : args) {
-            result = jsonbGetAttribute(result, arg);
-        }
-        return result;
-    }
-
     @Override
     public List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(
             final TimeInterval interval,
@@ -359,7 +338,7 @@ public class TimeSeriesRepository implements MetricRepository {
                         agent.AGENT_BOOT_TIME,
                         agent.AGENT_VERSION, traceIdGroupField, timeBucket)
                 .limit(limit);
-        System.out.println("쿼리는 = " + result.getSQL());
+
         return jdbcTemplate.query(
                 result.getSQL(),
                 txMeasurementRowMapper,
@@ -475,4 +454,26 @@ public class TimeSeriesRepository implements MetricRepository {
                         jdbcTemplate.queryForObject(sql, new StatisticsMetricAvgRowMapper(), timeRange.getLatestRange()))
                 .orElseThrow(() -> new IllegalArgumentException("not found avg metric"));
     }
+
+    private Field<BigDecimal> getMetricField(Field<JSONB> metricMeasurement, String... path) {
+        return round(
+                avg(
+                        DSL.cast(
+                                createJsonAccessorQuery(metricMeasurement, path),
+                                SQLDataType.NUMERIC
+                        )
+                ),
+                1
+        );
+    }
+
+    private Field<JSONB> createJsonAccessorQuery(Field<JSONB> jsonb, String... args) {
+
+        Field<JSONB> result = jsonb;
+        for (String arg : args) {
+            result = jsonbGetAttribute(result, arg);
+        }
+        return result;
+    }
+
 }
