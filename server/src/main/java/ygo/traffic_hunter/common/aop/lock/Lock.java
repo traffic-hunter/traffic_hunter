@@ -37,5 +37,5 @@ import ygo.traffic_hunter.common.aop.lock.method.LockMode;
 @Target(ElementType.METHOD)
 public @interface Lock {
 
-    LockMode mode();
+    LockMode mode() default LockMode.NORMAL;
 }

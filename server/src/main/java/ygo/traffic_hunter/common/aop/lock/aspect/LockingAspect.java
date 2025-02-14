@@ -23,7 +23,7 @@
  */
 package ygo.traffic_hunter.common.aop.lock.aspect;
 
-import java.util.Objects;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -43,13 +43,16 @@ public class LockingAspect {
 
     private final ReadWriteLock readWriteLock;
 
+    private final Lock lock;
+
     @Around("@annotation(ygo.traffic_hunter.common.aop.lock.Lock) && args(lockMode)")
     public Object lock(final ProceedingJoinPoint joinPoint, final LockMode lockMode) throws Throwable {
-        if(Objects.equals(lockMode, LockMode.READ)) {
-            return readLock(joinPoint);
-        } else {
-            return writeLock(joinPoint);
-        }
+
+        return switch (lockMode) {
+            case READ -> readLock(joinPoint);
+            case WRITE -> writeLock(joinPoint);
+            case NORMAL -> lock(joinPoint);
+        };
     }
 
     private Object readLock(final ProceedingJoinPoint joinPoint) throws Throwable {
@@ -69,6 +72,16 @@ public class LockingAspect {
             return joinPoint.proceed();
         } finally {
             readWriteLock.writeLock().unlock();
+        }
+    }
+
+    private Object lock(final ProceedingJoinPoint joinPoint) throws Throwable {
+        lock.lock();
+
+        try {
+            return joinPoint.proceed();
+        } finally {
+            lock.unlock();
         }
     }
 }
