@@ -23,17 +23,20 @@
  */
 package ygo.traffic_hunter.core.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.core.assembler.Assembler;
+import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
+import ygo.traffic_hunter.domain.metric.TransactionData;
 
 /**
  * @author yungwang-o
@@ -41,15 +44,27 @@ import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
  */
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MetricStatisticsService {
 
     private final MetricRepository metricRepository;
 
+    private final Assembler<List<TransactionData>, SpanTreeNode> assembler;
+
     public Slice<ServiceTransactionResponse> retrieveServiceTransactions(final Pageable pageable) {
 
         return metricRepository.findServiceTransaction(pageable);
+    }
+
+    public SpanTreeNode retrieveSpanTree(final String requestUri, final String traceId) {
+
+        if(!requestUri.startsWith("/")) {
+            throw new IllegalArgumentException("Invalid request uri: " + requestUri);
+        }
+
+        List<TransactionData> transactionDatas = metricRepository.findTxDataByRequestUri(requestUri, traceId);
+
+        return assembler.assemble(transactionDatas);
     }
 
     public StatisticsMetricMaxResponse retrieveStatisticsMaxMetric(final StatisticsMetricTimeRange timeRange) {

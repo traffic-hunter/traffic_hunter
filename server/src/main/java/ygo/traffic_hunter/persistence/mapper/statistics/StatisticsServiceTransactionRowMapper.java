@@ -25,6 +25,7 @@ package ygo.traffic_hunter.persistence.mapper.statistics;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneOffset;
 import org.springframework.jdbc.core.RowMapper;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
 
@@ -37,12 +38,14 @@ public class StatisticsServiceTransactionRowMapper implements RowMapper<ServiceT
     @Override
     public ServiceTransactionResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
         return new ServiceTransactionResponse(
-                rs.getString("url"),
-                rs.getLong("count"),
-                rs.getLong("err_count"),
-                rs.getDouble("avg_execution_time"),
-                rs.getLong("sum_execution_time"),
-                rs.getLong("max_execution_time")
+                rs.getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC),
+                rs.getString("uri"),
+                rs.getLong("duration"),
+                rs.getString("httpMethod"),
+                rs.getString("agentName"),
+                rs.getString("clientName"),
+                rs.getInt("httpStatusCode"),
+                rs.getString("traceId")
         );
     }
 }

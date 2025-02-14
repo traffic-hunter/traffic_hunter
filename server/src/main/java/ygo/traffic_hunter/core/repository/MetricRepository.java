@@ -31,6 +31,7 @@ import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
+import ygo.traffic_hunter.domain.metric.TransactionData;
 
 /**
  * @author yungwang-o, JuSeong
@@ -47,6 +48,8 @@ public interface MetricRepository extends AgentRepository {
 
     List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
                                                                           Integer limit);
+
+    List<TransactionData> findTxDataByRequestUri(String requestUri, String traceId);
 
     Slice<ServiceTransactionResponse> findServiceTransaction(Pageable pageable);
 

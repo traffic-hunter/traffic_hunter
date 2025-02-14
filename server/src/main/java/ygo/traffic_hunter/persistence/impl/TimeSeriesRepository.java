@@ -20,16 +20,12 @@ package ygo.traffic_hunter.persistence.impl;
 
 import static org.jooq.impl.DSL.asterisk;
 import static org.jooq.impl.DSL.avg;
-import static org.jooq.impl.DSL.count;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.jsonArrayAgg;
 import static org.jooq.impl.DSL.jsonbGetAttribute;
 import static org.jooq.impl.DSL.jsonbGetAttributeAsText;
-import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.round;
-import static org.jooq.impl.DSL.sum;
-import static org.jooq.impl.DSL.when;
 import static org.traffichunter.query.jooq.Tables.AGENT;
 import static org.traffichunter.query.jooq.Tables.METRIC_MEASUREMENT;
 import static org.traffichunter.query.jooq.Tables.TRANSACTION_MEASUREMENT;
@@ -47,8 +43,9 @@ import org.jooq.JSON;
 import org.jooq.JSONB;
 import org.jooq.Record;
 import org.jooq.Record5;
-import org.jooq.Record6;
+import org.jooq.Record8;
 import org.jooq.SelectLimitPercentStep;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.springframework.cache.annotation.Cacheable;
@@ -71,8 +68,10 @@ import ygo.traffic_hunter.domain.entity.Agent;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
+import ygo.traffic_hunter.domain.metric.TransactionData;
 import ygo.traffic_hunter.persistence.mapper.AgentRowMapper;
 import ygo.traffic_hunter.persistence.mapper.SystemMeasurementRowMapper;
+import ygo.traffic_hunter.persistence.mapper.TransactionDataMapper;
 import ygo.traffic_hunter.persistence.mapper.TransactionMeasurementRowMapper;
 import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsMetricAvgRowMapper;
 import ygo.traffic_hunter.persistence.mapper.statistics.StatisticsMetricMaxRowMapper;
@@ -159,7 +158,7 @@ public class TimeSeriesRepository implements MetricRepository {
         String sql = "select * from agent where id = ?::integer";
 
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, agentRowMapper, id))
-                .orElseThrow(() -> new IllegalArgumentException("Agent not found"));
+                .orElseThrow(() -> new ObservabilityNotFoundException("Agent not found"));
     }
 
     @Override
@@ -178,7 +177,7 @@ public class TimeSeriesRepository implements MetricRepository {
         String sql = "select * from agent where agent_name = ?";
 
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, agentRowMapper, agentName))
-                .orElseThrow(() -> new IllegalArgumentException("Agent not found"));
+                .orElseThrow(() -> new ObservabilityNotFoundException("Agent not found"));
     }
 
     @Override
@@ -188,7 +187,7 @@ public class TimeSeriesRepository implements MetricRepository {
         String sql = "select * from agent where agent_id = ?";
 
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, agentRowMapper, agentId))
-                .orElseThrow(() -> new IllegalArgumentException("Agent not found"));
+                .orElseThrow(() -> new ObservabilityNotFoundException("Agent not found"));
     }
 
     @Override
@@ -301,10 +300,12 @@ public class TimeSeriesRepository implements MetricRepository {
                 .from(metricMeasurement)
                 .join(agent)
                 .on(metricMeasurement.AGENT_ID.equal(agent.ID))
-                .groupBy(agent.AGENT_NAME,
+                .groupBy(
+                        agent.AGENT_NAME,
                         agent.AGENT_BOOT_TIME,
                         agent.AGENT_VERSION,
-                        timeBucket)
+                        timeBucket
+                )
                 .limit(limit);
 
         return jdbcTemplate.query(result.getSQL(), systemMeasurementRowMapper, result.getBindValues().toArray());
@@ -336,15 +337,45 @@ public class TimeSeriesRepository implements MetricRepository {
                 .join(agent)
                 .on(transactionMeasurement.AGENT_ID.eq(agent.ID))
                 .where(agent.AGENT_NAME.eq(agentName))
-                .groupBy(agent.AGENT_NAME,
+                .groupBy(
+                        agent.AGENT_NAME,
                         agent.AGENT_BOOT_TIME,
-                        agent.AGENT_VERSION, traceIdGroupField, timeBucket)
+                        agent.AGENT_VERSION,
+                        traceIdGroupField,
+                        timeBucket
+                )
                 .limit(limit);
 
         return jdbcTemplate.query(
                 result.getSQL(),
                 txMeasurementRowMapper,
                 result.getBindValues().toArray()
+        );
+    }
+
+    @Override
+    public List<TransactionData> findTxDataByRequestUri(final String requestUri, final String traceId) {
+
+        org.traffichunter.query.jooq.tables.TransactionMeasurement tm = TRANSACTION_MEASUREMENT;
+
+        Field<String> uri = jsonbGetAttributeAsText(
+                jsonbGetAttribute(tm.TRANSACTION_DATA, inline("attributes")),
+                inline("http.requestURI")
+        );
+
+        Field<String> traceIdentification = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("traceId"));
+
+        SelectQuery<Record> results = dsl.select(asterisk())
+                .from(tm)
+                .where(uri.eq(requestUri))
+                .groupBy(traceIdentification)
+                .having(traceIdentification.eq(traceId))
+                .getQuery();
+
+        return jdbcTemplate.query(
+                results.getSQL(),
+                new TransactionDataMapper(),
+                results.getBindValues().toArray()
         );
     }
 
@@ -364,8 +395,8 @@ public class TimeSeriesRepository implements MetricRepository {
     @Override
     @Cacheable(
             cacheNames = CacheType.STATISTIC_TRANSACTION_PAGE_CACHE_NAME,
-            key = "#{pageable.pageNumber}",
-            condition = "#{pageable.pageNumber == 0}"
+            key = "#pageable.pageNumber",
+            condition = "#pageable.pageNumber == 0"
     )
     public Slice<ServiceTransactionResponse> findServiceTransaction(final Pageable pageable) {
 
@@ -373,26 +404,37 @@ public class TimeSeriesRepository implements MetricRepository {
 
         Field<JSONB> attributes = jsonbGetAttribute(tm.TRANSACTION_DATA, inline("attributes"));
 
-        Field<String> urlField = jsonbGetAttributeAsText(attributes, inline("http.requestURI"));
+        Field<String> uriField = jsonbGetAttributeAsText(attributes, inline("http.requestURI"));
 
-        Field<Boolean> ended = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("ended")).cast(Boolean.class);
+        Field<Long> duration = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("duration"))
+                .cast(Long.class);
 
-        Field<Long> duration = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("duration")).cast(Long.class);
+        Field<String> httpMethodField = jsonbGetAttributeAsText(attributes, inline("http.method"));
 
-        SelectLimitPercentStep<Record6<String, Integer, BigDecimal, BigDecimal, BigDecimal, Long>> result =
+        Field<String> httpServerNameField = jsonbGetAttributeAsText(attributes, inline("http.serverName"));
+
+        Field<Integer> httpStatusCodeField = jsonbGetAttributeAsText(attributes, inline("http.statusCode"))
+                .cast(Integer.class);
+
+        Field<String> traceId = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, "traceId");
+
+        SelectLimitPercentStep<Record8<OffsetDateTime, String, Long, String, String, String, Integer, String>> result =
                 dsl.select(
-                                urlField.as("url"),
-                                count(asterisk()).as("count"),
-                                sum(when(ended.eq(inline(false)), inline(1)).otherwise(inline(0))).as("err_count"),
-                                avg(duration).as("avg_execution_time"),
-                                sum(duration).as("sum_execution_time"),
-                                max(duration).as("max_execution_time")
-                        )
-                        .from(tm)
-                        .where(urlField.isNotNull())
-                        .groupBy(urlField, tm.TIME)
-                        .orderBy(QuerySupport.orderByClause(pageable))
-                        .limit(pageable.getPageSize() + 1);
+                        tm.TIME.as("timestamp"),
+                        uriField.as("uri"),
+                        duration.as("duration"),
+                        httpMethodField.as("httpMethod"),
+                        AGENT.AGENT_NAME.as("agentName"),
+                        httpServerNameField.as("clientName"),
+                        httpStatusCodeField.as("httpStatusCode"),
+                        traceId.as("traceId")
+                )
+                .from(tm)
+                .join(AGENT)
+                .on(tm.AGENT_ID.eq(AGENT.ID))
+                .where(uriField.isNotNull())
+                .orderBy(QuerySupport.orderByClause(pageable))
+                .limit(pageable.getPageSize() + 1);
 
         int pageSize = pageable.getPageSize();
 
@@ -431,7 +473,7 @@ public class TimeSeriesRepository implements MetricRepository {
 
         return Optional.ofNullable(
                         jdbcTemplate.queryForObject(sql, new StatisticsMetricMaxRowMapper(), timeRange.getLatestRange()))
-                .orElseThrow(() -> new IllegalArgumentException("not found max metric"));
+                .orElseThrow(() -> new ObservabilityNotFoundException("not found max metric"));
     }
 
     @Override
@@ -455,7 +497,7 @@ public class TimeSeriesRepository implements MetricRepository {
 
         return Optional.ofNullable(
                         jdbcTemplate.queryForObject(sql, new StatisticsMetricAvgRowMapper(), timeRange.getLatestRange()))
-                .orElseThrow(() -> new IllegalArgumentException("not found avg metric"));
+                .orElseThrow(() -> new ObservabilityNotFoundException("not found avg metric"));
     }
 
     private Field<BigDecimal> getMetricField(final Field<JSONB> metricMeasurement, final String... path) {
@@ -479,4 +521,21 @@ public class TimeSeriesRepository implements MetricRepository {
         return result;
     }
 
+    public static class ObservabilityNotFoundException extends IllegalStateException {
+
+        public ObservabilityNotFoundException() {
+        }
+
+        public ObservabilityNotFoundException(final String s) {
+            super(s);
+        }
+
+        public ObservabilityNotFoundException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        public ObservabilityNotFoundException(final Throwable cause) {
+            super(cause);
+        }
+    }
 }

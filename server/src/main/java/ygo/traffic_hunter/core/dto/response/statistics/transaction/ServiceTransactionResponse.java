@@ -1,17 +1,23 @@
 package ygo.traffic_hunter.core.dto.response.statistics.transaction;
 
+import java.time.OffsetDateTime;
+
 public record ServiceTransactionResponse(
 
-        String url,
+        OffsetDateTime timestamp,
 
-        long count,
+        String uri,
 
-        long errCount,
+        long duration,
 
-        double avgExecutionTime,
+        String httpMethod,
 
-        long sumExecutionTime,
+        String agentName,
 
-        long maxExecutionTime
+        String clientName,
+
+        int httpStatusCode,
+
+        String traceId
 ) {
 }

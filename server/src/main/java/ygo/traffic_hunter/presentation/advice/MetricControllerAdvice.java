@@ -25,6 +25,7 @@ package ygo.traffic_hunter.presentation.advice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ygo.traffic_hunter.common.exception.TrafficHunterException;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel.ChannelException;
+import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository.ObservabilityNotFoundException;
 
 /**
  * @author yungwang-o
@@ -58,6 +60,18 @@ public class MetricControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeException(final RuntimeException e) {
         return ErrorResponse.create(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+
+    @ExceptionHandler(ObservabilityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleObservabilityNotFoundException(final ObservabilityNotFoundException e) {
+        return ErrorResponse.create(e, HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+        return ErrorResponse.create(e, HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(ChannelException.class)

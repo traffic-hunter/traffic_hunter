@@ -23,6 +23,8 @@
  */
 package ygo.traffic_hunter.presentation.controller;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
@@ -47,10 +50,10 @@ import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
  * @version 1.1.0
  */
 @Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/statistics")
-@Validated
 public class MetricController {
 
     private final MetricStatisticsService metricStatisticsService;
@@ -58,23 +61,30 @@ public class MetricController {
     @GetMapping("/transaction")
     @ResponseStatus(HttpStatus.OK)
     public Slice<ServiceTransactionResponse> retrieveServiceTransactionApi(@PageableDefault(
-                                                                                   sort = "count",
                                                                                    direction = Direction.DESC
                                                                            ) final Pageable pageable) {
 
         return metricStatisticsService.retrieveServiceTransactions(pageable);
     }
 
+    @GetMapping("/transaction/{requestUri}/{traceId}")
+    @ResponseStatus(HttpStatus.OK)
+    public SpanTreeNode retrieveTransactionApi(@PathVariable("requestUri") @NotBlank String requestUri,
+                                               @PathVariable("traceId") @NotBlank String traceId) {
+
+        return metricStatisticsService.retrieveSpanTree(requestUri, traceId);
+    }
+
     @GetMapping("/metric/max/{timeRange}")
     @ResponseStatus(HttpStatus.OK)
-    public StatisticsMetricMaxResponse retrieveMaxMetricApi(@PathVariable final StatisticsMetricTimeRange timeRange) {
+    public StatisticsMetricMaxResponse retrieveMaxMetricApi(@PathVariable @NotNull final StatisticsMetricTimeRange timeRange) {
 
         return metricStatisticsService.retrieveStatisticsMaxMetric(timeRange);
     }
 
     @GetMapping("/metric/avg/{timeRange}")
     @ResponseStatus(HttpStatus.OK)
-    public StatisticsMetricAvgResponse retrieveAvgMetricApi(@PathVariable final StatisticsMetricTimeRange timeRange) {
+    public StatisticsMetricAvgResponse retrieveAvgMetricApi(@PathVariable @NotNull final StatisticsMetricTimeRange timeRange) {
 
         return metricStatisticsService.retrieveStatisticsAvgMetric(timeRange);
     }
