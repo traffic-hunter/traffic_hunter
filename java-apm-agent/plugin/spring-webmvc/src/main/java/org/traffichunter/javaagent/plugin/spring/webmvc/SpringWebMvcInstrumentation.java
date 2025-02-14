@@ -77,7 +77,7 @@ public class SpringWebMvcInstrumentation extends AbstractPluginInstrumentation {
                                       @Argument(0) final HttpServletRequest request,
                                       @Argument(1) final HttpServletResponse response) {
 
-            return SpringWebMvcInstrumentationHelper.start(method, request);
+            return SpringWebMvcInstrumentationHelper.start(method, request, response);
         }
 
         @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)

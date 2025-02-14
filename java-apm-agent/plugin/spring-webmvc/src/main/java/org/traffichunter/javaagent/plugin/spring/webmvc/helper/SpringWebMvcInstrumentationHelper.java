@@ -27,7 +27,9 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Scope;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import org.springframework.http.HttpStatus;
 import org.traffichunter.javaagent.trace.manager.TraceManager;
 import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
@@ -39,12 +41,21 @@ public class SpringWebMvcInstrumentationHelper {
 
     private static final String SPRING_WEBMVC_INSTRUMENTATION_SCOPE_NAME = "spring-webmvc-tracer";
 
-    public static SpanScope start(final Method method, final HttpServletRequest request) {
+    public static SpanScope start(final Method method,
+                                  final HttpServletRequest request,
+                                  final HttpServletResponse response) {
 
         Span span = TraceManager.getTracer(SPRING_WEBMVC_INSTRUMENTATION_SCOPE_NAME)
-                .spanBuilder(method.getName())
+                .spanBuilder(generateSpanName(request))
+                .setAttribute("method.name", method.getName())
                 .setAttribute("http.method", request.getMethod())
+                .setAttribute("http.url", request.getRequestURL().toString())
+                .setAttribute("http.status", HttpStatus.valueOf(response.getStatus()).name().toUpperCase())
+                .setAttribute("http.statusCode", response.getStatus())
                 .setAttribute("http.requestURI", request.getRequestURI())
+                .setAttribute("http.queryString", request.getQueryString())
+                .setAttribute("http.serverName", request.getServerName())
+                .setAttribute("http.serverPort", request.getServerPort())
                 .startSpan();
 
         request.setAttribute("dispatch.span", span);
@@ -64,5 +75,10 @@ public class SpringWebMvcInstrumentationHelper {
 
         span.end();
         scope.close();
+    }
+
+    private static String generateSpanName(final HttpServletRequest request) {
+
+        return request.getMethod() + " " + request.getRequestURI();
     }
 }

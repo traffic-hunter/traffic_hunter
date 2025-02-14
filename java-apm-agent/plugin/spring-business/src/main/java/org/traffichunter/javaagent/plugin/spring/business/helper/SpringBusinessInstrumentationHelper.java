@@ -10,15 +10,17 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
 public class SpringBusinessInstrumentationHelper {
 
-    private static final String SPRING_BUSINESS_TRACE_SCOPE = "spring-business-trace";
+    private static final String SPRING_BUSINESS_SERVICE_TRACE_SCOPE = "spring-business-service-trace";
+
+    private static final String SPRING_BUSINESS_REPOSITORY_TRACE_SCOPE = "spring-business-repository-trace";
 
     public static class Service {
 
         public static SpanScope start(final Method method, final Context parentContext) {
-            Span span = TraceManager.getTracer(SPRING_BUSINESS_TRACE_SCOPE)
-                    .spanBuilder("spring-business-service-span")
+
+            Span span = TraceManager.getTracer(SPRING_BUSINESS_SERVICE_TRACE_SCOPE)
+                    .spanBuilder(generateSpanName(method))
                     .setParent(parentContext)
-                    .setAttribute("method.name", method.getName())
                     .startSpan();
 
             return new SpanScope(span, span.makeCurrent());
@@ -29,10 +31,9 @@ public class SpringBusinessInstrumentationHelper {
 
         public static SpanScope start(final Method method, final Context parentContext) {
 
-            Span span = TraceManager.getTracer(SPRING_BUSINESS_TRACE_SCOPE)
-                    .spanBuilder("spring-business-repository-span")
+            Span span = TraceManager.getTracer(SPRING_BUSINESS_REPOSITORY_TRACE_SCOPE)
+                    .spanBuilder(generateSpanName(method))
                     .setParent(parentContext)
-                    .setAttribute("method.name", method.getName())
                     .startSpan();
 
             return new SpanScope(span, span.makeCurrent());
@@ -51,5 +52,14 @@ public class SpringBusinessInstrumentationHelper {
 
         span.end();
         scope.close();
+    }
+
+    private static String generateSpanName(final Method method) {
+
+        try {
+            return method.getName().split(" ")[1];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return method.getName();
+        }
     }
 }

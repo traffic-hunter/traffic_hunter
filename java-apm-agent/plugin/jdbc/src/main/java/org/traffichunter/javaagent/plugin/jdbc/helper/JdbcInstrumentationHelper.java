@@ -44,7 +44,7 @@ public class JdbcInstrumentationHelper {
         public static SpanScope start(final DatabaseRequest request, final Context parentContext) {
 
             Span span = TraceManager.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
-                    .spanBuilder("statementSpan")
+                    .spanBuilder(request.getStatementString())
                     .setParent(parentContext)
                     .setAttribute("sql", request.getStatementString())
                     .setAttribute("system", request.getDatabaseInfo().getSystem())
@@ -64,7 +64,7 @@ public class JdbcInstrumentationHelper {
         public static SpanScope start(final Context parentContext, final DatabaseRequest request) {
 
             Span span = TraceManager.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
-                    .spanBuilder("preparedStatementSpan")
+                    .spanBuilder(request.getStatementString())
                     .setParent(parentContext)
                     .setAttribute("sql", request.getStatementString())
                     .setAttribute("system", request.getDatabaseInfo().getSystem())
