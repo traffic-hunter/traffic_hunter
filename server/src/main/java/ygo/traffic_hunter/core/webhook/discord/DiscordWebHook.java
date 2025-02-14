@@ -24,6 +24,7 @@
 package ygo.traffic_hunter.core.webhook.discord;
 
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
@@ -46,6 +47,36 @@ public class DiscordWebHook implements AlarmSender {
     private final RestClient restClient;
 
     private final WebHookProperties properties;
+
+    private volatile boolean isActive = true;
+
+    private final AtomicBoolean atomic = new AtomicBoolean(this.isActive);
+
+    @Override
+    public void enable() {
+
+        if(atomic.compareAndSet(false, true)) {
+            this.isActive = true;
+        }
+    }
+
+    @Override
+    public void disable() {
+
+       if(atomic.compareAndSet(true, false)) {
+           this.isActive = false;
+       }
+    }
+
+    @Override
+    public boolean isActive() {
+        return this.isActive;
+    }
+
+    @Override
+    public boolean isWebHook() {
+        return true;
+    }
 
     @Override
     public void send(final Message message) {

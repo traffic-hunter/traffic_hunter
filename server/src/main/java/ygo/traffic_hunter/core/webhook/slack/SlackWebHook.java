@@ -53,6 +53,28 @@ public class SlackWebHook implements AlarmSender {
 
     private final WebHookProperties properties;
 
+    private boolean isAlarm = true;
+
+    @Override
+    public void enable() {
+        this.isAlarm = true;
+    }
+
+    @Override
+    public void disable() {
+        this.isAlarm = false;
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+
+    @Override
+    public boolean isWebHook() {
+        return true;
+    }
+
     @Override
     public void send(final Message message) {
 

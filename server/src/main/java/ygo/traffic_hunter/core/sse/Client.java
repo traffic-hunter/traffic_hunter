@@ -52,6 +52,26 @@ public class Client implements AlarmSender, ViewSender {
     }
 
     @Override
+    public void enable() {
+
+    }
+
+    @Override
+    public void disable() {
+
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+
+    @Override
+    public boolean isWebHook() {
+        return false;
+    }
+
+    @Override
     public void send(final Message message) {
         send(message, emitter);
     }
