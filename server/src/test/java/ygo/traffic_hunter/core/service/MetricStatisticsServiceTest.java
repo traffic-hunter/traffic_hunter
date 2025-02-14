@@ -3,13 +3,13 @@ package ygo.traffic_hunter.core.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange.LATEST_ONE_DAY;
 
-import java.time.Duration;
-import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import ygo.traffic_hunter.AbstractTestConfiguration;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
@@ -24,19 +24,27 @@ class MetricStatisticsServiceTest extends AbstractTestConfiguration {
     @Test
     void 시간_범위를_통해_서비스_트랜잭션을_조회한다() {
         // given
-        Instant begin = Instant.now().minus(Duration.ofDays(40));
-        Instant end = Instant.now();
-
-        PageRequest pr = PageRequest.of(0, 10);
+        PageRequest pr = PageRequest.of(0, 10, Sort.by(Direction.DESC, "timestamp"));
 
         // when
         Slice<ServiceTransactionResponse> responses =
-                metricStatisticsService.retrieveServiceTransactions(begin, end, pr);
+                metricStatisticsService.retrieveServiceTransactions(pr);
 
         // then
         assertThat(responses.getNumber()).isEqualTo(0);
         assertThat(responses.getSize()).isEqualTo(10);
         System.out.println(responses.getContent());
+    }
+
+    @Test
+    void 서비스_트랜잭션의_상세_조회_서비스는_정상적으로_동작한다() {
+        // given
+
+
+        // when
+
+        // then
+
     }
 
     @Test

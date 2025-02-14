@@ -20,8 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,12 +79,14 @@ class MetricControllerTest extends AbstractTestConfiguration {
         );
 
         ServiceTransactionResponse str = new ServiceTransactionResponse(
+                Instant.now().atOffset(ZoneOffset.UTC),
                 "/test",
-                0,
-                0,
-                0.0,
-                0,
-                0
+                100,
+                "POST",
+                "payments-agent",
+                "traffic-hunter.com",
+                200,
+                UUID.randomUUID().toString()
         );
 
         // when
@@ -117,12 +121,14 @@ class MetricControllerTest extends AbstractTestConfiguration {
                         )
                         , responseFields(
                                 subsectionWithPath("content").description("조회된 서비스 트랜잭션 목록"),
-                                fieldWithPath("content[].url").description("해당 서비스의 url"),
-                                fieldWithPath("content[].count").description("해당 서비스의 요청 개수"),
-                                fieldWithPath("content[].errCount").description("해당 서비스의 에러 개수"),
-                                fieldWithPath("content[].avgExecutionTime").description("해당 서비스의 평균 실행 시간"),
-                                fieldWithPath("content[].sumExecutionTime").description("해당 서비스의 총 실행 시간"),
-                                fieldWithPath("content[].maxExecutionTime").description("해당 서비스의 가장 높은 실행 시간"),
+                                fieldWithPath("content[].timestamp").description("트랜잭션 시작 시간 UTC"),
+                                fieldWithPath("content[].uri").description("해당 서비스의 uri"),
+                                fieldWithPath("content[].duration").description("해당 서비스의 실행 시간"),
+                                fieldWithPath("content[].httpMethod").description("해당 서비스의 http 응답 method"),
+                                fieldWithPath("content[].agentName").description("에이전트 이름"),
+                                fieldWithPath("content[].clientName").description("클라이언트 이름 (도메인 이름)"),
+                                fieldWithPath("content[].httpStatusCode").description("http 상태 코드"),
+                                fieldWithPath("content[].traceId").description("트랜잭션 식별자"),
                                 subsectionWithPath("pageable").description("페이징 처리 정보"),
                                 fieldWithPath("first").description("첫 페이지 여부"),
                                 fieldWithPath("last").description("마지막 페이지 여부"),
