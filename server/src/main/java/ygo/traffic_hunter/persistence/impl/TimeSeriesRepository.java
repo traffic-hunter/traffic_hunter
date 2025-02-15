@@ -18,7 +18,6 @@
  */
 package ygo.traffic_hunter.persistence.impl;
 
-import static org.jooq.impl.DSL.asterisk;
 import static org.jooq.impl.DSL.avg;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.inline;
@@ -42,6 +41,7 @@ import org.jooq.Field;
 import org.jooq.JSON;
 import org.jooq.JSONB;
 import org.jooq.Record;
+import org.jooq.Record11;
 import org.jooq.Record5;
 import org.jooq.Record8;
 import org.jooq.SelectLimitPercentStep;
@@ -93,6 +93,8 @@ public class TimeSeriesRepository implements MetricRepository {
     private final SystemMeasurementRowMapper systemMeasurementRowMapper;
 
     private final TransactionMeasurementRowMapper txMeasurementRowMapper;
+
+    private final TransactionDataMapper transactionDataRowMapper;
 
     private final AgentRowMapper agentRowMapper;
 
@@ -354,27 +356,58 @@ public class TimeSeriesRepository implements MetricRepository {
     }
 
     @Override
-    public List<TransactionData> findTxDataByRequestUri(final String requestUri, final String traceId) {
+    public List<TransactionData> findTxDataByRequestUri(final String traceId) {
 
         org.traffichunter.query.jooq.tables.TransactionMeasurement tm = TRANSACTION_MEASUREMENT;
 
-        Field<String> uri = jsonbGetAttributeAsText(
-                jsonbGetAttribute(tm.TRANSACTION_DATA, inline("attributes")),
-                inline("http.requestURI")
-        );
-
         Field<String> traceIdentification = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("traceId"));
 
-        SelectQuery<Record> results = dsl.select(asterisk())
+        Field<String> nameField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("name"));
+
+        Field<String> traceIdField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("traceId"));
+
+        Field<String> parentSpanIdField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("parentSpanId"));
+
+        Field<String> spanIdField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("spanId"));
+
+        Field<String> attributesField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("attributes"));
+
+        Field<Integer> attributesCountField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("attributesCount"))
+                .cast(Integer.class);
+
+        Field<OffsetDateTime> startTimeField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("startTime"))
+                .cast(OffsetDateTime.class);
+
+        Field<OffsetDateTime> endTimeField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("endTime"))
+                .cast(OffsetDateTime.class);
+
+        Field<Long> durationField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("duration")).cast(Long.class);
+
+        Field<String> exceptionField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("exception"));
+
+        Field<Boolean> endedField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("ended")).cast(Boolean.class);
+
+        SelectQuery<Record11<String, String, String, String, String, Integer, OffsetDateTime, OffsetDateTime, Long, String, Boolean>> results =
+                dsl.select(
+                    nameField.as("name"),
+                    traceIdField.as("traceId"),
+                    parentSpanIdField.as("parentSpanId"),
+                    spanIdField.as("spanId"),
+                    attributesField.as("attributes"),
+                    attributesCountField.as("attributesCount"),
+                    startTimeField.as("startTime"),
+                    endTimeField.as("endTime"),
+                    durationField.as("duration"),
+                    exceptionField.as("exception"),
+                    endedField.as("ended")
+                )
                 .from(tm)
-                .where(uri.eq(requestUri))
-                .groupBy(traceIdentification)
-                .having(traceIdentification.eq(traceId))
+                .where(traceIdentification.eq(traceId))
                 .getQuery();
 
         return jdbcTemplate.query(
                 results.getSQL(),
-                new TransactionDataMapper(),
+                transactionDataRowMapper,
                 results.getBindValues().toArray()
         );
     }
@@ -401,6 +434,8 @@ public class TimeSeriesRepository implements MetricRepository {
     public Slice<ServiceTransactionResponse> findServiceTransaction(final Pageable pageable) {
 
         org.traffichunter.query.jooq.tables.TransactionMeasurement tm = TRANSACTION_MEASUREMENT;
+
+        Field<String> parentSpanIdField = jsonbGetAttributeAsText(tm.TRANSACTION_DATA, inline("parentSpanId"));
 
         Field<JSONB> attributes = jsonbGetAttribute(tm.TRANSACTION_DATA, inline("attributes"));
 
@@ -432,7 +467,7 @@ public class TimeSeriesRepository implements MetricRepository {
                 .from(tm)
                 .join(AGENT)
                 .on(tm.AGENT_ID.eq(AGENT.ID))
-                .where(uriField.isNotNull())
+                .where(uriField.isNotNull().and(parentSpanIdField.eq("0000000000000000")))
                 .orderBy(QuerySupport.orderByClause(pageable))
                 .limit(pageable.getPageSize() + 1);
 

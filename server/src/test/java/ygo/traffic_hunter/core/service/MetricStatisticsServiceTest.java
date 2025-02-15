@@ -11,6 +11,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import ygo.traffic_hunter.AbstractTestConfiguration;
+import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
@@ -37,14 +38,16 @@ class MetricStatisticsServiceTest extends AbstractTestConfiguration {
     }
 
     @Test
-    void 서비스_트랜잭션의_상세_조회_서비스는_정상적으로_동작한다() {
+    void 서비스_트랜잭션의_상세_조회한다() {
         // given
-
+        String traceId = "a7ae6e1955ce6033770a93fe8257f636";
 
         // when
+        SpanTreeNode spanTreeNode = metricStatisticsService.retrieveSpanTree(traceId);
 
         // then
-
+        assertThat(spanTreeNode.getData().traceId()).isEqualTo(traceId);
+        System.out.println(spanTreeNode);
     }
 
     @Test

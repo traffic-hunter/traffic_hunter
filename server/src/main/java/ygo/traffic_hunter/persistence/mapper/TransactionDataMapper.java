@@ -1,12 +1,19 @@
 package ygo.traffic_hunter.persistence.mapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
-public class TransactionDataMapper implements RowMapper<TransactionData> {
+@Component
+public class TransactionDataMapper extends RowMapSupport<String> implements RowMapper<TransactionData> {
+
+    public TransactionDataMapper(final ObjectMapper objectMapper) {
+        super(objectMapper);
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -17,7 +24,7 @@ public class TransactionDataMapper implements RowMapper<TransactionData> {
                 rs.getString("traceId"),
                 rs.getString("parentSpanId"),
                 rs.getString("spanId"),
-                rs.getObject("attributes", Map.class),
+                deserialize(rs.getString("attributes"), Map.class),
                 rs.getInt("attributesCount"),
                 rs.getTimestamp("startTime").toInstant(),
                 rs.getTimestamp("endTime").toInstant(),

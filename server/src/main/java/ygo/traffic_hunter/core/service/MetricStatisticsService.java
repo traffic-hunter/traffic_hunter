@@ -56,13 +56,9 @@ public class MetricStatisticsService {
         return metricRepository.findServiceTransaction(pageable);
     }
 
-    public SpanTreeNode retrieveSpanTree(final String requestUri, final String traceId) {
+    public SpanTreeNode retrieveSpanTree(final String traceId) {
 
-        if(!requestUri.startsWith("/")) {
-            throw new IllegalArgumentException("Invalid request uri: " + requestUri);
-        }
-
-        List<TransactionData> transactionDatas = metricRepository.findTxDataByRequestUri(requestUri, traceId);
+        List<TransactionData> transactionDatas = metricRepository.findTxDataByRequestUri(traceId);
 
         return assembler.assemble(transactionDatas);
     }

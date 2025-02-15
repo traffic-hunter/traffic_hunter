@@ -67,12 +67,11 @@ public class MetricController {
         return metricStatisticsService.retrieveServiceTransactions(pageable);
     }
 
-    @GetMapping("/transaction/{requestUri}/{traceId}")
+    @GetMapping("/transaction/{traceId}")
     @ResponseStatus(HttpStatus.OK)
-    public SpanTreeNode retrieveTransactionApi(@PathVariable("requestUri") @NotBlank String requestUri,
-                                               @PathVariable("traceId") @NotBlank String traceId) {
+    public SpanTreeNode retrieveTransactionApi(@PathVariable @NotBlank String traceId) {
 
-        return metricStatisticsService.retrieveSpanTree(requestUri, traceId);
+        return metricStatisticsService.retrieveSpanTree(traceId);
     }
 
     @GetMapping("/metric/max/{timeRange}")

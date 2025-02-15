@@ -49,7 +49,7 @@ public interface MetricRepository extends AgentRepository {
     List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
                                                                           Integer limit);
 
-    List<TransactionData> findTxDataByRequestUri(String requestUri, String traceId);
+    List<TransactionData> findTxDataByRequestUri(String traceId);
 
     Slice<ServiceTransactionResponse> findServiceTransaction(Pageable pageable);
 
