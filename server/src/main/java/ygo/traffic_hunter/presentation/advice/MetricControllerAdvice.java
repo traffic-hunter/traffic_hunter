@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ygo.traffic_hunter.common.exception.TrafficHunterException;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel.ChannelException;
+import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository.ObservabilityNotFoundException;
 
 /**
@@ -90,5 +91,11 @@ public class MetricControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalStateException(final IllegalStateException e) {
         return ErrorResponse.create(e, HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(AlarmException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleAlarmException(final AlarmException e) {
+        return ErrorResponse.create(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 }
