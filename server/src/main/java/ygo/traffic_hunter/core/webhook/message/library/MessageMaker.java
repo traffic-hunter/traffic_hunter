@@ -86,6 +86,7 @@ public class MessageMaker {
         return this;
     }
 
+    @Deprecated(since = "1.1.0")
     public MessageMaker inet(final InetAddress inetAddress) {
         this.inetAddress = inetAddress;
         return this;
@@ -116,7 +117,6 @@ public class MessageMaker {
                                 .color(color.getValue())
                                 .addField(Field.of("title", title, false))
                                 .addField(Field.of("message", bodyMessage, false))
-                                .addField(Field.of("ip", inetAddress.getHostAddress(), false))
                                 .build()
                 ).build();
     }
