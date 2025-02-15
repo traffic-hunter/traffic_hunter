@@ -1,8 +1,5 @@
 package ygo.traffic_hunter.core.webhook.slack;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.Collections;
@@ -69,8 +66,7 @@ class SlackWebHookTest extends AbstractTestConfiguration {
 
         MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(metadata, systemInfo);
 
-        Message message = WebHookMessageType.CPU.doMessage("http://localhost:8080/", InetAddress.getLocalHost(),
-                metadataWrapper);
+        Message message = WebHookMessageType.CPU.doMessage("http://localhost:8080/", metadataWrapper);
 
         // when
         slackWebHook.send(message);

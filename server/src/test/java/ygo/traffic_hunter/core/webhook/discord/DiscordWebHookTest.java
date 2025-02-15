@@ -1,6 +1,5 @@
 package ygo.traffic_hunter.core.webhook.discord;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.Collections;
@@ -67,8 +66,7 @@ class DiscordWebHookTest extends AbstractTestConfiguration {
 
         MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(metadata, systemInfo);
 
-        Message message = WebHookMessageType.CPU.doMessage("http://localhost:8080/", InetAddress.getLocalHost(),
-                metadataWrapper);
+        Message message = WebHookMessageType.CPU.doMessage("http://localhost:8080/", metadataWrapper);
 
         // when
         discordWebHook.send(message);
