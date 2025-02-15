@@ -1,4 +1,4 @@
-package ygo.traffic_hunter.config.webhook;
+package ygo.traffic_hunter.config.web.webhook;
 
 import com.slack.api.Slack;
 import org.springframework.context.annotation.Bean;
