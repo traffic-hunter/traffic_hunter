@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ygo.traffic_hunter.common.exception.TrafficHunterException;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel.ChannelException;
 import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
+import ygo.traffic_hunter.persistence.impl.MemberRepositoryImpl.MemberNotFoundException;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository.ObservabilityNotFoundException;
 
 /**
@@ -43,7 +44,7 @@ import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository.ObservabilityNot
  */
 @Slf4j
 @RestControllerAdvice(annotations = RestController.class)
-public class MetricControllerAdvice {
+public class GlobalControllerAdvice {
 
     @ExceptionHandler(TrafficHunterException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -97,5 +98,11 @@ public class MetricControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleAlarmException(final AlarmException e) {
         return ErrorResponse.create(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+
+    @ExceptionHandler(MemberNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleMemberNotFoundException(final MemberNotFoundException e) {
+        return ErrorResponse.create(e, HttpStatus.NOT_FOUND, e.getMessage());
     }
 }
