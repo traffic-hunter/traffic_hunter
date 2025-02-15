@@ -1,4 +1,11 @@
 CREATE SEQUENCE if not exists agent_id START 1;
+CREATE SEQUENCE if not exists member_id START 1;
+CREATE TYPE ROLES AS ENUM ('ADMIN', 'USER');
+
+INSERT INTO member (email, password, isAlarm, role)
+VALUES ('admin', 'admin', true, 'ADMIN')
+ON CONFLICT (email) DO NOTHING;
+
 CREATE TABLE if not exists agent
 (
     id              INTEGER                     DEFAULT nextval('agent_id') NOT NULL,
@@ -7,6 +14,15 @@ CREATE TABLE if not exists agent
     agent_version   VARCHAR                     NOT NULL,
     agent_boot_time TIMESTAMPTZ                 NOT NULL,
     CONSTRAINT pk_metric_measurement PRIMARY KEY (id)
+);
+
+CREATE TABLE if not exists member
+(
+    id              INTEGER                     DEFAULT nextval('member_id') NOT NULL,
+    email           VARCHAR                     UNIQUE NOT NULL,
+    password        VARCHAR                     NOT NULL,
+    isAlarm         BOOLEAN                     NOT NULL,
+    role            ROLES                       NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS metric_measurement (
