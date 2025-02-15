@@ -25,6 +25,7 @@ package ygo.traffic_hunter.presentation.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +83,7 @@ public class MemberController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public MemberResponse getMemberApi(@PathVariable final Integer id) {
+    public MemberResponse getMemberApi(@PathVariable @NotNull final Integer id) {
 
         return memberService.findById(id);
     }
