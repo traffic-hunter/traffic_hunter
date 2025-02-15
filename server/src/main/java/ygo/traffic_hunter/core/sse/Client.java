@@ -47,27 +47,30 @@ public class Client implements AlarmSender, ViewSender {
 
     private final Scheduler scheduler;
 
+    private boolean isActive = true;
+
     public void scheduleBroadcast(final Runnable runnable) {
         scheduler.schedule(DEFAULT_INTERVAL, runnable);
     }
 
     @Override
     public void enable() {
-
+        this.isActive = true;
     }
 
     @Override
     public void disable() {
-
+        this.isActive = false;
     }
 
     @Override
     public boolean isActive() {
-        return false;
+        return this.isActive;
     }
 
     @Override
     public boolean isWebHook() {
+        // fix
         return false;
     }
 

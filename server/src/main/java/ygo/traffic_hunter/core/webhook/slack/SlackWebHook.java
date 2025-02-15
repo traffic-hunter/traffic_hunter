@@ -31,6 +31,7 @@ import com.slack.api.webhook.WebhookResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -53,21 +54,21 @@ public class SlackWebHook implements AlarmSender {
 
     private final WebHookProperties properties;
 
-    private boolean isAlarm = true;
+    private final AtomicBoolean isActive = new AtomicBoolean(true);
 
     @Override
     public void enable() {
-        this.isAlarm = true;
+        this.isActive.compareAndSet(false, true);
     }
 
     @Override
     public void disable() {
-        this.isAlarm = false;
+        this.isActive.compareAndSet(false, true);
     }
 
     @Override
     public boolean isActive() {
-        return false;
+        return this.isActive.get();
     }
 
     @Override

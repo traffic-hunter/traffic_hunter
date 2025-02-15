@@ -48,29 +48,21 @@ public class DiscordWebHook implements AlarmSender {
 
     private final WebHookProperties properties;
 
-    private volatile boolean isActive = true;
-
-    private final AtomicBoolean atomic = new AtomicBoolean(this.isActive);
+    private final AtomicBoolean isActive = new AtomicBoolean(true);
 
     @Override
     public void enable() {
-
-        if(atomic.compareAndSet(false, true)) {
-            this.isActive = true;
-        }
+        this.isActive.compareAndSet(false, true);
     }
 
     @Override
     public void disable() {
-
-       if(atomic.compareAndSet(true, false)) {
-           this.isActive = false;
-       }
+        this.isActive.compareAndSet(true, false);
     }
 
     @Override
     public boolean isActive() {
-        return this.isActive;
+        return this.isActive.get();
     }
 
     @Override
