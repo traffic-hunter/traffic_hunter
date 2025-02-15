@@ -47,7 +47,7 @@ import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMa
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
 import ygo.traffic_hunter.core.service.MetricStatisticsService;
 import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
-import ygo.traffic_hunter.presentation.advice.MetricControllerAdvice;
+import ygo.traffic_hunter.presentation.advice.GlobalControllerAdvice;
 
 @ExtendWith(RestDocumentationExtension.class)
 @WebMvcTest(controllers = MetricController.class)
@@ -66,7 +66,7 @@ class MetricControllerTest extends AbstractTestConfiguration {
         this.mockMvc = MockMvcBuilders.standaloneSetup(new MetricController(metricStatisticsService))
                 .apply(documentationConfiguration(restDocumentation))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .setControllerAdvice(new MetricControllerAdvice())
+                .setControllerAdvice(new GlobalControllerAdvice())
                 .build();
     }
 

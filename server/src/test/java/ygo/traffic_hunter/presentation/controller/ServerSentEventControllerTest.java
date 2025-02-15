@@ -58,7 +58,7 @@ import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerThreadPoolMeas
 import ygo.traffic_hunter.core.service.MetricService;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.domain.metric.TransactionData;
-import ygo.traffic_hunter.presentation.advice.MetricControllerAdvice;
+import ygo.traffic_hunter.presentation.advice.GlobalControllerAdvice;
 
 @ExtendWith(RestDocumentationExtension.class)
 @WebMvcTest(controllers = ServerSentEventController.class)
@@ -79,7 +79,7 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
     void setUp(RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.standaloneSetup(new ServerSentEventController(metricService))
                 .apply(documentationConfiguration(restDocumentation))
-                .setControllerAdvice(new MetricControllerAdvice())
+                .setControllerAdvice(new GlobalControllerAdvice())
                 .build();
     }
 

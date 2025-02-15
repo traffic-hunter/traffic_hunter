@@ -30,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import ygo.traffic_hunter.common.util.LoginUtils;
-import ygo.traffic_hunter.core.repository.MemberRepository;
 
 /**
  * @author yungwang-o
@@ -40,8 +39,6 @@ import ygo.traffic_hunter.core.repository.MemberRepository;
 @RequiredArgsConstructor
 public class LoginInterceptor implements HandlerInterceptor {
 
-    private final MemberRepository memberRepository;
-
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {
 
@@ -49,6 +46,6 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         Integer id = (Integer) session.getAttribute(LoginUtils.SESSION_ID.name());
 
-        return id != null && memberRepository.existsById(id);
+        return id != null;
     }
 }

@@ -33,6 +33,7 @@ import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.traffichunter.query.jooq.enums.Roles;
 import org.traffichunter.query.jooq.tables.records.MemberRecord;
 import ygo.traffic_hunter.core.repository.MemberRepository;
 import ygo.traffic_hunter.domain.entity.user.Member;
@@ -68,7 +69,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                 member.getEmail(),
                 member.getPassword(),
                 member.isAlarm(),
-                member.getRole().name()
+                Roles.valueOf(member.getRole().name())
         ).execute();
 
         if(execute <= 0) {
@@ -155,7 +156,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                 .set(jMember.EMAIL, member.getEmail())
                 .set(jMember.PASSWORD, member.getPassword())
                 .set(jMember.ISALARM, member.isAlarm())
-                .set(jMember.ROLE, member.getRole().name())
+                .set(jMember.ROLE, Roles.valueOf(member.getRole().name()))
                 .where(jMember.ID.eq(member.getId()))
                 .execute();
 
@@ -192,7 +193,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                 .email(record.getEmail())
                 .password(record.getPassword())
                 .isAlarm(record.getIsalarm())
-                .role(Role.valueOf(record.getRole()))
+                .role(Role.valueOf(record.getRole().name()))
                 .build();
     }
 

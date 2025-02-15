@@ -15,4 +15,5 @@ endif::[]
 
 include::statistics.adoc[]
 include::sse.adoc[]
+include::member.adoc[]
 
