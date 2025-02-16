@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.core.assembler.Assembler;
 import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
@@ -44,6 +45,7 @@ import ygo.traffic_hunter.domain.metric.TransactionData;
  */
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MetricStatisticsService {
 
