@@ -156,8 +156,14 @@ public class MemberRepositoryImpl implements MemberRepository {
                 .set(jMember.EMAIL, member.getEmail())
                 .set(jMember.PASSWORD, member.getPassword())
                 .set(jMember.ISALARM, member.isAlarm())
+                .set(jMember.CPU_THRESHOLD, member.getThreshold().getCpuThreshold())
+                .set(jMember.MEMORY_THRESHOLD, member.getThreshold().getMemoryThreshold())
+                .set(jMember.THREAD_THRESHOLD, member.getThreshold().getThreadThreshold())
+                .set(jMember.WEB_REQUEST_THRESHOLD, member.getThreshold().getWebRequestThreshold())
+                .set(jMember.WEB_THREAD_THRESHOLD, member.getThreshold().getWebThreadThreshold())
+                .set(jMember.DBCP_THRESHOLD, member.getThreshold().getDbcpThreshold())
                 .set(jMember.ROLE, Roles.valueOf(member.getRole().name()))
-                .where(jMember.ID.eq(member.getId()))
+                .where(jMember.EMAIL.eq(member.getEmail()))
                 .execute();
 
         if(execute <= 0) {

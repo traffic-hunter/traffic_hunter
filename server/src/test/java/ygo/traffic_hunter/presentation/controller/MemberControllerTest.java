@@ -49,6 +49,7 @@ import ygo.traffic_hunter.core.dto.request.member.SignUp;
 import ygo.traffic_hunter.core.dto.request.member.UpdateMember;
 import ygo.traffic_hunter.core.dto.response.member.MemberResponse;
 import ygo.traffic_hunter.core.service.MemberService;
+import ygo.traffic_hunter.domain.entity.alarm.Threshold;
 import ygo.traffic_hunter.domain.entity.user.Role;
 import ygo.traffic_hunter.persistence.impl.MemberRepositoryImpl.MemberNotFoundException;
 import ygo.traffic_hunter.presentation.advice.GlobalControllerAdvice;
@@ -143,7 +144,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
         // given
         SignIn signIn = new SignIn("test@example.com", "password123");
 
-        MemberResponse response = new MemberResponse("test@example.com", true, Role.USER);
+        MemberResponse response = new MemberResponse("test@example.com", true, Threshold.DEFAULT, Role.USER);
 
         given(memberService.signIn(any(HttpServletRequest.class), eq(signIn.email()), eq(signIn.password())))
                 .willReturn(response);
@@ -172,8 +173,8 @@ class MemberControllerTest extends AbstractTestConfiguration {
     void 모든_회원_조회는_정상적으로_동작한다_200() throws Exception {
         // given
         List<MemberResponse> responses = Arrays.asList(
-                new MemberResponse("test@example.com", true, Role.USER),
-                new MemberResponse("example@test.com", false, Role.USER)
+                new MemberResponse("test@example.com", true, Threshold.DEFAULT, Role.USER),
+                new MemberResponse("example@test.com", false, Threshold.DEFAULT, Role.USER)
         );
 
         given(memberService.findAll()).willReturn(responses);
@@ -196,7 +197,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
     @Test
     void 회원_단건_조회는_정상적으로_동작한다_200() throws Exception {
         // given
-        MemberResponse response = new MemberResponse("test@example.com", true, Role.USER);
+        MemberResponse response = new MemberResponse("test@example.com", true, Threshold.DEFAULT, Role.USER);
         given(memberService.findById(1)).willReturn(response);
 
         // when & then
@@ -250,8 +251,21 @@ class MemberControllerTest extends AbstractTestConfiguration {
     @Test
     void 회원_수정은_정상적으로_동작한다_204() throws Exception {
         // given
-        UpdateMember updateMember = new UpdateMember("new@example.com", "newPassword123", true);
-        doNothing().when(memberService).update(eq(1), eq(updateMember.email()), eq(updateMember.password()), eq(updateMember.isAlarm()));
+        UpdateMember updateMember = new UpdateMember(
+                "new@example.com",
+                "newPassword123",
+                Threshold.DEFAULT,
+                true
+        );
+
+        doNothing().when(memberService)
+                .update(
+                        eq(1),
+                        eq(updateMember.email()),
+                        eq(updateMember.password()),
+                        eq(updateMember.threshold()),
+                        eq(updateMember.isAlarm())
+                );
 
         // when & then
         mockMvc.perform(put("/members")
@@ -268,6 +282,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
                         requestFields(
                                 fieldWithPath("email").description("수정할 회원 이메일"),
                                 fieldWithPath("password").description("수정할 회원 비밀번호"),
+                                fieldWithPath("threshold").description("수정할 임계치"),
                                 fieldWithPath("isAlarm").description("수정할 알림 설정 여부")
                         )
                 ));

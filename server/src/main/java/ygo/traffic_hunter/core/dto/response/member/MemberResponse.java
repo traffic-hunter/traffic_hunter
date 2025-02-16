@@ -23,6 +23,7 @@
  */
 package ygo.traffic_hunter.core.dto.response.member;
 
+import ygo.traffic_hunter.domain.entity.alarm.Threshold;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.entity.user.Role;
 
@@ -30,10 +31,24 @@ import ygo.traffic_hunter.domain.entity.user.Role;
  * @author yungwang-o
  * @version 1.1.0
  */
-public record MemberResponse(String email, boolean isAlarm, Role role) {
+public record MemberResponse(
+
+        String email,
+
+        boolean isAlarm,
+
+        Threshold threshold,
+
+        Role role
+) {
 
     public static MemberResponse map(final Member member) {
 
-        return new MemberResponse(member.getEmail(), member.isAlarm(), member.getRole());
+        return new MemberResponse(
+                member.getEmail(),
+                member.isAlarm(),
+                member.getThreshold(),
+                member.getRole()
+        );
     }
 }

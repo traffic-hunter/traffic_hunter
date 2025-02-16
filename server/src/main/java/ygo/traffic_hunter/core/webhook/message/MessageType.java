@@ -34,7 +34,7 @@ import ygo.traffic_hunter.core.webhook.message.library.MessageMaker.Color;
  * @version 1.1.0
  */
 @Getter
-public enum WebHookMessageType {
+public enum MessageType {
 
     CPU("Cpu alert!!", "[[ Alert ]] !!", "CPU usage has exceeded the threshold: {}% !!") {
         @Override
@@ -42,12 +42,12 @@ public enum WebHookMessageType {
 
             return MessageMaker.builder()
                     .url(url)
-                    .title(WebHookMessageType.CPU.getTitle())
-                    .content(WebHookMessageType.CPU.getContent())
+                    .title(MessageType.CPU.getTitle())
+                    .content(MessageType.CPU.getContent())
                     .color(Color.RED)
                     .agentName(metadataWrapper.metadata().agentName())
                     .times(metadataWrapper.metadata().startTime())
-                    .description(WebHookMessageType.CPU.getBody(), metadataWrapper.data().cpuStatusInfo().processCpuLoad())
+                    .description(MessageType.CPU.getBody(), metadataWrapper.data().cpuStatusInfo().processCpuLoad())
                     .build();
         }
     },
@@ -62,12 +62,12 @@ public enum WebHookMessageType {
 
             return MessageMaker.builder()
                     .url(url)
-                    .title(WebHookMessageType.MEMORY.getTitle())
-                    .content(WebHookMessageType.MEMORY.getContent())
+                    .title(MessageType.MEMORY.getTitle())
+                    .content(MessageType.MEMORY.getContent())
                     .color(Color.RED)
                     .agentName(metadataWrapper.metadata().agentName())
                     .times(metadataWrapper.metadata().startTime())
-                    .description(WebHookMessageType.MEMORY.getBody(), used)
+                    .description(MessageType.MEMORY.getBody(), used)
                     .build();
         }
     },
@@ -77,12 +77,12 @@ public enum WebHookMessageType {
 
             return MessageMaker.builder()
                     .url(url)
-                    .title(WebHookMessageType.THREAD.getTitle())
-                    .content(WebHookMessageType.THREAD.getContent())
+                    .title(MessageType.THREAD.getTitle())
+                    .content(MessageType.THREAD.getContent())
                     .color(Color.RED)
                     .agentName(metadataWrapper.metadata().agentName())
                     .times(metadataWrapper.metadata().startTime())
-                    .description(WebHookMessageType.THREAD.getBody(), metadataWrapper.data().threadStatusInfo().threadCount())
+                    .description(MessageType.THREAD.getBody(), metadataWrapper.data().threadStatusInfo().threadCount())
                     .build();
         }
     },
@@ -92,12 +92,12 @@ public enum WebHookMessageType {
 
             return MessageMaker.builder()
                     .url(url)
-                    .title(WebHookMessageType.WEB_REQUEST.getTitle())
-                    .content(WebHookMessageType.WEB_REQUEST.getContent())
+                    .title(MessageType.WEB_REQUEST.getTitle())
+                    .content(MessageType.WEB_REQUEST.getContent())
                     .color(Color.RED)
                     .agentName(metadataWrapper.metadata().agentName())
                     .times(metadataWrapper.metadata().startTime())
-                    .description(WebHookMessageType.WEB_REQUEST.getBody(), metadataWrapper.data()
+                    .description(MessageType.WEB_REQUEST.getBody(), metadataWrapper.data()
                             .tomcatWebServerInfo()
                             .tomcatRequestInfo()
                             .requestCount()
@@ -110,12 +110,12 @@ public enum WebHookMessageType {
 
             return MessageMaker.builder()
                     .url(url)
-                    .title(WebHookMessageType.WEB_THREAD.getTitle())
-                    .content(WebHookMessageType.WEB_THREAD.getContent())
+                    .title(MessageType.WEB_THREAD.getTitle())
+                    .content(MessageType.WEB_THREAD.getContent())
                     .color(Color.RED)
                     .agentName(metadataWrapper.metadata().agentName())
                     .times(metadataWrapper.metadata().startTime())
-                    .description(WebHookMessageType.WEB_THREAD.getBody(), metadataWrapper.data()
+                    .description(MessageType.WEB_THREAD.getBody(), metadataWrapper.data()
                             .tomcatWebServerInfo()
                             .tomcatThreadPoolInfo()
                             .currentThreads()
@@ -128,12 +128,12 @@ public enum WebHookMessageType {
 
             return MessageMaker.builder()
                     .url(url)
-                    .title(WebHookMessageType.DBCP.getTitle())
-                    .content(WebHookMessageType.DBCP.getContent())
+                    .title(MessageType.DBCP.getTitle())
+                    .content(MessageType.DBCP.getContent())
                     .color(Color.RED)
                     .agentName(metadataWrapper.metadata().agentName())
                     .times(metadataWrapper.metadata().startTime())
-                    .description(WebHookMessageType.DBCP.getBody(), metadataWrapper.data().hikariDbcpInfo().activeConnections())
+                    .description(MessageType.DBCP.getBody(), metadataWrapper.data().hikariDbcpInfo().activeConnections())
                     .build();
         }
     },
@@ -145,7 +145,7 @@ public enum WebHookMessageType {
 
     private final String body;
 
-    WebHookMessageType(final String title, final String content, final String body) {
+    MessageType(final String title, final String content, final String body) {
         this.title = title;
         this.content = content;
         this.body = body;

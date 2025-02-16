@@ -27,6 +27,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ygo.traffic_hunter.domain.entity.alarm.Threshold;
 
 /**
  * @author yungwang-o
@@ -44,6 +45,8 @@ public class Member {
 
     private boolean isAlarm;
 
+    private Threshold threshold;
+
     private Role role;
 
     @Builder
@@ -51,12 +54,14 @@ public class Member {
                    final String email,
                    final String password,
                    final boolean isAlarm,
+                   final Threshold threshold,
                    final Role role) {
 
         this.id = id;
         this.email = email;
         this.password = password;
         this.isAlarm = isAlarm;
+        this.threshold = threshold;
         this.role = role;
     }
 
@@ -64,6 +69,7 @@ public class Member {
         this.email = member.getEmail();
         this.password = member.getPassword();
         this.isAlarm = member.isAlarm();
+        this.threshold = member.getThreshold();
         this.role = member.getRole();
     }
 }

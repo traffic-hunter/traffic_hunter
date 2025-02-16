@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.core.dto.response.member.MemberResponse;
 import ygo.traffic_hunter.core.identification.login.LoginHandler;
 import ygo.traffic_hunter.core.repository.MemberRepository;
+import ygo.traffic_hunter.domain.entity.alarm.Threshold;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.entity.user.Role;
 
@@ -100,6 +101,7 @@ public class MemberService {
     public void update(final Integer id,
                        final String email,
                        final String password,
+                       final Threshold threshold,
                        final boolean isAlarm) {
 
         Member updateMember = Member.builder()
@@ -107,6 +109,7 @@ public class MemberService {
                 .email(email)
                 .password(password)
                 .isAlarm(isAlarm)
+                .threshold(threshold)
                 .role(Role.USER)
                 .build();
 

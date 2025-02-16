@@ -99,7 +99,13 @@ public class MemberController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateApi(@RequestBody @Valid final UpdateMember updateMember, @Member final Integer id) {
 
-        memberService.update(id, updateMember.email(), updateMember.password(), updateMember.isAlarm());
+        memberService.update(
+                id,
+                updateMember.email(),
+                updateMember.password(),
+                updateMember.threshold(),
+                updateMember.isAlarm()
+        );
     }
 
     @DeleteMapping

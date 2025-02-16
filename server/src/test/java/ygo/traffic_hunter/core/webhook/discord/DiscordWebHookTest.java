@@ -24,7 +24,7 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServer
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.request.TomcatRequestInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.thread.TomcatThreadPoolInfo;
 import ygo.traffic_hunter.core.webhook.message.Message;
-import ygo.traffic_hunter.core.webhook.message.WebHookMessageType;
+import ygo.traffic_hunter.core.webhook.message.MessageType;
 import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 
 @EnableConfigurationProperties(WebHookProperties.class)
@@ -66,7 +66,7 @@ class DiscordWebHookTest extends AbstractTestConfiguration {
 
         MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(metadata, systemInfo);
 
-        Message message = WebHookMessageType.CPU.doMessage("http://localhost:8080/", metadataWrapper);
+        Message message = MessageType.CPU.doMessage("http://localhost:8080/", metadataWrapper);
 
         // when
         discordWebHook.send(message);
