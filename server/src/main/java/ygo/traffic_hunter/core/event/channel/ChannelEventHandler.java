@@ -18,21 +18,28 @@
  */
 package ygo.traffic_hunter.core.event.channel;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
-import ygo.traffic_hunter.common.map.ThresholdMapper;
 import ygo.traffic_hunter.common.map.TransactionMapper;
+import ygo.traffic_hunter.core.alarm.AlarmManger;
 import ygo.traffic_hunter.core.collector.validator.MetricValidator;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
+import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
+import ygo.traffic_hunter.core.service.AlarmService;
+import ygo.traffic_hunter.core.webhook.message.MessageType;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
-import ygo.traffic_hunter.domain.entity.alarm.Threshold;
+import ygo.traffic_hunter.domain.entity.alarm.Threshold.CalculatedThreshold;
+import ygo.traffic_hunter.domain.entity.alarm.Threshold.Calculator;
 import ygo.traffic_hunter.domain.metric.TraceInfo;
 
 /**
@@ -91,9 +98,13 @@ public class ChannelEventHandler {
 
     private final TransactionMapper transactionMapper;
 
-    private final ThresholdMapper thresholdMapper;
+    private final MetricRepository metricRepository;
 
-    private final MetricRepository repository;
+    private final AlarmService alarmService;
+
+    private final AlarmManger alarmManger;
+
+    private final CacheManager cacheManager;
 
     @EventListener
     @Transactional
@@ -103,7 +114,7 @@ public class ChannelEventHandler {
 
         TransactionMeasurement measurement = transactionMapper.map(object);
 
-        repository.save(measurement);
+        metricRepository.save(measurement);
     }
 
     @EventListener
@@ -114,18 +125,67 @@ public class ChannelEventHandler {
 
         MetricMeasurement measurement = systemInfoMapper.map(object);
 
-        repository.save(measurement);
+        metricRepository.save(measurement);
     }
 
     @EventListener
-    @Transactional
     public void handle(final AlarmEvent event) {
-
         MetadataWrapper<SystemInfo> object = event.systemInfo();
+        ThresholdResponse threshold = alarmService.retrieveThreshold();
+        CalculatedThreshold calculate = new Calculator(object.data().memoryStatusInfo(),
+                object.data().cpuStatusInfo(),
+                object.data().threadStatusInfo(),
+                object.data().tomcatWebServerInfo(),
+                object.data().hikariDbcpInfo())
+                .calculate(threshold);
 
-        Threshold threshold = thresholdMapper.map(object);
+        // CPU 알림
+        if (canSendable(MessageType.CPU, object.data().cpuStatusInfo().processCpuLoad(), calculate.calculateCpu())) {
+            alarmManger.send(MessageType.CPU.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.CPU.name(), true);
+        }
 
+        // Memory 알림
+        if (canSendable(MessageType.MEMORY, object.data().memoryStatusInfo().heapMemoryUsage().used(),
+                calculate.calculateMemory())) {
+            alarmManger.send(MessageType.MEMORY.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.MEMORY.name(), true);
+        }
 
+        // Thread 알림
+        if (canSendable(MessageType.THREAD, object.data().threadStatusInfo().threadCount(),
+                calculate.calculateThread())) {
+            alarmManger.send(MessageType.THREAD.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.THREAD.name(), true);
+        }
+
+        // Web Request 알림
+        if (canSendable(MessageType.WEB_REQUEST, object.data().tomcatWebServerInfo().tomcatRequestInfo().requestCount(),
+                calculate.calculateWebRequest())) {
+            alarmManger.send(MessageType.WEB_REQUEST.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.WEB_REQUEST.name(), true);
+        }
+
+        // Web Thread 알림
+        if (canSendable(MessageType.WEB_THREAD, object.data().threadStatusInfo().threadCount(),
+                calculate.calculateWebThread())) {
+            alarmManger.send(MessageType.WEB_THREAD.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.WEB_THREAD.name(), true);
+        }
+
+        // DBCP 알림
+        if (canSendable(MessageType.DBCP, object.data().hikariDbcpInfo().activeConnections(),
+                calculate.calculateDbcp())) {
+            alarmManger.send(MessageType.DBCP.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.DBCP.name(), true);
+        }
     }
 
+    private boolean canSendable(MessageType messageType, double currentValue, double thresholdValue) {
+        Cache cache = cacheManager.getCache("alarm_cache");
+        if (cache != null && cache.get(messageType.name()) != null) {
+            return false;
+        }
+        return thresholdValue <= currentValue;
+    }
 }

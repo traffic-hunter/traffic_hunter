@@ -70,6 +70,7 @@ public class CacheConfig {
         AGENT_CACHE("agent_cache", 3600, 100),
         STATISTIC_TRANSACTION_PAGE_CACHE("statistic_transaction_page_cache", 600, 50),
         ALARM_CACHE("alarm_cache", 600, 50),
+        THRESHOLD_CACHE("threshold_cache", 3600, 50),
         ;
 
         private final String cacheName;

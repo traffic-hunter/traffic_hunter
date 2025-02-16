@@ -20,15 +20,15 @@ package ygo.traffic_hunter.core.sse;
 
 import java.io.IOException;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import ygo.traffic_hunter.core.identification.Identification;
 import ygo.traffic_hunter.core.schedule.Scheduler;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.send.ViewSender;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager.ServerSentEventException;
 import ygo.traffic_hunter.core.webhook.message.Message;
+import ygo.traffic_hunter.core.webhook.message.SseMessage;
+import ygo.traffic_hunter.domain.entity.user.Member;
 
 /**
  * @author yungwang-o, JuSeong
@@ -36,18 +36,24 @@ import ygo.traffic_hunter.core.webhook.message.Message;
  * @see SseEmitter
  */
 @Slf4j
-@RequiredArgsConstructor
 public class Client implements AlarmSender, ViewSender {
 
     private static final int DEFAULT_INTERVAL = 5000;
 
-    private final Identification identification;
+    private final Member member;
 
     private final SseEmitter emitter;
 
     private final Scheduler scheduler;
 
-    private boolean isActive = true;
+    private boolean isActive;
+
+    public Client(final Member member, final SseEmitter emitter, final Scheduler scheduler) {
+        this.member = member;
+        this.emitter = emitter;
+        this.scheduler = scheduler;
+        this.isActive = member.isAlarm();
+    }
 
     public void scheduleBroadcast(final Runnable runnable) {
         scheduler.schedule(DEFAULT_INTERVAL, runnable);
@@ -76,7 +82,8 @@ public class Client implements AlarmSender, ViewSender {
 
     @Override
     public void send(final Message message) {
-        send(message, emitter);
+        SseMessage sseMessage = SseMessage.from(message);
+        send(sseMessage, emitter);
     }
 
     @Override
@@ -96,7 +103,7 @@ public class Client implements AlarmSender, ViewSender {
         }
 
         SseEmitter.SseEventBuilder sseBuilder = SseEmitter.event()
-                .name(identification.getId())
+                .name(String.valueOf(member.getId()))
                 .data(data);
 
         try {

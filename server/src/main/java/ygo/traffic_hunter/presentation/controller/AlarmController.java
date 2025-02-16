@@ -46,9 +46,4 @@ public class AlarmController {
         );
     }
 
-    @PutMapping("/threshold")
-    public void updateAlarmThreshold(@RequestBody AlarmThreshold alarmThreshold) {
-        alarmService.updateThreshold(alarmThreshold);
-    }
-
 }
