@@ -1,6 +1,16 @@
 CREATE SEQUENCE if not exists agent_id START 1;
 CREATE SEQUENCE if not exists member_id START 1;
 
+DO
+$$
+DECLARE
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'roles') THEN
+        CREATE TYPE roles AS ENUM ('ADMIN', 'USER');
+    END IF;
+END;
+$$;;
+
 CREATE TABLE if not exists agent
 (
     id              INTEGER                     DEFAULT nextval('agent_id') NOT NULL,
@@ -26,13 +36,6 @@ CREATE TABLE if not exists member
     dbcp_threshold         INTEGER  DEFAULT 80 NOT NULL CHECK (dbcp_threshold BETWEEN 0 AND 100),
     CONSTRAINT pk_member PRIMARY KEY (id)
 );
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'roles') THEN
-        CREATE TYPE roles AS ENUM ('ADMIN', 'USER');
-    END IF;
-END $$;
 
 INSERT INTO member (email, password, isAlarm, role)
 VALUES ('admin', 'admin', true, 'ADMIN')

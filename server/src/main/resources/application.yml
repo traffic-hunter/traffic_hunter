@@ -12,6 +12,7 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+      separator: ;;
 
   jooq:
     sql-dialect: postgres
