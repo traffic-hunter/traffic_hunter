@@ -25,8 +25,6 @@ package ygo.traffic_hunter.core.dto.request.member;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import ygo.traffic_hunter.domain.entity.alarm.Threshold;
 
 /**
  * @author yungwang-o
@@ -40,9 +38,6 @@ public record UpdateMember(
 
         @NotBlank
         String password,
-
-        @NotNull
-        Threshold threshold,
 
         boolean isAlarm
 ) {

@@ -28,14 +28,33 @@ CREATE TABLE if not exists member
     password        VARCHAR                     NOT NULL,
     isAlarm         BOOLEAN                     NOT NULL,
     role            ROLES                       NOT NULL,
-    cpu_threshold          INTEGER  DEFAULT 80 NOT NULL CHECK (cpu_threshold BETWEEN 0 AND 100),
-    memory_threshold       INTEGER  DEFAULT 80 NOT NULL CHECK (memory_threshold BETWEEN 0 AND 100),
-    thread_threshold       INTEGER  DEFAULT 80 NOT NULL CHECK (thread_threshold BETWEEN 0 AND 100),
-    web_request_threshold  INTEGER  DEFAULT 100 NOT NULL,
-    web_thread_threshold   INTEGER  DEFAULT 80 NOT NULL CHECK (web_thread_threshold BETWEEN 0 AND 100),
-    dbcp_threshold         INTEGER  DEFAULT 80 NOT NULL CHECK (dbcp_threshold BETWEEN 0 AND 100),
+
     CONSTRAINT pk_member PRIMARY KEY (id)
 );
+
+CREATE TABLE if not exists threshold
+(
+    id                     INTEGER  NOT NULL ,
+    cpu_threshold          INTEGER  NOT NULL CHECK (cpu_threshold BETWEEN 0 AND 100),
+    memory_threshold       INTEGER  NOT NULL CHECK (memory_threshold BETWEEN 0 AND 100),
+    thread_threshold       INTEGER  NOT NULL CHECK (thread_threshold BETWEEN 0 AND 100),
+    web_request_threshold  INTEGER  NOT NULL,
+    web_thread_threshold   INTEGER  NOT NULL CHECK (web_thread_threshold BETWEEN 0 AND 100),
+    dbcp_threshold         INTEGER  NOT NULL CHECK (dbcp_threshold BETWEEN 0 AND 100),
+    CONSTRAINT pk_threshold_id PRIMARY KEY (id)
+);
+
+INSERT INTO threshold
+(                      id,
+                       cpu_threshold,
+                       memory_threshold,
+                       thread_threshold,
+                       web_request_threshold,
+                       web_thread_threshold,
+                       dbcp_threshold
+)
+VALUES (1, 80, 80, 80, 100, 80, 80)
+ON CONFLICT (id) DO NOTHING ;
 
 INSERT INTO member (email, password, isAlarm, role)
 VALUES ('admin', 'admin', true, 'ADMIN')

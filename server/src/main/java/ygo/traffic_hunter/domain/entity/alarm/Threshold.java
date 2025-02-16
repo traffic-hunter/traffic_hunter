@@ -32,6 +32,8 @@ public class Threshold {
             .dbcpThreshold(DEFAULT_SETTING_PERCENTAGE)
             .build();
 
+    private Integer id;
+
     private int cpuThreshold;
 
     private int memoryThreshold;

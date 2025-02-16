@@ -103,7 +103,6 @@ public class MemberController {
                 id,
                 updateMember.email(),
                 updateMember.password(),
-                updateMember.threshold(),
                 updateMember.isAlarm()
         );
     }

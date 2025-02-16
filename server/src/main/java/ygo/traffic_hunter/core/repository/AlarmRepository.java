@@ -23,9 +23,20 @@
  */
 package ygo.traffic_hunter.core.repository;
 
+import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
+
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
 public interface AlarmRepository {
+
+    ThresholdResponse findThreshold();
+
+    void updateThreshold(final int cpuThreshold,
+                         final int memoryThreshold,
+                         final int threadThreshold,
+                         final int webRequestThreshold,
+                         final int webThreadThreshold,
+                         final int dbcpThreshold);
 }

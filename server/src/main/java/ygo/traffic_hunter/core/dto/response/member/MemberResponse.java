@@ -23,7 +23,6 @@
  */
 package ygo.traffic_hunter.core.dto.response.member;
 
-import ygo.traffic_hunter.domain.entity.alarm.Threshold;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.entity.user.Role;
 
@@ -37,8 +36,6 @@ public record MemberResponse(
 
         boolean isAlarm,
 
-        Threshold threshold,
-
         Role role
 ) {
 
@@ -47,7 +44,6 @@ public record MemberResponse(
         return new MemberResponse(
                 member.getEmail(),
                 member.isAlarm(),
-                member.getThreshold(),
                 member.getRole()
         );
     }
