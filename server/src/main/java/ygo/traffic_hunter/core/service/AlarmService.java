@@ -1,6 +1,7 @@
 package ygo.traffic_hunter.core.service;
 
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,8 @@ import ygo.traffic_hunter.core.repository.AlarmRepository;
 public class AlarmService {
 
     private final AlarmRepository alarmRepository;
+
+    private final AlarmManger alarmManger;
 
     public ThresholdResponse retrieveThreshold() {
 
@@ -37,4 +40,17 @@ public class AlarmService {
                 dbcpThreshold
         );
     }
+
+    public void updateThreshold(final AlarmThreshold alarmThreshold) {
+        Threshold threshold = Threshold.builder()
+                .cpuThreshold(alarmThreshold.cpuThreshold())
+                .memoryThreshold(alarmThreshold.memoryThreshold())
+                .webRequestThreshold(alarmThreshold.webRequestThreshold())
+                .webThreadThreshold(alarmThreshold.webThreadThreshold())
+                .dbcpThreshold(alarmThreshold.dbcpThreshold())
+                .build();
+        alarmManger.updateThreshold(threshold);
+
+    }
+
 }
