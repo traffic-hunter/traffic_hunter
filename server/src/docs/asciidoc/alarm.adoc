@@ -1,0 +1,20 @@
+[[Alarm-API]]
+== Alarm API
+
+[[Success]]
+== Success
+
+=== GET /alarms/threshold
+
+operation::alarm/get-threshold[snippets='curl-request,http-request,http-response,response-body,response-fields']
+
+=== PUT /alarms/threshold
+
+operation::alarm/update-threshold[snippets='curl-request,http-request,http-response,request-body,request-fields']
+
+[[Failed]]
+== Failed
+
+=== PUT /alarms/threshold
+
+operation::alarm/failed-update-threshold[snippets='curl-request,http-request,http-response,request-body,response-body']

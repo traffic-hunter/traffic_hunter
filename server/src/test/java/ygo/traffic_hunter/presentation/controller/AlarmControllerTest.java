@@ -71,12 +71,12 @@ class AlarmControllerTest extends AbstractTestConfiguration {
         given(alarmService.retrieveThreshold()).willReturn(thresholdResponse);
 
         // when
-        ResultActions resultActions = mockMvc.perform(get("/alarms/get-threshold"));
+        ResultActions resultActions = mockMvc.perform(get("/alarms/threshold"));
 
         // then
         resultActions.andExpect(status().isOk())
                 .andDo(print())
-                .andDo(document("alarm/threshold"
+                .andDo(document("alarm/get-threshold"
                         , preprocessRequest(prettyPrint())
                         , preprocessResponse(prettyPrint())
                         , responseFields(
@@ -168,7 +168,7 @@ class AlarmControllerTest extends AbstractTestConfiguration {
         // then
         resultActions.andExpect(status().isBadRequest())
                 .andDo(print())
-                .andDo(document("alarm/update-threshold"
+                .andDo(document("alarm/failed-update-threshold"
                         , preprocessRequest(prettyPrint())
                         , preprocessResponse(prettyPrint())
                 ));
