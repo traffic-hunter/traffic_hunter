@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import ygo.traffic_hunter.core.alarm.WebHookAlarm;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.webhook.message.Message;
 import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
@@ -42,7 +43,7 @@ import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DiscordWebHook implements AlarmSender {
+public class DiscordWebHook implements WebHookAlarm, AlarmSender {
 
     private final RestClient restClient;
 
@@ -52,26 +53,25 @@ public class DiscordWebHook implements AlarmSender {
 
     @Override
     public void enable() {
-        this.isActive.compareAndSet(false, true);
+        isActive.compareAndSet(false, true);
     }
 
     @Override
     public void disable() {
-        this.isActive.compareAndSet(true, false);
+        isActive.compareAndSet(true, false);
     }
 
     @Override
     public boolean isActive() {
-        return this.isActive.get();
-    }
-
-    @Override
-    public boolean isWebHook() {
-        return true;
+        return isActive.get();
     }
 
     @Override
     public void send(final Message message) {
+
+        if(!isActive.get() || properties.discordUrl() == null || properties.discordUrl().isEmpty()) {
+            return;
+        }
 
         restClient.post()
                 .uri(URI.create(properties.discordUrl()))

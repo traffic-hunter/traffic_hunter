@@ -36,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import ygo.traffic_hunter.core.alarm.WebHookAlarm;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.webhook.message.Message;
 import ygo.traffic_hunter.core.webhook.message.library.MessageMaker.Color;
@@ -48,7 +49,7 @@ import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SlackWebHook implements AlarmSender {
+public class SlackWebHook implements WebHookAlarm, AlarmSender {
 
     private final Slack slack;
 
@@ -58,26 +59,25 @@ public class SlackWebHook implements AlarmSender {
 
     @Override
     public void enable() {
-        this.isActive.compareAndSet(false, true);
+        isActive.compareAndSet(false, true);
     }
 
     @Override
     public void disable() {
-        this.isActive.compareAndSet(false, true);
+        isActive.compareAndSet(true, false);
     }
 
     @Override
     public boolean isActive() {
-        return this.isActive.get();
-    }
-
-    @Override
-    public boolean isWebHook() {
-        return true;
+        return isActive.get();
     }
 
     @Override
     public void send(final Message message) {
+
+        if(!isActive.get() || properties.discordUrl() == null || properties.discordUrl().isEmpty()) {
+            return;
+        }
 
         try {
             WebhookResponse response = slack.send(

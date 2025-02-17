@@ -12,13 +12,10 @@ public class AlarmManger {
 
     private final List<AlarmSender> alarmSenders;
 
-    public void send(Message message) {
+    public void send(final Message message) {
 
         for (AlarmSender alarmSender : alarmSenders) {
-            if (alarmSender.isActive()) {
-                alarmSender.send(message);
-            }
+            alarmSender.send(message);
         }
     }
-
 }

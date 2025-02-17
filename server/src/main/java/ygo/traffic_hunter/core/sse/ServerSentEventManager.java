@@ -18,13 +18,18 @@
  */
 package ygo.traffic_hunter.core.sse;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.schedule.Scheduler;
+import ygo.traffic_hunter.core.send.AlarmSender;
+import ygo.traffic_hunter.core.send.ViewSender;
+import ygo.traffic_hunter.core.webhook.message.Message;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
@@ -35,24 +40,23 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 
 @Slf4j
 @Component
-public class ServerSentEventManager {
+public class ServerSentEventManager implements AlarmSender, ViewSender {
 
-    private final Map<Member, Client> clients = new ConcurrentHashMap<>();
+    private final Map<Member, Client> clientMap = new ConcurrentHashMap<>();
 
     public SseEmitter register(final Member member, final SseEmitter emitter) {
 
         log.info("registering sse emitter {}", emitter);
 
-        Client client = new Client(member, emitter,
-                new Scheduler(Executors.newSingleThreadScheduledExecutor()));
+        Client client = new Client(emitter, new Scheduler(Executors.newSingleThreadScheduledExecutor()));
 
-        clients.put(member, client);
+        clientMap.put(member, client);
 
-        client.send("connect");
+        client.send("connect", member.getEmail());
 
         emitter.onCompletion(() -> {
             log.info("completed sse emitter {}", emitter);
-            clients.remove(member);
+            clientMap.remove(member);
         });
 
         emitter.onTimeout(() -> {
@@ -67,21 +71,50 @@ public class ServerSentEventManager {
                                   final TimeInterval timeInterval,
                                   final Runnable runnable) {
 
-        if (!clients.containsKey(member)) {
+        if (!clientMap.containsKey(member)) {
             throw new IllegalStateException(
                     "The client with the given identification does not exist. Please subscribe first.");
         }
 
         log.info("schedule broadcasting sse emitter {}", timeInterval);
 
-        Client client = clients.get(member);
+        Client client = clientMap.get(member);
         client.scheduleBroadcast(runnable);
     }
 
-    public <T> void send(final Member member, final T data) {
+    @Override
+    public void send(final Message message) {
+        this.sendAll(message);
+    }
 
-        Client client = clients.get(member);
-        client.send(data);
+    @Override
+    public <T> void send(final T data) {
+        this.sendAll(data);
+    }
+
+    @Override
+    public <T> void send(final List<T> data) {
+        this.sendAll(data);
+    }
+
+    private <T> void sendAll(final T data) {
+
+        for (Member member : clientMap.keySet()) {
+            Client client = clientMap.get(member);
+
+            if(member.isAlarm()) {
+                client.send(data, member.getEmail());
+            }
+        }
+    }
+
+    private <T> void asyncSend(final T data) {
+
+        clientMap.keySet().forEach(member -> {
+            Client client = clientMap.get(member);
+
+            CompletableFuture.runAsync(() -> client.send(data, member.getEmail()));
+        });
     }
 
     static class ServerSentEventException extends RuntimeException {

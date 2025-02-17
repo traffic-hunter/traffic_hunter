@@ -33,14 +33,6 @@ public interface AlarmSender {
 
     void send(Message message);
 
-    void enable(); // enable alarm
-
-    void disable(); // disable alarm
-
-    boolean isActive(); // alarm enable or disable
-
-    boolean isWebHook();
-
     class AlarmException extends RuntimeException {
 
         public AlarmException() {

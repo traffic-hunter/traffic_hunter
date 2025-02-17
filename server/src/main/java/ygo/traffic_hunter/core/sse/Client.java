@@ -19,16 +19,11 @@
 package ygo.traffic_hunter.core.sse;
 
 import java.io.IOException;
-import java.util.List;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ygo.traffic_hunter.core.schedule.Scheduler;
-import ygo.traffic_hunter.core.send.AlarmSender;
-import ygo.traffic_hunter.core.send.ViewSender;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager.ServerSentEventException;
-import ygo.traffic_hunter.core.webhook.message.Message;
-import ygo.traffic_hunter.core.webhook.message.SseMessage;
-import ygo.traffic_hunter.domain.entity.user.Member;
 
 /**
  * @author yungwang-o, JuSeong
@@ -36,74 +31,32 @@ import ygo.traffic_hunter.domain.entity.user.Member;
  * @see SseEmitter
  */
 @Slf4j
-public class Client implements AlarmSender, ViewSender {
+@Getter
+public class Client {
 
     private static final int DEFAULT_INTERVAL = 5000;
-
-    private final Member member;
 
     private final SseEmitter emitter;
 
     private final Scheduler scheduler;
 
-    private boolean isActive;
-
-    public Client(final Member member, final SseEmitter emitter, final Scheduler scheduler) {
-        this.member = member;
+    public Client(final SseEmitter emitter, final Scheduler scheduler) {
         this.emitter = emitter;
         this.scheduler = scheduler;
-        this.isActive = member.isAlarm();
     }
 
     public void scheduleBroadcast(final Runnable runnable) {
         scheduler.schedule(DEFAULT_INTERVAL, runnable);
     }
 
-    @Override
-    public void enable() {
-        this.isActive = true;
-    }
-
-    @Override
-    public void disable() {
-        this.isActive = false;
-    }
-
-    @Override
-    public boolean isActive() {
-        return this.isActive;
-    }
-
-    @Override
-    public boolean isWebHook() {
-        // fix
-        return false;
-    }
-
-    @Override
-    public void send(final Message message) {
-        SseMessage sseMessage = SseMessage.from(message);
-        send(sseMessage, emitter);
-    }
-
-    @Override
-    public <T> void send(final T data) {
-        send(data, emitter);
-    }
-
-    @Override
-    public <T> void send(final List<T> data) {
-        send(data, emitter);
-    }
-
-    private <T> void send(final T data, final SseEmitter emitter) {
+    public <T> void send(final T data, final String name) {
 
         if (data == null) {
             return;
         }
 
         SseEmitter.SseEventBuilder sseBuilder = SseEmitter.event()
-                .name(String.valueOf(member.getId()))
+                .name(name)
                 .data(data);
 
         try {
