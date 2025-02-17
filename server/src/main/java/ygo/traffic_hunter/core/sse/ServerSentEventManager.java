@@ -24,8 +24,8 @@ import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import ygo.traffic_hunter.core.identification.Identification;
 import ygo.traffic_hunter.core.schedule.Scheduler;
+import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
 /**
@@ -37,22 +37,22 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @Component
 public class ServerSentEventManager {
 
-    private final Map<Identification, Client> clients = new ConcurrentHashMap<>();
+    private final Map<Member, Client> clients = new ConcurrentHashMap<>();
 
-    public SseEmitter register(final Identification identification, final SseEmitter emitter) {
+    public SseEmitter register(final Member member, final SseEmitter emitter) {
 
         log.info("registering sse emitter {}", emitter);
 
-        Client client = new Client(identification, emitter,
+        Client client = new Client(member, emitter,
                 new Scheduler(Executors.newSingleThreadScheduledExecutor()));
 
-        clients.put(identification, client);
+        clients.put(member, client);
 
         client.send("connect");
 
         emitter.onCompletion(() -> {
             log.info("completed sse emitter {}", emitter);
-            clients.remove(identification);
+            clients.remove(member);
         });
 
         emitter.onTimeout(() -> {
@@ -63,24 +63,24 @@ public class ServerSentEventManager {
         return emitter;
     }
 
-    public void scheduleBroadcast(final Identification identification,
+    public void scheduleBroadcast(final Member member,
                                   final TimeInterval timeInterval,
                                   final Runnable runnable) {
 
-        if (!clients.containsKey(identification)) {
+        if (!clients.containsKey(member)) {
             throw new IllegalStateException(
                     "The client with the given identification does not exist. Please subscribe first.");
         }
 
         log.info("schedule broadcasting sse emitter {}", timeInterval);
 
-        Client client = clients.get(identification);
+        Client client = clients.get(member);
         client.scheduleBroadcast(runnable);
     }
 
-    public <T> void send(final Identification identification, final T data) {
+    public <T> void send(final Member member, final T data) {
 
-        Client client = clients.get(identification);
+        Client client = clients.get(member);
         client.send(data);
     }
 

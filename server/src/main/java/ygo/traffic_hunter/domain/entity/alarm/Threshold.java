@@ -10,9 +10,9 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.dbcp.HikariDbcpInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.memory.MemoryStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServerInfo;
+import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 
 /**
- *
  * @author yungwang-o
  * @version 1.1.0
  */
@@ -65,7 +65,7 @@ public class Threshold {
     // early return
     public boolean isInvalid(final Threshold threshold) {
 
-        if(threshold == null) {
+        if (threshold == null) {
             return true;
         }
 
@@ -77,7 +77,7 @@ public class Threshold {
         };
 
         for (int value : values) {
-            if(value < 0 || value > 100) {
+            if (value < 0 || value > 100) {
                 return true;
             }
         }
@@ -99,15 +99,19 @@ public class Threshold {
             HikariDbcpInfo hikariDbcpInfo
     ) {
 
-        public CalculatedThreshold calculate(final Threshold threshold) {
+        public CalculatedThreshold calculate(final ThresholdResponse threshold) {
 
             return CalculatedThreshold.builder()
-                    .calculateCpu(threshold.cpuThreshold)
-                    .calculateMemory((long) (memoryStatusInfo.heapMemoryUsage().max() * (threshold.memoryThreshold / 100.0)))
-                    .calculateThread((long) (threadStatusInfo.getTotalStartThreadCount() * (threshold.threadThreshold / 100.0)))
-                    .calculateWebRequest(threshold.webRequestThreshold)
-                    .calculateWebThread((int) (tomcatWebServerInfo.tomcatThreadPoolInfo().maxThreads() * (threshold.webThreadThreshold / 100.0)))
-                    .calculateDbcp((int) (hikariDbcpInfo.totalConnections() * (threshold.dbcpThreshold / 100.0)))
+                    .calculateCpu(threshold.cpuThreshold())
+                    .calculateMemory((long) (memoryStatusInfo.heapMemoryUsage().max() * (threshold.memoryThreshold()
+                            / 100.0)))
+                    .calculateThread(
+                            (long) (threadStatusInfo.getTotalStartThreadCount() * (threshold.threadThreshold()
+                                    / 100.0)))
+                    .calculateWebRequest(threshold.webRequestThreshold())
+                    .calculateWebThread((int) (tomcatWebServerInfo.tomcatThreadPoolInfo().maxThreads() * (
+                            threshold.webRequestThreshold() / 100.0)))
+                    .calculateDbcp((int) (hikariDbcpInfo.totalConnections() * (threshold.dbcpThreshold() / 100.0)))
                     .build();
         }
     }
@@ -126,5 +130,6 @@ public class Threshold {
             int calculateWebThread,
 
             int calculateDbcp
-    ) { }
+    ) {
+    }
 }

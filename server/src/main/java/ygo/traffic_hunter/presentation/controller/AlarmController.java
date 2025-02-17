@@ -24,6 +24,7 @@ public class AlarmController {
 
     private final AlarmService alarmService;
 
+
     @GetMapping("/threshold")
     @ResponseStatus(HttpStatus.OK)
     public ThresholdResponse getThresholdApi() {
@@ -44,4 +45,5 @@ public class AlarmController {
                 thresholdRequest.dbcpThreshold()
         );
     }
+
 }
