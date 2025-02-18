@@ -49,14 +49,14 @@ public class Client {
         scheduler.schedule(DEFAULT_INTERVAL, runnable);
     }
 
-    public <T> void send(final T data, final String name) {
+    public <T> void send(final T data) {
 
         if (data == null) {
             return;
         }
 
         SseEmitter.SseEventBuilder sseBuilder = SseEmitter.event()
-                .name(name)
+                .name("sse metric sender")
                 .data(data);
 
         try {
