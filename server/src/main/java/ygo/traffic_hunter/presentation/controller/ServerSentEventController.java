@@ -56,8 +56,7 @@ public class ServerSentEventController {
     public void broadcast(@Member final Integer id,
                           @PathVariable(name = "interval") final TimeInterval interval) {
 
-        metricService.scheduleBroadcast(id, interval,
-                interval.getLimit());
+        metricService.scheduleBroadcast(id, interval, interval.getLimit());
     }
 
 }

@@ -132,8 +132,11 @@ public class ChannelEventHandler {
 
     @EventListener
     public void handle(final AlarmEvent event) {
+
         MetadataWrapper<SystemInfo> object = event.systemInfo();
+
         ThresholdResponse threshold = alarmService.retrieveThreshold();
+
         Calculator calculator = Calculator.builder()
                 .memoryStatusInfo(object.data().memoryStatusInfo())
                 .cpuStatusInfo(object.data().cpuStatusInfo())
@@ -144,50 +147,60 @@ public class ChannelEventHandler {
 
         CalculatedThreshold calculate = calculator.calculate(threshold);
 
+        double processCpuLoad = object.data().cpuStatusInfo().processCpuLoad();
+        long memoryUsed = object.data().memoryStatusInfo().heapMemoryUsage().used();
+        int threadCount = object.data().threadStatusInfo().threadCount();
+        long webRequestCount = object.data().tomcatWebServerInfo().tomcatRequestInfo().requestCount();
+        int webThreadCount = object.data().threadStatusInfo().threadCount();
+        int databaseActiveConnectionCount = object.data().hikariDbcpInfo().activeConnections();
+
         // CPU Alarm
-        if (canSend(MessageType.CPU, object.data().cpuStatusInfo().processCpuLoad(), calculate.calculateCpu())) {
+        if (canSend(MessageType.CPU, processCpuLoad, calculate.calculateCpu())) {
+
             alarmManager.send(MessageType.CPU.doMessage(null, object));
             Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.CPU.name(), true);
         }
 
         // Memory Alarm
-        if (canSend(MessageType.MEMORY, object.data().memoryStatusInfo().heapMemoryUsage().used(),
-                calculate.calculateMemory())) {
+        if (canSend(MessageType.MEMORY, memoryUsed, calculate.calculateMemory())) {
+
             alarmManager.send(MessageType.MEMORY.doMessage(null, object));
             Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.MEMORY.name(), true);
         }
 
         // Thread Alarm
-        if (canSend(MessageType.THREAD, object.data().threadStatusInfo().threadCount(),
-                calculate.calculateThread())) {
+        if (canSend(MessageType.THREAD, threadCount, calculate.calculateThread())) {
+
             alarmManager.send(MessageType.THREAD.doMessage(null, object));
             Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.THREAD.name(), true);
         }
 
         // Web Request Alarm
-        if (canSend(MessageType.WEB_REQUEST, object.data().tomcatWebServerInfo().tomcatRequestInfo().requestCount(),
-                calculate.calculateWebRequest())) {
+        if (canSend(MessageType.WEB_REQUEST, webRequestCount, calculate.calculateWebRequest())) {
+
             alarmManager.send(MessageType.WEB_REQUEST.doMessage(null, object));
             Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.WEB_REQUEST.name(), true);
         }
 
         // Web Thread Alarm
-        if (canSend(MessageType.WEB_THREAD, object.data().threadStatusInfo().threadCount(),
-                calculate.calculateWebThread())) {
+        if (canSend(MessageType.WEB_THREAD, webThreadCount, calculate.calculateWebThread())) {
+
             alarmManager.send(MessageType.WEB_THREAD.doMessage(null, object));
             Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.WEB_THREAD.name(), true);
         }
 
         // DBCP Alarm
-        if (canSend(MessageType.DBCP, object.data().hikariDbcpInfo().activeConnections(),
-                calculate.calculateDbcp())) {
+        if (canSend(MessageType.DBCP, databaseActiveConnectionCount, calculate.calculateDbcp())) {
+
             alarmManager.send(MessageType.DBCP.doMessage(null, object));
             Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.DBCP.name(), true);
         }
     }
 
     private boolean canSend(MessageType messageType, double currentValue, double thresholdValue) {
+
         Cache cache = cacheManager.getCache(ALARM_CACHE_NAME);
+
         if (cache != null && cache.get(messageType.name()) != null) {
             return false;
         }

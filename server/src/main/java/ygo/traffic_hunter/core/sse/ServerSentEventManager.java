@@ -94,13 +94,15 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
     @Override
     public <T> void send(final Member member, final T data) {
+
         Client client = clientMap.get(member);
+
         client.send(data, member.getEmail());
     }
 
     @Override
     public <T> void send(final List<T> data) {
-        this.sendAll(data);
+        // TODO: view list send
     }
 
     private <T> void sendAll(final T data) {
@@ -140,8 +142,11 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
             super(cause);
         }
 
-        public ServerSentEventException(final String message, final Throwable cause, final boolean enableSuppression,
+        public ServerSentEventException(final String message,
+                                        final Throwable cause,
+                                        final boolean enableSuppression,
                                         final boolean writableStackTrace) {
+
             super(message, cause, enableSuppression, writableStackTrace);
         }
     }

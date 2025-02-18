@@ -73,11 +73,8 @@ public class MetricService {
     public SseEmitter register(final Integer id, final SseEmitter sseEmitter) {
 
         Member member = memberRepository.findById(id);
+
         return sseManager.register(member, sseEmitter);
-    }
-
-    public void asyncBroadcast(final TimeInterval interval) {
-
     }
 
     public void scheduleBroadcast(final Integer id,
@@ -85,13 +82,18 @@ public class MetricService {
                                   final Integer limit) {
 
         Member member = memberRepository.findById(id);
-        sseManager.scheduleBroadcast(member, DEFAULT_BROADCAST_INTERVAL,
-                () -> broadcast(id, interval, limit));
+
+        sseManager.scheduleBroadcast(
+                member,
+                DEFAULT_BROADCAST_INTERVAL,
+                () -> broadcast(id, interval, limit)
+        );
     }
 
     private void broadcast(final Integer id, final TimeInterval interval, final Integer limit) {
 
         Member member = memberRepository.findById(id);
+
         List<AgentMetadata> agents = webSocketHandler.getAgents();
 
         for (AgentMetadata metadata : agents) {
