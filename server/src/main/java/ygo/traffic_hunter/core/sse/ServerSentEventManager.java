@@ -23,13 +23,15 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import ygo.traffic_hunter.core.repository.MemberRepository;
 import ygo.traffic_hunter.core.schedule.Scheduler;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.send.ViewSender;
-import ygo.traffic_hunter.core.webhook.message.Message;
+import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
@@ -39,9 +41,12 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ServerSentEventManager implements AlarmSender, ViewSender {
 
     private final Map<Member, Client> clientMap = new ConcurrentHashMap<>();
+
+    private final MemberRepository memberRepository;
 
     public SseEmitter register(final Member member, final SseEmitter emitter) {
 
@@ -51,7 +56,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
         clientMap.put(member, client);
 
-        client.send("connect", member.getEmail());
+        client.send("connect");
 
         emitter.onCompletion(() -> {
             log.info("completed sse emitter {}", emitter);
@@ -96,7 +101,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
         Client client = clientMap.get(member);
 
-        client.send(data, member.getEmail());
+        client.send(data);
     }
 
     @Override
@@ -106,22 +111,24 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
     private <T> void sendAll(final T data) {
 
-        for (Member member : clientMap.keySet()) {
-            Client client = clientMap.get(member);
+        List<Member> members = memberRepository.findAll();
 
-            if (member.isAlarm()) {
-                client.send(data, member.getEmail());
-            }
-        }
+        members.stream()
+                .filter(clientMap::containsKey)
+                .filter(Member::isAlarm)
+                .map(clientMap::get)
+                .forEach(client -> client.send(data));
     }
 
     private <T> void asyncSend(final T data) {
 
-        clientMap.keySet().forEach(member -> {
-            Client client = clientMap.get(member);
+        List<Member> members = memberRepository.findAll();
 
-            CompletableFuture.runAsync(() -> client.send(data, member.getEmail()));
-        });
+        members.stream()
+                .filter(clientMap::containsKey)
+                .filter(Member::isAlarm)
+                .map(clientMap::get)
+                .forEach(client -> CompletableFuture.runAsync(() -> client.send(data)));
     }
 
     public static class ServerSentEventException extends RuntimeException {
