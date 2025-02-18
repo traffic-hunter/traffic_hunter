@@ -37,7 +37,6 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
  * @author JuSeong
  * @version 1.1.0
  */
-
 @Slf4j
 @Component
 public class ServerSentEventManager implements AlarmSender, ViewSender {
