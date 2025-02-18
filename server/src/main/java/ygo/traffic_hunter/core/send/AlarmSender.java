@@ -23,7 +23,7 @@
  */
 package ygo.traffic_hunter.core.send;
 
-import ygo.traffic_hunter.core.webhook.message.Message;
+import ygo.traffic_hunter.core.alarm.message.Message;
 
 /**
  * @author yungwang-o

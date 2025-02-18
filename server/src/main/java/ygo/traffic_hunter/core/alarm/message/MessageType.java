@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.webhook.message;
+package ygo.traffic_hunter.core.alarm.message;
 
 import lombok.Getter;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
-import ygo.traffic_hunter.core.webhook.message.library.MessageMaker;
-import ygo.traffic_hunter.core.webhook.message.library.MessageMaker.Color;
+import ygo.traffic_hunter.core.alarm.message.library.MessageMaker;
+import ygo.traffic_hunter.core.alarm.message.library.MessageMaker.Color;
 
 /**
  * @author yungwang-o

@@ -21,16 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.webhook.message.library;
-
-import static ygo.traffic_hunter.core.webhook.message.Message.Embed;
-import static ygo.traffic_hunter.core.webhook.message.Message.Field;
+package ygo.traffic_hunter.core.alarm.message.library;
 
 import java.net.InetAddress;
 import java.time.Instant;
 import lombok.Getter;
 import org.slf4j.helpers.MessageFormatter;
-import ygo.traffic_hunter.core.webhook.message.Message;
+import ygo.traffic_hunter.core.alarm.message.Message;
+import ygo.traffic_hunter.core.alarm.message.Message.Embed;
+import ygo.traffic_hunter.core.alarm.message.Message.Field;
 
 /**
  * @author yungwang-o

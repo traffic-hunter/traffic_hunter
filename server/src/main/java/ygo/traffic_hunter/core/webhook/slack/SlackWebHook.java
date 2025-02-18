@@ -38,8 +38,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.alarm.WebHookAlarm;
 import ygo.traffic_hunter.core.send.AlarmSender;
-import ygo.traffic_hunter.core.webhook.message.Message;
-import ygo.traffic_hunter.core.webhook.message.library.MessageMaker.Color;
+import ygo.traffic_hunter.core.alarm.message.Message;
+import ygo.traffic_hunter.core.alarm.message.library.MessageMaker.Color;
 import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 
 /**

@@ -1,7 +1,7 @@
-package ygo.traffic_hunter.core.webhook.message;
+package ygo.traffic_hunter.core.alarm.message;
 
 import java.util.List;
-import ygo.traffic_hunter.core.webhook.message.Message.Embed;
+import ygo.traffic_hunter.core.alarm.message.Message.Embed;
 
 public record SseMessage(
         String title,

@@ -23,8 +23,8 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServerInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.request.TomcatRequestInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.thread.TomcatThreadPoolInfo;
-import ygo.traffic_hunter.core.webhook.message.Message;
-import ygo.traffic_hunter.core.webhook.message.MessageType;
+import ygo.traffic_hunter.core.alarm.message.Message;
+import ygo.traffic_hunter.core.alarm.message.MessageType;
 import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 
 @EnableConfigurationProperties(WebHookProperties.class)

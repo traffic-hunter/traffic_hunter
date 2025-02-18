@@ -37,7 +37,7 @@ import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.service.AlarmService;
-import ygo.traffic_hunter.core.webhook.message.MessageType;
+import ygo.traffic_hunter.core.alarm.message.MessageType;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.entity.alarm.Threshold.CalculatedThreshold;
