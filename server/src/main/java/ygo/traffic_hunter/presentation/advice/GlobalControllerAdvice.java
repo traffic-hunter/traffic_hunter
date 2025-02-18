@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ygo.traffic_hunter.common.exception.TrafficHunterException;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel.ChannelException;
 import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
+import ygo.traffic_hunter.core.sse.ServerSentEventManager.ServerSentEventException;
 import ygo.traffic_hunter.persistence.impl.MemberRepositoryImpl.MemberNotFoundException;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository.ObservabilityNotFoundException;
 
@@ -99,6 +100,12 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleMemberNotFoundException(final MemberNotFoundException e) {
         return ErrorResponse.create(e, HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  
+    @ExceptionHandler(ServerSentEventException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleServerSentEventException(final ServerSentEventException e) {
+        return ErrorResponse.create(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
 }
