@@ -117,7 +117,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
         });
     }
 
-    static class ServerSentEventException extends RuntimeException {
+    public static class ServerSentEventException extends RuntimeException {
 
         public ServerSentEventException() {
         }
