@@ -18,6 +18,8 @@
  */
 package ygo.traffic_hunter.core.event.channel;
 
+import static ygo.traffic_hunter.config.cache.CacheConfig.CacheType.ALARM_CACHE_NAME;
+
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
@@ -27,7 +29,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.common.map.TransactionMapper;
-import ygo.traffic_hunter.core.alarm.AlarmManger;
+import ygo.traffic_hunter.core.alarm.AlarmManager;
 import ygo.traffic_hunter.core.collector.validator.MetricValidator;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
@@ -102,7 +104,7 @@ public class ChannelEventHandler {
 
     private final AlarmService alarmService;
 
-    private final AlarmManger alarmManger;
+    private final AlarmManager alarmManager;
 
     private final CacheManager cacheManager;
 
@@ -132,57 +134,60 @@ public class ChannelEventHandler {
     public void handle(final AlarmEvent event) {
         MetadataWrapper<SystemInfo> object = event.systemInfo();
         ThresholdResponse threshold = alarmService.retrieveThreshold();
-        CalculatedThreshold calculate = new Calculator(object.data().memoryStatusInfo(),
-                object.data().cpuStatusInfo(),
-                object.data().threadStatusInfo(),
-                object.data().tomcatWebServerInfo(),
-                object.data().hikariDbcpInfo())
-                .calculate(threshold);
+        Calculator calculator = Calculator.builder()
+                .memoryStatusInfo(object.data().memoryStatusInfo())
+                .cpuStatusInfo(object.data().cpuStatusInfo())
+                .threadStatusInfo(object.data().threadStatusInfo())
+                .tomcatWebServerInfo(object.data().tomcatWebServerInfo())
+                .hikariDbcpInfo(object.data().hikariDbcpInfo())
+                .build();
 
-        // CPU 알림
-        if (canSendable(MessageType.CPU, object.data().cpuStatusInfo().processCpuLoad(), calculate.calculateCpu())) {
-            alarmManger.send(MessageType.CPU.doMessage(null, object));
-            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.CPU.name(), true);
+        CalculatedThreshold calculate = calculator.calculate(threshold);
+
+        // CPU Alarm
+        if (canSend(MessageType.CPU, object.data().cpuStatusInfo().processCpuLoad(), calculate.calculateCpu())) {
+            alarmManager.send(MessageType.CPU.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.CPU.name(), true);
         }
 
-        // Memory 알림
-        if (canSendable(MessageType.MEMORY, object.data().memoryStatusInfo().heapMemoryUsage().used(),
+        // Memory Alarm
+        if (canSend(MessageType.MEMORY, object.data().memoryStatusInfo().heapMemoryUsage().used(),
                 calculate.calculateMemory())) {
-            alarmManger.send(MessageType.MEMORY.doMessage(null, object));
-            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.MEMORY.name(), true);
+            alarmManager.send(MessageType.MEMORY.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.MEMORY.name(), true);
         }
 
-        // Thread 알림
-        if (canSendable(MessageType.THREAD, object.data().threadStatusInfo().threadCount(),
+        // Thread Alarm
+        if (canSend(MessageType.THREAD, object.data().threadStatusInfo().threadCount(),
                 calculate.calculateThread())) {
-            alarmManger.send(MessageType.THREAD.doMessage(null, object));
-            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.THREAD.name(), true);
+            alarmManager.send(MessageType.THREAD.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.THREAD.name(), true);
         }
 
-        // Web Request 알림
-        if (canSendable(MessageType.WEB_REQUEST, object.data().tomcatWebServerInfo().tomcatRequestInfo().requestCount(),
+        // Web Request Alarm
+        if (canSend(MessageType.WEB_REQUEST, object.data().tomcatWebServerInfo().tomcatRequestInfo().requestCount(),
                 calculate.calculateWebRequest())) {
-            alarmManger.send(MessageType.WEB_REQUEST.doMessage(null, object));
-            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.WEB_REQUEST.name(), true);
+            alarmManager.send(MessageType.WEB_REQUEST.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.WEB_REQUEST.name(), true);
         }
 
-        // Web Thread 알림
-        if (canSendable(MessageType.WEB_THREAD, object.data().threadStatusInfo().threadCount(),
+        // Web Thread Alarm
+        if (canSend(MessageType.WEB_THREAD, object.data().threadStatusInfo().threadCount(),
                 calculate.calculateWebThread())) {
-            alarmManger.send(MessageType.WEB_THREAD.doMessage(null, object));
-            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.WEB_THREAD.name(), true);
+            alarmManager.send(MessageType.WEB_THREAD.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.WEB_THREAD.name(), true);
         }
 
-        // DBCP 알림
-        if (canSendable(MessageType.DBCP, object.data().hikariDbcpInfo().activeConnections(),
+        // DBCP Alarm
+        if (canSend(MessageType.DBCP, object.data().hikariDbcpInfo().activeConnections(),
                 calculate.calculateDbcp())) {
-            alarmManger.send(MessageType.DBCP.doMessage(null, object));
-            Objects.requireNonNull(cacheManager.getCache("alarm_cache")).put(MessageType.DBCP.name(), true);
+            alarmManager.send(MessageType.DBCP.doMessage(null, object));
+            Objects.requireNonNull(cacheManager.getCache(ALARM_CACHE_NAME)).put(MessageType.DBCP.name(), true);
         }
     }
 
-    private boolean canSendable(MessageType messageType, double currentValue, double thresholdValue) {
-        Cache cache = cacheManager.getCache("alarm_cache");
+    private boolean canSend(MessageType messageType, double currentValue, double thresholdValue) {
+        Cache cache = cacheManager.getCache(ALARM_CACHE_NAME);
         if (cache != null && cache.get(messageType.name()) != null) {
             return false;
         }

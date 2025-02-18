@@ -70,7 +70,9 @@ public class MetricService {
         return metricRepository.findTxMetricsByRecentTimeAndAgentName(interval, agentName, limit);
     }
 
-    public SseEmitter register(final Member member, final SseEmitter sseEmitter) {
+    public SseEmitter register(final Integer id, final SseEmitter sseEmitter) {
+
+        Member member = memberRepository.findById(id);
         return sseManager.register(member, sseEmitter);
     }
 
@@ -78,16 +80,18 @@ public class MetricService {
 
     }
 
-    public void scheduleBroadcast(final Member member,
+    public void scheduleBroadcast(final Integer id,
                                   @NonNull final TimeInterval interval,
                                   final Integer limit) {
 
+        Member member = memberRepository.findById(id);
         sseManager.scheduleBroadcast(member, DEFAULT_BROADCAST_INTERVAL,
-                () -> broadcast(member, interval, limit));
+                () -> broadcast(id, interval, limit));
     }
 
-    private void broadcast(final Member member, final TimeInterval interval, final Integer limit) {
+    private void broadcast(final Integer id, final TimeInterval interval, final Integer limit) {
 
+        Member member = memberRepository.findById(id);
         List<AgentMetadata> agents = webSocketHandler.getAgents();
 
         for (AgentMetadata metadata : agents) {

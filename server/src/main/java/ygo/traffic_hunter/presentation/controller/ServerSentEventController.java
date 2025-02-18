@@ -18,8 +18,7 @@
  */
 package ygo.traffic_hunter.presentation.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,8 +28,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import ygo.traffic_hunter.core.annotation.Member;
 import ygo.traffic_hunter.core.service.MetricService;
-import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
 /**
@@ -47,31 +46,18 @@ public class ServerSentEventController {
 
     @GetMapping(path = "/metrics/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public SseEmitter subscribe(final HttpServletRequest request) {
-        Member member = getMember(request);
-        return metricService.register(member, new SseEmitter(TIMEOUT));
+    public SseEmitter subscribe(@Member final Integer id) {
+
+        return metricService.register(id, new SseEmitter(TIMEOUT));
     }
 
     @PostMapping("/metrics/broadcast/{interval}")
     @ResponseStatus(HttpStatus.OK)
-    public void broadcast(final HttpServletRequest request,
+    public void broadcast(@Member final Integer id,
                           @PathVariable(name = "interval") final TimeInterval interval) {
-        Member member = getMember(request);
-        metricService.scheduleBroadcast(member, interval,
+
+        metricService.scheduleBroadcast(id, interval,
                 interval.getLimit());
     }
 
-    private Member getMember(final HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("member") == null) {
-            throw new UnauthorizedAccessException("Login is required");
-        }
-        return (Member) session.getAttribute("member");
-    }
-
-    public static class UnauthorizedAccessException extends IllegalStateException {
-        public UnauthorizedAccessException(String message) {
-            super(message);
-        }
-    }
 }

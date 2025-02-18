@@ -19,6 +19,8 @@
 package ygo.traffic_hunter.core.send;
 
 import java.util.List;
+import ygo.traffic_hunter.domain.entity.user.Member;
+
 
 /**
  * @author yungwang-o
@@ -28,5 +30,8 @@ public interface ViewSender {
 
     <T> void send(T data);
 
+    <T> void send(Member member, T data);
+
     <T> void send(List<T> data);
+
 }

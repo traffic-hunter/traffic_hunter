@@ -33,7 +33,6 @@ import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
 import ygo.traffic_hunter.core.sse.ServerSentEventManager.ServerSentEventException;
 import ygo.traffic_hunter.persistence.impl.MemberRepositoryImpl.MemberNotFoundException;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository.ObservabilityNotFoundException;
-import ygo.traffic_hunter.presentation.controller.ServerSentEventController.UnauthorizedAccessException;
 
 /**
  * @author yungwang-o
@@ -102,16 +101,11 @@ public class GlobalControllerAdvice {
     public ErrorResponse handleMemberNotFoundException(final MemberNotFoundException e) {
         return ErrorResponse.create(e, HttpStatus.NOT_FOUND, e.getMessage());
     }
-
-    @ExceptionHandler(UnauthorizedAccessException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleUnauthorizedAccessException(final UnauthorizedAccessException e) {
-        return ErrorResponse.create(e, HttpStatus.UNAUTHORIZED, e.getMessage());
-    }
-
+  
     @ExceptionHandler(ServerSentEventException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleServerSentEventException(final ServerSentEventException e) {
         return ErrorResponse.create(e, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
+
 }
