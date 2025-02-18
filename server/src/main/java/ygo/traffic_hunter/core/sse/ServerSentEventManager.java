@@ -93,6 +93,12 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
     }
 
     @Override
+    public <T> void send(final Member member, final T data) {
+        Client client = clientMap.get(member);
+        client.send(data, member.getEmail());
+    }
+
+    @Override
     public <T> void send(final List<T> data) {
         this.sendAll(data);
     }
@@ -102,7 +108,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
         for (Member member : clientMap.keySet()) {
             Client client = clientMap.get(member);
 
-            if(member.isAlarm()) {
+            if (member.isAlarm()) {
                 client.send(data, member.getEmail());
             }
         }

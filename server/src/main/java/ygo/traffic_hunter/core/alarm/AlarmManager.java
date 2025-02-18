@@ -8,7 +8,7 @@ import ygo.traffic_hunter.core.webhook.message.Message;
 
 @Component
 @RequiredArgsConstructor
-public class AlarmManger {
+public class AlarmManager {
 
     private final List<AlarmSender> alarmSenders;
 

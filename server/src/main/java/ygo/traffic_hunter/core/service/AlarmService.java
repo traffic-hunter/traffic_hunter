@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.config.cache.CacheConfig.CacheType;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 
@@ -17,14 +18,14 @@ public class AlarmService {
 
     private final AlarmRepository alarmRepository;
 
-    @Cacheable(value = "threshold_cache", key = "'threshold'")
+    @Cacheable(cacheNames = CacheType.THRESHOLD_CACHE_NAME, key = "'threshold'")
     public ThresholdResponse retrieveThreshold() {
 
         return alarmRepository.findThreshold();
     }
 
     @Transactional
-    @CachePut(value = "threshold_cache", key = "'threshold'")
+    @CachePut(cacheNames = CacheType.THRESHOLD_CACHE_NAME, key = "'threshold'")
     public void updateThreshold(final int cpuThreshold,
                                 final int memoryThreshold,
                                 final int threadThreshold,
