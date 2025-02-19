@@ -12,13 +12,19 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -31,8 +37,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ygo.traffic_hunter.AbstractTestConfiguration;
 import ygo.traffic_hunter.common.web.resolver.MemberArgumentResolver;
 import ygo.traffic_hunter.core.dto.request.alarm.ThresholdRequest;
+import ygo.traffic_hunter.core.dto.response.alarm.ActivationWebhook;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.service.AlarmService;
+import ygo.traffic_hunter.core.webhook.Webhook;
 import ygo.traffic_hunter.presentation.advice.GlobalControllerAdvice;
 
 @ExtendWith(RestDocumentationExtension.class)
@@ -172,5 +180,77 @@ class AlarmControllerTest extends AbstractTestConfiguration {
                         , preprocessRequest(prettyPrint())
                         , preprocessResponse(prettyPrint())
                 ));
+    }
+
+    @Test
+    void webhook_알람의_정보를_조회한다() throws Exception {
+        // given
+        List<ActivationWebhook> webhooks = Arrays.asList(
+                new ActivationWebhook(Webhook.SLACK, true),
+                new ActivationWebhook(Webhook.DISCORD, true)
+        );
+
+        given(alarmService.getActiveWebhooks()).willReturn(webhooks);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get("/alarms/webhook/activation"));
+
+        // then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("alarm/get-webhook"
+                        , preprocessRequest(prettyPrint())
+                        , preprocessResponse(prettyPrint())
+                        , responseFields(
+                                fieldWithPath("[].webhook").description("웹훅 플랫폼 이름"),
+                                fieldWithPath("[].isActive").description("웹훅 활성화, 비활성화")
+                        )
+                ));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Webhook.class, names = {"SLACK", "DISCORD"})
+    void 특정_웹훅을_활성화_시킨다(final Webhook webhook) throws Exception {
+        // given
+        willDoNothing()
+                .given(alarmService).enableWebhook(webhook);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get("/alarms/webhook/{webhook}/enable", webhook));
+
+        // then
+        resultActions.andExpect(status().isNoContent())
+                .andDo(print())
+                .andDo(document("alarms/webhook-enable" + "-" + webhook.name().toLowerCase()
+                        , preprocessRequest(prettyPrint())
+                        , preprocessResponse(prettyPrint())
+                        , pathParameters(
+                                parameterWithName("webhook").description("웹훅 플랫폼 이름")
+                        )
+                ));
+
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Webhook.class, names = {"SLACK", "DISCORD"})
+    void 특정_웹훅을_비활성화_시킨다(final Webhook webhook) throws Exception {
+        // given
+        willDoNothing()
+                .given(alarmService).disableWebhook(webhook);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get("/alarms/webhook/{webhook}/disable", webhook));
+
+        // then
+        resultActions.andExpect(status().isNoContent())
+                .andDo(print())
+                .andDo(document("alarms/webhook-disable"
+                        , preprocessRequest(prettyPrint())
+                        , preprocessResponse(prettyPrint())
+                        , pathParameters(
+                                parameterWithName("webhook").description("웹훅 플랫폼 이름")
+                        )
+                ));
+
     }
 }
