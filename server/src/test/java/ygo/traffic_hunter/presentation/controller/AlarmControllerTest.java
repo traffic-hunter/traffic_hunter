@@ -23,8 +23,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -202,53 +200,51 @@ class AlarmControllerTest extends AbstractTestConfiguration {
                         , preprocessRequest(prettyPrint())
                         , preprocessResponse(prettyPrint())
                         , responseFields(
-                                fieldWithPath("[].webhook").description("웹훅 플랫폼 이름"),
+                                fieldWithPath("[].webhook").description("웹훅 플랫폼 이름 (예: SLACK, DISCORD)"),
                                 fieldWithPath("[].isActive").description("웹훅 활성화, 비활성화")
                         )
                 ));
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Webhook.class, names = {"SLACK", "DISCORD"})
-    void 특정_웹훅을_활성화_시킨다(final Webhook webhook) throws Exception {
+    @Test
+    void 특정_웹훅을_활성화_시킨다() throws Exception {
         // given
         willDoNothing()
-                .given(alarmService).enableWebhook(webhook);
+                .given(alarmService).enableWebhook(Webhook.SLACK);
 
         // when
-        ResultActions resultActions = mockMvc.perform(get("/alarms/webhook/{webhook}/enable", webhook));
+        ResultActions resultActions = mockMvc.perform(get("/alarms/webhook/{webhook}/enable", Webhook.SLACK));
 
         // then
         resultActions.andExpect(status().isNoContent())
                 .andDo(print())
-                .andDo(document("alarms/webhook-enable" + "-" + webhook.name().toLowerCase()
+                .andDo(document("alarm/webhook-enable"
                         , preprocessRequest(prettyPrint())
                         , preprocessResponse(prettyPrint())
                         , pathParameters(
-                                parameterWithName("webhook").description("웹훅 플랫폼 이름")
+                                parameterWithName("webhook").description("웹훅 플랫폼 이름 (예: SLACK, DISCORD)")
                         )
                 ));
 
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Webhook.class, names = {"SLACK", "DISCORD"})
-    void 특정_웹훅을_비활성화_시킨다(final Webhook webhook) throws Exception {
+    @Test
+    void 특정_웹훅을_비활성화_시킨다() throws Exception {
         // given
         willDoNothing()
-                .given(alarmService).disableWebhook(webhook);
+                .given(alarmService).disableWebhook(Webhook.SLACK);
 
         // when
-        ResultActions resultActions = mockMvc.perform(get("/alarms/webhook/{webhook}/disable", webhook));
+        ResultActions resultActions = mockMvc.perform(get("/alarms/webhook/{webhook}/disable", Webhook.SLACK));
 
         // then
         resultActions.andExpect(status().isNoContent())
                 .andDo(print())
-                .andDo(document("alarms/webhook-disable"
+                .andDo(document("alarm/webhook-disable"
                         , preprocessRequest(prettyPrint())
                         , preprocessResponse(prettyPrint())
                         , pathParameters(
-                                parameterWithName("webhook").description("웹훅 플랫폼 이름")
+                                parameterWithName("webhook").description("웹훅 플랫폼 이름 (예: SLACK, DISCORD)")
                         )
                 ));
 

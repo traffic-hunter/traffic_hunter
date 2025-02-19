@@ -12,6 +12,18 @@ operation::alarm/get-threshold[snippets='curl-request,http-request,http-response
 
 operation::alarm/update-threshold[snippets='curl-request,http-request,http-response,request-body,request-fields']
 
+=== GET /alarms/webhook/activation
+
+operation::alarm/get-webhook[snippets='curl-request,http-request,http-response,response-body,response-fields']
+
+=== GET /alarms/webhook/{webhook}/enable
+
+operation::alarm/webhook-enable[snippets='curl-request,http-request,http-response,path-parameters']
+
+=== GET /alarms/webhook/{webhook}/disable
+
+operation::alarm/webhook-disable[snippets='curl-request,http-request,http-response,path-parameters']
+
 [[Failed]]
 == Failed
 
