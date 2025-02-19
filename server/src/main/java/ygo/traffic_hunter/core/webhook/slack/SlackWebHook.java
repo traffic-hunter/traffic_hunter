@@ -40,6 +40,7 @@ import ygo.traffic_hunter.core.alarm.WebHookAlarm;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.alarm.message.library.MessageMaker.Color;
+import ygo.traffic_hunter.core.webhook.Webhook;
 import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 
 /**
@@ -58,12 +59,27 @@ public class SlackWebHook implements WebHookAlarm, AlarmSender {
     private final AtomicBoolean isActive = new AtomicBoolean(true);
 
     @Override
+    public Webhook getWebhook() {
+        return Webhook.SLACK;
+    }
+
+    @Override
     public void enable() {
+
+        if(isActive.get()) {
+            return;
+        }
+
         isActive.compareAndSet(false, true);
     }
 
     @Override
     public void disable() {
+
+        if(!isActive.get()) {
+            return;
+        }
+
         isActive.compareAndSet(true, false);
     }
 
