@@ -2,7 +2,7 @@ package ygo.traffic_hunter.core.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ public class AlarmService {
     }
 
     @Transactional
-    @CachePut(cacheNames = CacheType.THRESHOLD_CACHE_NAME, key = "'threshold'")
+    @CacheEvict(cacheNames = CacheType.THRESHOLD_CACHE_NAME, key = "'threshold'")
     public void updateThreshold(final int cpuThreshold,
                                 final int memoryThreshold,
                                 final int threadThreshold,
