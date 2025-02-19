@@ -36,7 +36,7 @@ import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
 /**
- * @author JuSeong
+ * @author yungwnag-o, JuSeong
  * @version 1.1.0
  */
 @Slf4j
