@@ -8,7 +8,6 @@ import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
  * @author JuSeong
  * @version 1.1.0
  */
-
 public record RealTimeMonitoringResponse(String agentName,
                                          Instant agentBootTime,
                                          String agentVersion,
@@ -16,6 +15,10 @@ public record RealTimeMonitoringResponse(String agentName,
 ) {
 
     public static RealTimeMonitoringResponse create(List<SystemMetricResponse> systemMetricResponses) {
+
+        if (systemMetricResponses.isEmpty()) {
+            return null;
+        }
 
         SystemMetricResponse systemMetricResponse = systemMetricResponses.getFirst();
         String agentName = systemMetricResponse.agentName();
