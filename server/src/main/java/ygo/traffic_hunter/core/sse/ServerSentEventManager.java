@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import ygo.traffic_hunter.core.alarm.message.SseMessage;
 import ygo.traffic_hunter.core.repository.MemberRepository;
 import ygo.traffic_hunter.core.schedule.Scheduler;
 import ygo.traffic_hunter.core.send.AlarmSender;
@@ -88,7 +89,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
     @Override
     public void send(final Message message) {
-        this.sendAll(message);
+        this.sendAll(SseMessage.from(message));
     }
 
     @Override
