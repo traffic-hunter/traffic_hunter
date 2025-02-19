@@ -123,11 +123,11 @@ class ServerSentEventControllerTest extends AbstractTestConfiguration {
                         , responseFields(
                                 fieldWithPath("agentName").description("에이전트 이름"),
                                 fieldWithPath("agentBootTime").description(
-                                        "에이전트 시작 시간"),
+                                        "에이전트 시작 시간 UTC"),
                                 fieldWithPath("agentVersion").description("에이전트 버전"),
                                 fieldWithPath("systemMetricResponses").description("시스템 메트릭 응답 목록"),
                                 fieldWithPath("systemMetricResponses[].time").description(
-                                        "응답 수집 시간 (ISO 8601 형식)"),
+                                        "응답 수집 시간 (ISO 8601 형식) UTC"),
                                 fieldWithPath("systemMetricResponses[].metricData").description("시스템 메트릭 데이터"),
 
                                 // CPU 메트릭
