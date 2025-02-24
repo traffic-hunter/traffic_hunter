@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>SSE</title>
+<title>Traffic-hunter-API docs</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -548,23 +548,70 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 }
 </style>
 </head>
-<body id="resources" class="book toc2 toc-left">
+<body id="Traffic-hunter-API" class="book toc2 toc-left">
 <div id="header">
-<h1>SSE</h1>
+<h1>Traffic-hunter-API docs</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#resources-user">subscribe</a>
+<li><a href="#Statstics-API">Statistics-API</a></li>
+<li><a href="#success">Success</a>
 <ul class="sectlevel2">
-<li><a href="#resources-user_http_request">Request</a></li>
-<li><a href="#resources-user_http_response">Response</a></li>
+<li><a href="#_statistictransaction">/statistic/transaction</a></li>
+<li><a href="#_statisticsmetricmax">/statistics/metric/max</a></li>
+<li><a href="#_statisticsmetricavg">/statistics/metric/avg</a></li>
 </ul>
 </li>
-<li><a href="#_broadcast">broadcast</a>
+<li><a href="#failed">Failed</a>
 <ul class="sectlevel2">
-<li><a href="#_broadcast_http_request">Request</a></li>
-<li><a href="#_broadcast_http_response">Response</a></li>
-<li><a href="#_broadcast_response_fields">Response fields</a></li>
+<li><a href="#_statisticstransaction">/statistics/transaction</a></li>
+<li><a href="#_statisticsmetricmax_2">/statistics/metric/max</a></li>
+<li><a href="#_statisticsmetricavg_2">/statistics/metric/avg</a></li>
+</ul>
+</li>
+<li><a href="#ServerSentEvent-API">ServerSentEvent-API</a></li>
+<li><a href="#success">Success</a>
+<ul class="sectlevel2">
+<li><a href="#_metricssubscribe">/metrics/subscribe</a></li>
+<li><a href="#_metricsbroadcastinterval">/metrics/broadcast/{interval}</a></li>
+</ul>
+</li>
+<li><a href="#failed">Failed</a>
+<ul class="sectlevel2">
+<li><a href="#_metricsbroadcastinterval_2">/metrics/broadcast/{interval}</a></li>
+</ul>
+</li>
+<li><a href="#Member-API">Member API</a></li>
+<li><a href="#success">Success</a>
+<ul class="sectlevel2">
+<li><a href="#_post_members">POST /members</a></li>
+<li><a href="#_get_members">GET /members</a></li>
+<li><a href="#_get_membersid">GET /members/{id}</a></li>
+<li><a href="#_post_memberssign_in">POST /members/sign-in</a></li>
+<li><a href="#_post_memberssign_out">POST /members/sign-out</a></li>
+<li><a href="#_put_members">PUT /members</a></li>
+<li><a href="#_delete_members">DELETE /members</a></li>
+</ul>
+</li>
+<li><a href="#Failed">Failed</a>
+<ul class="sectlevel2">
+<li><a href="#_get_membersid_2">GET /members/{id}</a></li>
+<li><a href="#_post_members_2">POST /members</a></li>
+</ul>
+</li>
+<li><a href="#Alarm-API">Alarm API</a></li>
+<li><a href="#Success">Success</a>
+<ul class="sectlevel2">
+<li><a href="#_get_alarmsthreshold">GET /alarms/threshold</a></li>
+<li><a href="#_put_alarmsthreshold">PUT /alarms/threshold</a></li>
+<li><a href="#_get_alarmswebhookactivation">GET /alarms/webhook/activation</a></li>
+<li><a href="#_get_alarmswebhookwebhookenable">GET /alarms/webhook/{webhook}/enable</a></li>
+<li><a href="#_get_alarmswebhookwebhookdisable">GET /alarms/webhook/{webhook}/disable</a></li>
+</ul>
+</li>
+<li><a href="#Failed">Failed</a>
+<ul class="sectlevel2">
+<li><a href="#_put_alarmsthreshold_2">PUT /alarms/threshold</a></li>
 </ul>
 </li>
 </ul>
@@ -572,10 +619,723 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="resources-user"><a class="link" href="#resources-user">subscribe</a></h2>
+<h2 id="Statstics-API"><a class="link" href="#Statstics-API">Statistics-API</a></h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="success"><a class="link" href="#success">Success</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="resources-user_http_request"><a class="link" href="#resources-user_http_request">Request</a></h3>
+<h3 id="_statistictransaction"><a class="link" href="#_statistictransaction">/statistic/transaction</a></h3>
+<div class="sect3">
+<h4 id="_statistictransaction_curl_request"><a class="link" href="#_statistictransaction_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/statistics/transaction?page=0&amp;size=10&amp;sort=count%2CDESC' -i -X GET \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d '{
+  "begin" : "2025-02-13T12:45:14.457213Z",
+  "end" : "2025-02-14T12:45:14.457266Z"
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statistictransaction_http_request"><a class="link" href="#_statistictransaction_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /statistics/transaction?page=0&amp;size=10&amp;sort=count%2CDESC HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Content-Length: 86
+Host: localhost:8080
+
+{
+  "begin" : "2025-02-13T12:45:14.457213Z",
+  "end" : "2025-02-14T12:45:14.457266Z"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statistictransaction_query_parameters"><a class="link" href="#_statistictransaction_query_parameters">Query parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 넘버 (default 0)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>size</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 사이즈 (default 10)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sort</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 정렬 (default count,DESC)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_statistictransaction_request_fields"><a class="link" href="#_statistictransaction_request_fields">Request fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>begin</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회 시작 시간 UTC</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>end</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회 종료 시간 UTC</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_statistictransaction_http_response"><a class="link" href="#_statistictransaction_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 524
+
+{
+  "content" : [ {
+    "timestamp" : "2025-02-14T12:45:14.45729Z",
+    "uri" : "/test",
+    "duration" : 100,
+    "httpMethod" : "POST",
+    "agentName" : "payments-agent",
+    "clientName" : "traffic-hunter.com",
+    "httpStatusCode" : 200,
+    "traceId" : "4081d12f-1b3c-41f1-9cb2-844d9c66fcd4"
+  } ],
+  "pageable" : "INSTANCE",
+  "first" : true,
+  "last" : true,
+  "size" : 1,
+  "number" : 0,
+  "sort" : {
+    "empty" : true,
+    "unsorted" : true,
+    "sorted" : false
+  },
+  "numberOfElements" : 1,
+  "empty" : false
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statistictransaction_response_fields"><a class="link" href="#_statistictransaction_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회된 서비스 트랜잭션 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].timestamp</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">트랜잭션 시작 시간 UTC</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].uri</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">해당 서비스의 uri</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].duration</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">해당 서비스의 실행 시간</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].httpMethod</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">해당 서비스의 http 응답 method</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].agentName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 이름</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].clientName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">클라이언트 이름 (도메인 이름)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].httpStatusCode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">http 상태 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].traceId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">트랜잭션 식별자</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageable</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이징 처리 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>first</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">첫 페이지 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>last</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">마지막 페이지 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>size</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 크기</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현재 페이지 번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sort</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">정렬 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>numberOfElements</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현재 페이지에 포함된 데이터 개수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>empty</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회 결과가 비어있는지 여부</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_statisticsmetricmax"><a class="link" href="#_statisticsmetricmax">/statistics/metric/max</a></h3>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_curl_request"><a class="link" href="#_statisticsmetricmax_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/statistics/metric/max/LATEST_ONE_HOUR' -i -X GET \
+    -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_http_request"><a class="link" href="#_statisticsmetricmax_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /statistics/metric/max/LATEST_ONE_HOUR HTTP/1.1
+Accept: application/json
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_path_parameters"><a class="link" href="#_statisticsmetricmax_path_parameters">Path parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /statistics/metric/max/{timeRange}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>timeRange</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LATEST_ONE_HOUR, LATEST_TWO_HOURS, LATEST_THREE_HOURS, LATEST_SIX_HOURS, LATEST_TWELVE_HOURS, LATEST_ONE_DAY, LATEST_TWO_DAY, LATEST_THREE_DAY, LATEST_ONE_WEEK, LATEST_ONE_MONTH, LATEST_TWO_MONTHS, LATEST_THREE_MONTHS, LATEST_SIX_MONTHS, LATEST_ONE_YEAR, LATEST_TWO_YEARS, LATEST_THREE_YEARS</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_request_body"><a class="link" href="#_statisticsmetricmax_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-none hljs"></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_http_response"><a class="link" href="#_statisticsmetricmax_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 291
+
+{
+  "time" : 1.73908782881201E9,
+  "maxSystemCpuUsage" : 50.8,
+  "maxProcessCpuUsage" : 3.0,
+  "maxHeapMemoryUsage" : 2048,
+  "maxThreadCount" : 10,
+  "maxPeakThreadCount" : 10,
+  "maxWebRequestCount" : 20,
+  "maxWebErrorCount" : 3,
+  "maxWebThreadCount" : 1,
+  "maxDbConnectionCount" : 10
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_response_fields"><a class="link" href="#_statisticsmetricmax_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>time</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">데이터 저장된 시간 UTC</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxSystemCpuUsage</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 system cpu (linux) 사용량</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxProcessCpuUsage</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 process cpu (jvm) 사용량</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxHeapMemoryUsage</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 힙 메모리 사용량</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxThreadCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 쓰레드 사용 개수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxPeakThreadCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 쓰레드 경합 개수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxWebRequestCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 웹 요청 횟수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxWebErrorCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 웹 에러 응답 횟수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxWebThreadCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 웹 쓰레드 활성화 개수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxDbConnectionCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">최고 db 커넥션 활성화 개수</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_response_body"><a class="link" href="#_statisticsmetricmax_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "time" : 1.73908782881201E9,
+  "maxSystemCpuUsage" : 50.8,
+  "maxProcessCpuUsage" : 3.0,
+  "maxHeapMemoryUsage" : 2048,
+  "maxThreadCount" : 10,
+  "maxPeakThreadCount" : 10,
+  "maxWebRequestCount" : 20,
+  "maxWebErrorCount" : 3,
+  "maxWebThreadCount" : 1,
+  "maxDbConnectionCount" : 10
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_statisticsmetricavg"><a class="link" href="#_statisticsmetricavg">/statistics/metric/avg</a></h3>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_curl_request"><a class="link" href="#_statisticsmetricavg_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/statistics/metric/avg/LATEST_ONE_HOUR' -i -X GET \
+    -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_http_request"><a class="link" href="#_statisticsmetricavg_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /statistics/metric/avg/LATEST_ONE_HOUR HTTP/1.1
+Accept: application/json
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_path_parameters"><a class="link" href="#_statisticsmetricavg_path_parameters">Path parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /statistics/metric/avg/{timeRange}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>timeRange</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LATEST_ONE_HOUR, LATEST_TWO_HOURS, LATEST_THREE_HOURS, LATEST_SIX_HOURS, LATEST_TWELVE_HOURS, LATEST_ONE_DAY, LATEST_TWO_DAY, LATEST_THREE_DAY, LATEST_ONE_WEEK, LATEST_ONE_MONTH, LATEST_TWO_MONTHS, LATEST_THREE_MONTHS, LATEST_SIX_MONTHS, LATEST_ONE_YEAR, LATEST_TWO_YEARS, LATEST_THREE_YEARS</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_request_body"><a class="link" href="#_statisticsmetricavg_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-none hljs"></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_http_response"><a class="link" href="#_statisticsmetricavg_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 306
+
+{
+  "time" : 1.739087828736265E9,
+  "avgSystemCpuUsage" : 50.8,
+  "avgProcessCpuUsage" : 3.0,
+  "avgHeapMemoryUsage" : 2048.0,
+  "avgThreadCount" : 10.0,
+  "avgPeakThreadCount" : 10.0,
+  "avgWebRequestCount" : 20.0,
+  "avgWebErrorCount" : 3.0,
+  "avgWebThreadCount" : 1.0,
+  "avgDbConnectionCount" : 10.0
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_response_fields"><a class="link" href="#_statisticsmetricavg_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>time</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">데이터 저장된 시간 UTC</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgSystemCpuUsage</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 system cpu (linux) 사용량</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgProcessCpuUsage</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 process cpu (jvm) 사용량</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgHeapMemoryUsage</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 힙 메모리 사용량</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgThreadCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 쓰레드 사용 개수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgPeakThreadCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 쓰레드 경합 개수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgWebRequestCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 웹 요청 횟수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgWebErrorCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 웹 에러 응답 횟수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgWebThreadCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 웹 쓰레드 활성화 개수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>avgDbConnectionCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">평균 db 커넥션 활성화 개수</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_response_body"><a class="link" href="#_statisticsmetricavg_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "time" : 1.739087828736265E9,
+  "avgSystemCpuUsage" : 50.8,
+  "avgProcessCpuUsage" : 3.0,
+  "avgHeapMemoryUsage" : 2048.0,
+  "avgThreadCount" : 10.0,
+  "avgPeakThreadCount" : 10.0,
+  "avgWebRequestCount" : 20.0,
+  "avgWebErrorCount" : 3.0,
+  "avgWebThreadCount" : 1.0,
+  "avgDbConnectionCount" : 10.0
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="failed"><a class="link" href="#failed">Failed</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_statisticstransaction"><a class="link" href="#_statisticstransaction">/statistics/transaction</a></h3>
+<div class="sect3">
+<h4 id="_statisticstransaction_curl_request"><a class="link" href="#_statisticstransaction_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/statistics/transaction?page=0&amp;size=10&amp;sort=count%2CDESC' -i -X GET \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d '{
+  "begin" : null,
+  "end" : "2025-02-09T07:57:08.680412Z"
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticstransaction_http_request"><a class="link" href="#_statisticstransaction_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /statistics/transaction?page=0&amp;size=10&amp;sort=count%2CDESC HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Content-Length: 61
+Host: localhost:8080
+
+{
+  "begin" : null,
+  "end" : "2025-02-09T07:57:08.680412Z"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticstransaction_http_response"><a class="link" href="#_statisticstransaction_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Length: 868
+
+{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "Validation failed for argument [0] in public org.springframework.data.domain.Slice&lt;ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse&gt; ygo.traffic_hunter.presentation.controller.MetricController.retrieveServiceTransactionApi(ygo.traffic_hunter.core.dto.request.statistics.StatisticsRequest,org.springframework.data.domain.Pageable): [Field error in object 'statisticsRequest' on field 'begin': rejected value [null]; codes [NotNull.statisticsRequest.begin,NotNull.begin,NotNull.java.time.Instant,NotNull]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [statisticsRequest.begin,begin]; arguments []; default message [begin]]; default message [must not be null]] ",
+  "instance" : "/statistics/transaction"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_statisticsmetricmax_2"><a class="link" href="#_statisticsmetricmax_2">/statistics/metric/max</a></h3>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_2_curl_request"><a class="link" href="#_statisticsmetricmax_2_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/statistics/metric/max/LATEST_ONE_HOUR' -i -X GET \
+    -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_2_http_request"><a class="link" href="#_statisticsmetricmax_2_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /statistics/metric/max/LATEST_ONE_HOUR HTTP/1.1
+Accept: application/json
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricmax_2_http_response"><a class="link" href="#_statisticsmetricmax_2_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Length: 167
+
+{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "not found max metric",
+  "instance" : "/statistics/metric/max/LATEST_ONE_HOUR"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_statisticsmetricavg_2"><a class="link" href="#_statisticsmetricavg_2">/statistics/metric/avg</a></h3>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_2_curl_request"><a class="link" href="#_statisticsmetricavg_2_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/statistics/metric/avg/LATEST_ONE_HOUR' -i -X GET \
+    -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_2_http_request"><a class="link" href="#_statisticsmetricavg_2_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /statistics/metric/avg/LATEST_ONE_HOUR HTTP/1.1
+Accept: application/json
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_statisticsmetricavg_2_http_response"><a class="link" href="#_statisticsmetricavg_2_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Length: 167
+
+{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "not found max metric",
+  "instance" : "/statistics/metric/avg/LATEST_ONE_HOUR"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ServerSentEvent-API"><a class="link" href="#ServerSentEvent-API">ServerSentEvent-API</a></h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="success"><a class="link" href="#success">Success</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_metricssubscribe"><a class="link" href="#_metricssubscribe">/metrics/subscribe</a></h3>
+<div class="sect3">
+<h4 id="_metricssubscribe_http_request"><a class="link" href="#_metricssubscribe_http_request">Request</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /metrics/subscribe HTTP/1.1
@@ -584,8 +1344,8 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="resources-user_http_response"><a class="link" href="#resources-user_http_response">Response</a></h3>
+<div class="sect3">
+<h4 id="_metricssubscribe_http_response"><a class="link" href="#_metricssubscribe_http_response">Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK</code></pre>
@@ -593,49 +1353,81 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_broadcast"><a class="link" href="#_broadcast">broadcast</a></h2>
-<div class="sectionbody">
 <div class="sect2">
-<h3 id="_broadcast_http_request"><a class="link" href="#_broadcast_http_request">Request</a></h3>
+<h3 id="_metricsbroadcastinterval"><a class="link" href="#_metricsbroadcastinterval">/metrics/broadcast/{interval}</a></h3>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_http_request"><a class="link" href="#_metricsbroadcastinterval_http_request">Request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /metrics/broadcast/REAL_TIME?limit=20 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /metrics/broadcast/REAL_TIME HTTP/1.1
 Accept: application/json
-Content-Type: application/x-www-form-urlencoded
-Host: localhost:8080</code></pre>
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_broadcast_http_response"><a class="link" href="#_broadcast_http_response">Response</a></h3>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_query_parameters"><a class="link" href="#_metricsbroadcastinterval_query_parameters">Query parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>limit</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회할 개수(기본값 20)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_path_parameters"><a class="link" href="#_metricsbroadcastinterval_path_parameters">Path parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /metrics/broadcast/{interval}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>interval</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">REAL_TIME, FIVE_MINUTES, TEN_MINUTES, THIRTY_MINUTES, ONE_HOUR, THREE_HOURS, SIX_HOURS, TWELVE_HOURS, ONE_DAYS, TWO_DAYS, THREE_DAYS</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_http_response"><a class="link" href="#_metricsbroadcastinterval_http_response">Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 2563
+Content-Length: 1268
 
 {
+  "agentName" : "myAgent",
+  "agentBootTime" : "2025-01-21T18:20:18.933976Z",
+  "agentVersion" : "1.0.0",
   "systemMetricResponses" : [ {
     "time" : "2025-01-21T18:20:27.822166Z",
-    "agentName" : "myAgent",
-    "agentBootTime" : "2025-01-21T18:20:18.933976Z",
-    "agentVersion" : "1.0.0",
     "metricData" : {
       "cpuMetric" : {
         "systemCpuLoad" : 0.0,
         "processCpuLoad" : 0.14010085468246197,
         "availableProcessors" : 12
-      },
-      "gcMetric" : {
-        "gcMetricCollectionTimes" : [ {
-          "getCollectionCount" : 61,
-          "getCollectionTime" : 16
-        }, {
-          "getCollectionCount" : 17,
-          "getCollectionTime" : 6
-        } ]
       },
       "memoryMetric" : {
         "heapMemoryUsage" : {
@@ -643,19 +1435,7 @@ Content-Length: 2563
           "used" : 78528144,
           "committed" : 113246208,
           "max" : 8577351680
-        },
-        "nonHeapMemoryUsage" : {
-          "init" : 2555904,
-          "used" : 103137872,
-          "committed" : 105119744,
-          "max" : -1
         }
-      },
-      "runtimeMetric" : {
-        "getStartTime" : 173748361863,
-        "getUpTime" : 9652,
-        "getVmName" : "OpenJDK 64-Bit Server VM",
-        "getVmVersion" : "21.0.5+11-LTS"
       },
       "threadMetric" : {
         "threadCount" : 35,
@@ -683,34 +1463,13 @@ Content-Length: 2563
         "threadsAwaitingConnection" : 0
       }
     }
-  } ],
-  "transactionMetricResponses" : [ {
-    "agentName" : "myAgent",
-    "agentBootTime" : "2025-01-21T18:20:18.933976Z",
-    "agentVersion" : "1.0.0",
-    "spanTreeNode" : {
-      "data" : {
-        "name" : "test",
-        "traceId" : "traceId",
-        "parentSpanId" : "0000000000000000",
-        "spanId" : "a",
-        "attributes" : { },
-        "attributesCount" : 2,
-        "startTime" : "2025-02-06T13:31:37.251171500Z",
-        "endTime" : "2025-02-06T13:31:37.251171500Z",
-        "duration" : 30,
-        "exception" : "exception",
-        "ended" : true
-      },
-      "children" : [ ]
-    }
   } ]
 }</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_broadcast_response_fields"><a class="link" href="#_broadcast_response_fields">Response fields</a></h3>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_response_fields"><a class="link" href="#_metricsbroadcastinterval_response_fields">Response fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -726,6 +1485,21 @@ Content-Length: 2563
 </thead>
 <tbody>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 이름</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentBootTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 시작 시간</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentVersion</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 버전</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">시스템 메트릭 응답 목록</p></td>
@@ -734,21 +1508,6 @@ Content-Length: 2563
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].time</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">응답 수집 시간 (ISO 8601 형식)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].agentName</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 이름</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].agentBootTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 시작 시간</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].agentVersion</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 버전</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData</code></p></td>
@@ -774,26 +1533,6 @@ Content-Length: 2563
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.cpuMetric.availableProcessors</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">사용 가능한 프로세서 수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.gcMetric</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">GC 메트릭 데이터</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.gcMetric.gcMetricCollectionTimes</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">GC 수집 시간 정보 목록</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.gcMetric.gcMetricCollectionTimes[].getCollectionCount</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">GC 호출 횟수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.gcMetric.gcMetricCollectionTimes[].getCollectionTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">GC 총 수집 시간(ms)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.memoryMetric</code></p></td>
@@ -824,56 +1563,6 @@ Content-Length: 2563
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.memoryMetric.heapMemoryUsage.max</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">힙 메모리 최대 크기</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">논힙 메모리 사용량</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.init</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">논힙 메모리 초기 크기</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.used</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">논힙 메모리 사용량</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.committed</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">논힙 메모리 커밋 크기</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.memoryMetric.nonHeapMemoryUsage.max</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">논힙 메모리 최대 크기</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.runtimeMetric</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">런타임 메트릭 데이터</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.runtimeMetric.getStartTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">시작 시간 (타임스탬프)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.runtimeMetric.getUpTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">업타임(ms)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.runtimeMetric.getVmName</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">VM 이름</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.runtimeMetric.getVmVersion</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">VM 버전</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>systemMetricResponses[].metricData.threadMetric</code></p></td>
@@ -975,80 +1664,699 @@ Content-Length: 2563
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">연결 대기 중인 스레드 수</p></td>
 </tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="failed"><a class="link" href="#failed">Failed</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_metricsbroadcastinterval_2"><a class="link" href="#_metricsbroadcastinterval_2">/metrics/broadcast/{interval}</a></h3>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_2_curl_request"><a class="link" href="#_metricsbroadcastinterval_2_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/statistics/transaction?page=0&amp;size=10&amp;sort=count%2CDESC' -i -X GET \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d '{
+  "begin" : null,
+  "end" : "2025-02-09T07:57:08.680412Z"
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_2_http_request"><a class="link" href="#_metricsbroadcastinterval_2_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /statistics/transaction?page=0&amp;size=10&amp;sort=count%2CDESC HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Content-Length: 61
+Host: localhost:8080
+
+{
+  "begin" : null,
+  "end" : "2025-02-09T07:57:08.680412Z"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_metricsbroadcastinterval_2_http_response"><a class="link" href="#_metricsbroadcastinterval_2_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Length: 868
+
+{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "Validation failed for argument [0] in public org.springframework.data.domain.Slice&lt;ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse&gt; ygo.traffic_hunter.presentation.controller.MetricController.retrieveServiceTransactionApi(ygo.traffic_hunter.core.dto.request.statistics.StatisticsRequest,org.springframework.data.domain.Pageable): [Field error in object 'statisticsRequest' on field 'begin': rejected value [null]; codes [NotNull.statisticsRequest.begin,NotNull.begin,NotNull.java.time.Instant,NotNull]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [statisticsRequest.begin,begin]; arguments []; default message [begin]]; default message [must not be null]] ",
+  "instance" : "/statistics/transaction"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Member-API"><a class="link" href="#Member-API">Member API</a></h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="success"><a class="link" href="#success">Success</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_post_members"><a class="link" href="#_post_members">POST /members</a></h3>
+<div class="sect3">
+<h4 id="_post_members_curl_request"><a class="link" href="#_post_members_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members' -i -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d '{
+  "email" : "qwer1234@naver.com",
+  "password" : "qwer1234"
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_http_request"><a class="link" href="#_post_members_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /members HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Content-Length: 63
+Host: localhost:8080
+
+{
+  "email" : "qwer1234@naver.com",
+  "password" : "qwer1234"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_http_response"><a class="link" href="#_post_members_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_request_body"><a class="link" href="#_post_members_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "email" : "qwer1234@naver.com",
+  "password" : "qwer1234"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_request_fields"><a class="link" href="#_post_members_request_fields">Request fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].agentName</code></p></td>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트의 이름</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이메일</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].agentBootTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트 부팅 시간</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비밀 번호</p></td>
 </tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_members"><a class="link" href="#_get_members">GET /members</a></h3>
+<div class="sect3">
+<h4 id="_get_members_curl_request"><a class="link" href="#_get_members_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members/1' -i -X GET \
+    -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_members_http_request"><a class="link" href="#_get_members_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /members/1 HTTP/1.1
+Accept: application/json
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_members_path_parameters"><a class="link" href="#_get_members_path_parameters">Path parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /members/{id}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].agentVersion</code></p></td>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회할 회원의 ID</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_get_members_request_body"><a class="link" href="#_get_members_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-none hljs"></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_members_response_body"><a class="link" href="#_get_members_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "email" : "test@example.com",
+  "isAlarm" : true,
+  "role" : "USER"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_members_response_fields"><a class="link" href="#_get_members_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에이전트의 버전</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원 이메일</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.name</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">트랜잭션이 수행된 메서드의 이름과 경로</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.traceId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">트랜잭션의 고유 식별자</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.parentSpanId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">부모 메서드의 ID (루트 Span의 경우 0000000000000000)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.spanId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현재 메서드의 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.attributes</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">메서드의 세부 정보 ex) { http.method : GET }</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.attributesCount</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">세부 정보 개수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.startTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">메서드 시작 시간 (ISO 8601 형식)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.endTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">메서드 종료 시간 (ISO 8601 형식)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.duration</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">메서드 실행 시간 (ms 단위)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.exception</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">메서드 수행 결과 (예: success 또는 예외 메시지)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.data.ended</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>isAlarm</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">메서드 종료 여부 (true: 종료됨)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">알림 설정 여부</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>transactionMetricResponses[].spanTreeNode.children[]</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현재 메서드 자식 목록</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>role</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원 역할</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_membersid"><a class="link" href="#_get_membersid">GET /members/{id}</a></h3>
+<div class="sect3">
+<h4 id="_get_membersid_curl_request"><a class="link" href="#_get_membersid_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members' -i -X GET \
+    -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_http_request"><a class="link" href="#_get_membersid_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /members HTTP/1.1
+Accept: application/json
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_http_response"><a class="link" href="#_get_membersid_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 153
+
+[ {
+  "email" : "test@example.com",
+  "isAlarm" : true,
+  "role" : "USER"
+}, {
+  "email" : "example@test.com",
+  "isAlarm" : false,
+  "role" : "USER"
+} ]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_httpie_request"><a class="link" href="#_get_membersid_httpie_request">HTTPie request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ http GET 'http://localhost:8080/members' \
+    'Accept:application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_request_body"><a class="link" href="#_get_membersid_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-none hljs"></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_response_body"><a class="link" href="#_get_membersid_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">[ {
+  "email" : "test@example.com",
+  "isAlarm" : true,
+  "role" : "USER"
+}, {
+  "email" : "example@test.com",
+  "isAlarm" : false,
+  "role" : "USER"
+} ]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_response_fields"><a class="link" href="#_get_membersid_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[].email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원 이메일</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[].isAlarm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">알림 설정 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[].role</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원 역할</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_post_memberssign_in"><a class="link" href="#_post_memberssign_in">POST /members/sign-in</a></h3>
+<div class="sect3">
+<h4 id="_post_memberssign_in_curl_request"><a class="link" href="#_post_memberssign_in_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members/sign-in' -i -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{
+  "email" : "test@example.com",
+  "password" : "password123"
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_in_http_request"><a class="link" href="#_post_memberssign_in_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /members/sign-in HTTP/1.1
+Content-Type: application/json
+Content-Length: 64
+Host: localhost:8080
+
+{
+  "email" : "test@example.com",
+  "password" : "password123"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_in_http_response"><a class="link" href="#_post_memberssign_in_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 73
+
+{
+  "email" : "test@example.com",
+  "isAlarm" : true,
+  "role" : "USER"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_in_httpie_request"><a class="link" href="#_post_memberssign_in_httpie_request">HTTPie request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ echo '{
+  "email" : "test@example.com",
+  "password" : "password123"
+}' | http POST 'http://localhost:8080/members/sign-in' \
+    'Content-Type:application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_in_request_body"><a class="link" href="#_post_memberssign_in_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "email" : "test@example.com",
+  "password" : "password123"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_in_request_fields"><a class="link" href="#_post_memberssign_in_request_fields">Request fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원의 이메일 주소</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원의 비밀번호</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_in_response_body"><a class="link" href="#_post_memberssign_in_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "email" : "test@example.com",
+  "isAlarm" : true,
+  "role" : "USER"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_in_response_fields"><a class="link" href="#_post_memberssign_in_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원 이메일</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>isAlarm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">알림 설정 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>role</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원 역할</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_post_memberssign_out"><a class="link" href="#_post_memberssign_out">POST /members/sign-out</a></h3>
+<div class="sect3">
+<h4 id="_post_memberssign_out_curl_request"><a class="link" href="#_post_memberssign_out_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members/sign-out' -i -X POST</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_out_http_request"><a class="link" href="#_post_memberssign_out_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /members/sign-out HTTP/1.1
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_memberssign_out_http_response"><a class="link" href="#_post_memberssign_out_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_put_members"><a class="link" href="#_put_members">PUT /members</a></h3>
+<div class="sect3">
+<h4 id="_put_members_curl_request"><a class="link" href="#_put_members_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members' -i -X PUT \
+    -H 'Content-Type: application/json' \
+    -H 'Member: 1' \
+    -d '{
+  "email" : "new@example.com",
+  "password" : "newPassword123",
+  "isAlarm" : true
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_members_http_request"><a class="link" href="#_put_members_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PUT /members HTTP/1.1
+Content-Type: application/json
+Member: 1
+Content-Length: 86
+Host: localhost:8080
+
+{
+  "email" : "new@example.com",
+  "password" : "newPassword123",
+  "isAlarm" : true
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_members_http_response"><a class="link" href="#_put_members_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_members_request_body"><a class="link" href="#_put_members_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "email" : "new@example.com",
+  "password" : "newPassword123",
+  "isAlarm" : true
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_members_request_fields"><a class="link" href="#_put_members_request_fields">Request fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정할 회원 이메일</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정할 회원 비밀번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>isAlarm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정할 알림 설정 여부</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_put_members_request_headers"><a class="link" href="#_put_members_request_headers">Request headers</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Member</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원 ID (커스텀 리졸버를 통해 처리)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_delete_members"><a class="link" href="#_delete_members">DELETE /members</a></h3>
+<div class="sect3">
+<h4 id="_delete_members_curl_request"><a class="link" href="#_delete_members_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members' -i -X DELETE \
+    -H 'Member: 1'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_delete_members_http_request"><a class="link" href="#_delete_members_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">DELETE /members HTTP/1.1
+Member: 1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_delete_members_http_response"><a class="link" href="#_delete_members_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_delete_members_request_headers"><a class="link" href="#_delete_members_request_headers">Request headers</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Member</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">삭제할 회원 ID (커스텀 리졸버를 통해 처리)</p></td>
 </tr>
 </tbody>
 </table>
@@ -1056,9 +2364,649 @@ Content-Length: 2563
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="Failed"><a class="link" href="#Failed">Failed</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_get_membersid_2"><a class="link" href="#_get_membersid_2">GET /members/{id}</a></h3>
+<div class="sect3">
+<h4 id="_get_membersid_2_curl_request"><a class="link" href="#_get_membersid_2_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members/1' -i -X GET \
+    -H 'Accept: application/json'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_2_http_request"><a class="link" href="#_get_membersid_2_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /members/1 HTTP/1.1
+Accept: application/json
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_2_http_response"><a class="link" href="#_get_membersid_2_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+Content-Length: 133
+
+{
+  "type" : "about:blank",
+  "title" : "Not Found",
+  "status" : 404,
+  "detail" : "not found member",
+  "instance" : "/members/1"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_membersid_2_response_body"><a class="link" href="#_get_membersid_2_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "type" : "about:blank",
+  "title" : "Not Found",
+  "status" : 404,
+  "detail" : "not found member",
+  "instance" : "/members/1"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_post_members_2"><a class="link" href="#_post_members_2">POST /members</a></h3>
+<div class="sect3">
+<h4 id="_post_members_2_curl_request"><a class="link" href="#_post_members_2_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/members' -i -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d '{
+  "email" : "qwer1234",
+  "password" : "qwer1234"
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_2_http_request"><a class="link" href="#_post_members_2_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /members HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Content-Length: 53
+Host: localhost:8080
+
+{
+  "email" : "qwer1234",
+  "password" : "qwer1234"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_2_http_response"><a class="link" href="#_post_members_2_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Length: 696
+
+{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "Validation failed for argument [0] in public void ygo.traffic_hunter.presentation.controller.MemberController.signUpApi(ygo.traffic_hunter.core.dto.request.member.SignUp): [Field error in object 'signUp' on field 'email': rejected value [qwer1234]; codes [Email.signUp.email,Email.email,Email.java.lang.String,Email]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [signUp.email,email]; arguments []; default message [email],[Ljakarta.validation.constraints.Pattern$Flag;@7591cbd1,.*]; default message [must be a well-formed email address]] ",
+  "instance" : "/members"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_2_request_body"><a class="link" href="#_post_members_2_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "email" : "qwer1234",
+  "password" : "qwer1234"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_post_members_2_response_body"><a class="link" href="#_post_members_2_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "Validation failed for argument [0] in public void ygo.traffic_hunter.presentation.controller.MemberController.signUpApi(ygo.traffic_hunter.core.dto.request.member.SignUp): [Field error in object 'signUp' on field 'email': rejected value [qwer1234]; codes [Email.signUp.email,Email.email,Email.java.lang.String,Email]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [signUp.email,email]; arguments []; default message [email],[Ljakarta.validation.constraints.Pattern$Flag;@7591cbd1,.*]; default message [must be a well-formed email address]] ",
+  "instance" : "/members"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Alarm-API"><a class="link" href="#Alarm-API">Alarm API</a></h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="Success"><a class="link" href="#Success">Success</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_get_alarmsthreshold"><a class="link" href="#_get_alarmsthreshold">GET /alarms/threshold</a></h3>
+<div class="sect3">
+<h4 id="_get_alarmsthreshold_curl_request"><a class="link" href="#_get_alarmsthreshold_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/alarms/threshold' -i -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmsthreshold_http_request"><a class="link" href="#_get_alarmsthreshold_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /alarms/threshold HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmsthreshold_http_response"><a class="link" href="#_get_alarmsthreshold_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 160
+
+{
+  "cpuThreshold" : 80,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmsthreshold_response_body"><a class="link" href="#_get_alarmsthreshold_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "cpuThreshold" : 80,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmsthreshold_response_fields"><a class="link" href="#_get_alarmsthreshold_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cpuThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">cpu 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>memoryThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">memory 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>threadThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">thread 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webRequestThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">web request 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webThreadThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">web thread 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dbcpThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbcp 임계치</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_put_alarmsthreshold"><a class="link" href="#_put_alarmsthreshold">PUT /alarms/threshold</a></h3>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_curl_request"><a class="link" href="#_put_alarmsthreshold_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/alarms/threshold' -i -X PUT \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d '{
+  "cpuThreshold" : 80,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_http_request"><a class="link" href="#_put_alarmsthreshold_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PUT /alarms/threshold HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Content-Length: 160
+Host: localhost:8080
+
+{
+  "cpuThreshold" : 80,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_http_response"><a class="link" href="#_put_alarmsthreshold_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_request_body"><a class="link" href="#_put_alarmsthreshold_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "cpuThreshold" : 80,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_request_fields"><a class="link" href="#_put_alarmsthreshold_request_fields">Request fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cpuThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">cpu 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>memoryThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">memory 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>threadThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">thread 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webRequestThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">web request 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webThreadThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">web thread 임계치</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dbcpThreshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbcp 임계치</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_alarmswebhookactivation"><a class="link" href="#_get_alarmswebhookactivation">GET /alarms/webhook/activation</a></h3>
+<div class="sect3">
+<h4 id="_get_alarmswebhookactivation_curl_request"><a class="link" href="#_get_alarmswebhookactivation_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/alarms/webhook/activation' -i -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookactivation_http_request"><a class="link" href="#_get_alarmswebhookactivation_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /alarms/webhook/activation HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookactivation_http_response"><a class="link" href="#_get_alarmswebhookactivation_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 100
+
+[ {
+  "webhook" : "SLACK",
+  "isActive" : true
+}, {
+  "webhook" : "DISCORD",
+  "isActive" : true
+} ]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookactivation_response_body"><a class="link" href="#_get_alarmswebhookactivation_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">[ {
+  "webhook" : "SLACK",
+  "isActive" : true
+}, {
+  "webhook" : "DISCORD",
+  "isActive" : true
+} ]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookactivation_response_fields"><a class="link" href="#_get_alarmswebhookactivation_response_fields">Response fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[].webhook</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">웹훅 플랫폼 이름 (예: SLACK, DISCORD)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[].isActive</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">웹훅 활성화, 비활성화</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_alarmswebhookwebhookenable"><a class="link" href="#_get_alarmswebhookwebhookenable">GET /alarms/webhook/{webhook}/enable</a></h3>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookenable_curl_request"><a class="link" href="#_get_alarmswebhookwebhookenable_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/alarms/webhook/SLACK/enable' -i -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookenable_http_request"><a class="link" href="#_get_alarmswebhookwebhookenable_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /alarms/webhook/SLACK/enable HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookenable_http_response"><a class="link" href="#_get_alarmswebhookwebhookenable_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookenable_path_parameters"><a class="link" href="#_get_alarmswebhookwebhookenable_path_parameters">Path parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /alarms/webhook/{webhook}/enable</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webhook</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">웹훅 플랫폼 이름 (예: SLACK, DISCORD)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_alarmswebhookwebhookdisable"><a class="link" href="#_get_alarmswebhookwebhookdisable">GET /alarms/webhook/{webhook}/disable</a></h3>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookdisable_curl_request"><a class="link" href="#_get_alarmswebhookwebhookdisable_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/alarms/webhook/SLACK/disable' -i -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookdisable_http_request"><a class="link" href="#_get_alarmswebhookwebhookdisable_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /alarms/webhook/SLACK/disable HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookdisable_http_response"><a class="link" href="#_get_alarmswebhookwebhookdisable_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_get_alarmswebhookwebhookdisable_path_parameters"><a class="link" href="#_get_alarmswebhookwebhookdisable_path_parameters">Path parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /alarms/webhook/{webhook}/disable</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>webhook</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">웹훅 플랫폼 이름 (예: SLACK, DISCORD)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Failed"><a class="link" href="#Failed">Failed</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_put_alarmsthreshold_2"><a class="link" href="#_put_alarmsthreshold_2">PUT /alarms/threshold</a></h3>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_2_curl_request"><a class="link" href="#_put_alarmsthreshold_2_curl_request">Curl request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/alarms/threshold' -i -X PUT \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d '{
+  "cpuThreshold" : 150,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_2_http_request"><a class="link" href="#_put_alarmsthreshold_2_http_request">Request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PUT /alarms/threshold HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Content-Length: 161
+Host: localhost:8080
+
+{
+  "cpuThreshold" : 150,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_2_http_response"><a class="link" href="#_put_alarmsthreshold_2_http_response">Response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Length: 711
+
+{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "Validation failed for argument [0] in public void ygo.traffic_hunter.presentation.controller.AlarmController.updateThresholdApi(ygo.traffic_hunter.core.dto.request.alarm.ThresholdRequest): [Field error in object 'thresholdRequest' on field 'cpuThreshold': rejected value [150]; codes [Max.thresholdRequest.cpuThreshold,Max.cpuThreshold,Max.int,Max]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [thresholdRequest.cpuThreshold,cpuThreshold]; arguments []; default message [cpuThreshold],100]; default message [must be less than or equal to 100]] ",
+  "instance" : "/alarms/threshold"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_2_request_body"><a class="link" href="#_put_alarmsthreshold_2_request_body">Request body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "cpuThreshold" : 150,
+  "memoryThreshold" : 80,
+  "threadThreshold" : 80,
+  "webRequestThreshold" : 80,
+  "webThreadThreshold" : 80,
+  "dbcpThreshold" : 80
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_put_alarmsthreshold_2_response_body"><a class="link" href="#_put_alarmsthreshold_2_response_body">Response body</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "type" : "about:blank",
+  "title" : "Bad Request",
+  "status" : 400,
+  "detail" : "Validation failed for argument [0] in public void ygo.traffic_hunter.presentation.controller.AlarmController.updateThresholdApi(ygo.traffic_hunter.core.dto.request.alarm.ThresholdRequest): [Field error in object 'thresholdRequest' on field 'cpuThreshold': rejected value [150]; codes [Max.thresholdRequest.cpuThreshold,Max.cpuThreshold,Max.int,Max]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [thresholdRequest.cpuThreshold,cpuThreshold]; arguments []; default message [cpuThreshold],100]; default message [must be less than or equal to 100]] ",
+  "instance" : "/alarms/threshold"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-02-06 22:18:26 +0900
+Last updated 2025-02-17 16:33:28 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
