@@ -29,20 +29,20 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.common.map.TransactionMapper;
 import ygo.traffic_hunter.core.alarm.AlarmManager;
-import ygo.traffic_hunter.core.collector.validator.MetricValidator;
+import ygo.traffic_hunter.core.alarm.message.MessageType;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.service.AlarmService;
-import ygo.traffic_hunter.core.alarm.message.MessageType;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.entity.alarm.Threshold.CalculatedThreshold;
@@ -58,7 +58,6 @@ import ygo.traffic_hunter.domain.metric.TraceInfo;
  * <h4>Core Responsibilities</h4>
  * <ul>
  *     <li>Listens for {@link TransactionMetricEvent} and {@link SystemInfoMetricEvent} events.</li>
- *     <li>Validates incoming metrics using {@link MetricValidator}.</li>
  *     <li>Maps valid metric events to database entities using mappers.</li>
  *     <li>Persists the mapped entities into the {@link MetricRepository}.</li>
  *     <li>Handles transactions independently for each event.</li>
@@ -77,27 +76,25 @@ import ygo.traffic_hunter.domain.metric.TraceInfo;
  * <ol>
  *     <li>An event is published ({@link TransactionMetricEvent} or {@link SystemInfoMetricEvent}).</li>
  *     <li>The corresponding event handler method is triggered.</li>
- *     <li>The metric data is validated using {@link MetricValidator}.</li>
  *     <li>If valid, the metric is mapped to a database entity.</li>
  *     <li>The entity is saved in the database.</li>
  * </ol>
  *
  * <h2>Dependencies</h2>
  * <ul>
- *     <li>{@link MetricValidator}: Ensures metrics meet validation criteria.</li>
  *     <li>{@link SystemInfoMapper}: Maps {@link SystemInfo} metrics to database entities.</li>
  *     <li>{@link TransactionMapper}: Maps {@link TransactionInfo} metrics to database entities.</li>
  *     <li>{@link MetricRepository}: Handles database persistence of metrics.</li>
  * </ul>
  *
- * @author yungwang-o
+ * @author yungwang-o, JuSeong
  * @version 1.0.0
  * @see TransactionMetricEvent
  * @see SystemInfoMetricEvent
- * @see MetricValidator
  * @see MetricRepository
  */
 @Component
+@CacheConfig(cacheNames = ALARM_CACHE_NAME)
 @RequiredArgsConstructor
 public class ChannelEventHandler {
 
@@ -202,13 +199,21 @@ public class ChannelEventHandler {
         }
     }
 
-    private boolean canSend(MessageType messageType, double currentValue, double thresholdValue) {
+    /**
+     * <p>
+     * request collapsing
+     * </p>
+     */
+    private boolean canSend(final MessageType messageType,
+                            final double currentValue,
+                            final double thresholdValue) {
 
         Cache cache = cacheManager.getCache(ALARM_CACHE_NAME);
 
         if (cache != null && cache.get(messageType.name()) != null) {
             return false;
         }
+
         return thresholdValue <= currentValue;
     }
 }
