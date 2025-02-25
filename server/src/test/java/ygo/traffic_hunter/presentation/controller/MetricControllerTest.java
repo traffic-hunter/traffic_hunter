@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,12 +43,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ygo.traffic_hunter.AbstractTestConfiguration;
+import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.request.statistics.StatisticsRequest;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
 import ygo.traffic_hunter.core.service.MetricStatisticsService;
 import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
+import ygo.traffic_hunter.domain.metric.TransactionData;
 import ygo.traffic_hunter.presentation.advice.GlobalControllerAdvice;
 
 @ExtendWith(RestDocumentationExtension.class)
@@ -138,6 +141,59 @@ class MetricControllerTest extends AbstractTestConfiguration {
                                 subsectionWithPath("sort").description("정렬 정보"),
                                 fieldWithPath("numberOfElements").description("현재 페이지에 포함된 데이터 개수"),
                                 fieldWithPath("empty").description("조회 결과가 비어있는지 여부")
+                        )
+                ));
+    }
+
+    @Test
+    void 트랜젝션_상세_페이지는_정상적으로_동작한다_200() throws Exception {
+        // given
+        String traceId = "a7ae6e1955ce6033770a93fe8257f636";
+
+        TransactionData transactionData = TransactionData.builder()
+                .traceId(traceId)
+                .endTime(Instant.now())
+                .startTime(Instant.now())
+                .duration(100)
+                .attributesCount(1)
+                .name("GET /test")
+                .exception("exception")
+                .spanId("26b9ee3faac1317c")
+                .parentSpanId("88e42ecd823670e2")
+                .attributes(Map.of())
+                .ended(true)
+                .build();
+
+        SpanTreeNode spanTreeNode = new SpanTreeNode(transactionData);
+
+        given(metricStatisticsService.retrieveSpanTree(traceId)).willReturn(spanTreeNode);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get("/statistics/transaction/{traceId}", traceId));
+
+        // then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("service-transaction-detail"
+                    , preprocessRequest(prettyPrint())
+                    , preprocessResponse(prettyPrint())
+                    , pathParameters(
+                            parameterWithName("traceId").description("trace ID (span들의 집합을 식별하는 ID)")
+                    )
+                    , responseFields(
+                                fieldWithPath("data").description("span의 정보를 담고 있는 DTO"),
+                                fieldWithPath("data.name").description("span의 이름 (예: 'GET /test')"),
+                                fieldWithPath("data.traceId").description("trace ID (span들의 집합을 식별하는 ID)"),
+                                fieldWithPath("data.parentSpanId").description("부모 span의 ID (최고 부모는 0000000000000)"),
+                                fieldWithPath("data.spanId").description("현재 span의 ID"),
+                                fieldWithPath("data.attributes").description("span에 대한 추가 메타데이터 key-value"),
+                                fieldWithPath("data.attributesCount").description("속성의 개수"),
+                                fieldWithPath("data.startTime").description("span의 시작 시간 UTC"),
+                                fieldWithPath("data.endTime").description("span의 종료 시간 UTC"),
+                                fieldWithPath("data.duration").description("span의 지속 시간 (밀리초)"),
+                                fieldWithPath("data.exception").description("발생한 예외 (있을 경우)"),
+                                fieldWithPath("data.ended").description("span이 종료되었는지 여부 (true/false)"),
+                                fieldWithPath("children").description("자식 transaction data (자식은 여러 개일 수 있음)")
                         )
                 ));
     }

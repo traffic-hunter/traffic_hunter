@@ -1,5 +1,5 @@
 [[Member-API]]
-== Member API
+= Member API
 
 [[success]]
 == Success

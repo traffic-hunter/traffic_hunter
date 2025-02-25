@@ -1,5 +1,5 @@
 [[Alarm-API]]
-== Alarm API
+= Alarm API
 
 [[Success]]
 == Success
