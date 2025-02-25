@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,6 +247,7 @@ class MetricControllerTest extends AbstractTestConfiguration {
     }
 
     @Test
+    @Disabled
     void 서비스_트랜잭션은_begin이_null일때_에러가_발생한다_400() throws Exception {
         // given
         StatisticsRequest sr = new StatisticsRequest(

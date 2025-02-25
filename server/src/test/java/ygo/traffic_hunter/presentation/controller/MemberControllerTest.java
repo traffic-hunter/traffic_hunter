@@ -279,7 +279,6 @@ class MemberControllerTest extends AbstractTestConfiguration {
                         requestFields(
                                 fieldWithPath("email").description("수정할 회원 이메일"),
                                 fieldWithPath("password").description("수정할 회원 비밀번호"),
-                                fieldWithPath("threshold").description("수정할 임계치"),
                                 fieldWithPath("isAlarm").description("수정할 알림 설정 여부")
                         )
                 ));
