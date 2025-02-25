@@ -54,7 +54,7 @@ INSERT INTO threshold
                        dbcp_threshold
 )
 VALUES (1, 80, 80, 80, 100, 80, 80)
-ON CONFLICT (id) DO NOTHING ;
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO member (email, password, isAlarm, role)
 VALUES ('admin', 'admin', true, 'ADMIN')
@@ -72,6 +72,18 @@ CREATE TABLE IF NOT EXISTS transaction_measurement (
     agent_id integer            not null
 );
 
+CREATE TABLE IF NOT EXISTS alarm (
+    time        timestamptz     not null,
+    alarm_data  jsonb           not null,
+    agent_id    integer         not null
+);
+
+CREATE TABLE IF NOT EXISTS dead_letter (
+    id                  bigserial  primary key,
+    dead_letter_data    jsonb   not null,
+    is_delete           boolean not null
+);
+
 SELECT create_hypertable(
                'metric_measurement',
                by_range('time'),
@@ -83,6 +95,32 @@ SELECT create_hypertable(
                by_range('time'),
                if_not_exists := TRUE
        );
+
+SELECT create_hypertable(
+                'alarm',
+                by_range('time'),
+                if_not_exists := TRUE
+       );
+
+SELECT add_retention_policy(
+               'metric_measurement',
+               interval '1 years',
+               if_not_exists := TRUE
+       );
+
+SELECT add_retention_policy(
+               'transaction_measurement',
+               interval '1 years',
+               if_not_exists := TRUE
+       );
+
+SELECT add_retention_policy(
+               'alarm',
+               interval '1 years',
+               if_not_exists := TRUE
+       );
+
+CREATE INDEX IF NOT EXISTS alarm_time_idx ON alarm (time, agent_id);
 
 CREATE INDEX IF NOT EXISTS metric_measurement_agent_id_time_idx ON metric_measurement (agent_id, time);
 CREATE INDEX IF NOT EXISTS metric_measurement_agent_id_idx ON metric_measurement (agent_id);

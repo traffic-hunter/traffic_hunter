@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License
  *
  * Copyright (c) 2024 traffic-hunter.org
@@ -21,40 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.repository;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.List;
-import ygo.traffic_hunter.core.dto.response.alarm.AlarmResponse;
-import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
-import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
-import ygo.traffic_hunter.domain.entity.alarm.Alarm;
-import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
+package ygo.traffic_hunter.core.alarm.loss;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public interface AlarmRepository {
+public interface LossPreventionHooker {
 
-    ThresholdResponse findThreshold();
-
-    void updateThreshold(final int cpuThreshold,
-                         final int memoryThreshold,
-                         final int threadThreshold,
-                         final int webRequestThreshold,
-                         final int webThreadThreshold,
-                         final int dbcpThreshold);
-
-    void save(Alarm alarm) throws JsonProcessingException;
-
-    List<AlarmResponse> findAll(int limit);
-
-    void save(DeadLetter deadLetter) throws JsonProcessingException;
-
-    boolean existDeadLetter();
-
-    List<DeadLetterResponse> findAllDeadLetter();
-
-    void BulkSoftDeleteDeadLetter();
+    <T> void hook(T lossData);
 }

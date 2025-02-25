@@ -23,15 +23,34 @@
  */
 package ygo.traffic_hunter.persistence.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.JSONB;
+import org.jooq.Record1;
+import org.jooq.Record3;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.UpdateSetMoreStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.traffichunter.query.jooq.tables.Agent;
+import org.traffichunter.query.jooq.tables.Threshold;
+import org.traffichunter.query.jooq.tables.records.DeadLetterRecord;
 import org.traffichunter.query.jooq.tables.records.ThresholdRecord;
+import ygo.traffic_hunter.core.alarm.message.Message;
+import ygo.traffic_hunter.core.dto.response.alarm.AlarmResponse;
+import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
+import ygo.traffic_hunter.domain.entity.alarm.Alarm;
+import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
 
 /**
  * @author yungwang-o
@@ -44,8 +63,17 @@ public class AlarmRepositoryImpl implements AlarmRepository {
 
     private final DSLContext dsl;
 
-    private final org.traffichunter.query.jooq.tables.Threshold jThreshold =
-            org.traffichunter.query.jooq.tables.Threshold.THRESHOLD;
+    private final ObjectMapper objectMapper;
+
+    private final Threshold jThreshold = Threshold.THRESHOLD;
+
+    private final org.traffichunter.query.jooq.tables.Alarm jAlarm =
+            org.traffichunter.query.jooq.tables.Alarm.ALARM;
+
+    private final Agent jAgent = Agent.AGENT;
+
+    private final org.traffichunter.query.jooq.tables.DeadLetter jDeadLetter =
+            org.traffichunter.query.jooq.tables.DeadLetter.DEAD_LETTER;
 
     @Override
     public ThresholdResponse findThreshold() {
@@ -89,5 +117,115 @@ public class AlarmRepositoryImpl implements AlarmRepository {
         if(execute <= 0) {
             throw new AlarmException("not update threshold");
         }
+    }
+
+    @Override
+    public boolean existDeadLetter() {
+
+        SelectConditionStep<Record1<Integer>> exist = dsl.selectOne()
+                .from(jDeadLetter)
+                .where(jDeadLetter.IS_DELETE.eq(false));
+
+        return dsl.fetchExists(exist);
+    }
+
+    @Override
+    @Transactional
+    public void save(final Alarm alarm) throws JsonProcessingException {
+
+        int execute = dsl.insertInto(jAlarm,
+                jAlarm.TIME,
+                jAlarm.ALARM_DATA,
+                jAlarm.AGENT_ID
+            ).values(
+                alarm.time().atOffset(ZoneOffset.UTC),
+                JSONB.jsonb(objectMapper.writeValueAsString(alarm.message())),
+                alarm.agent_id()
+            ).execute();
+
+        if(execute <= 0) {
+            throw new AlarmException("not save alarm");
+        }
+    }
+
+    @Override
+    public List<AlarmResponse> findAll(final int limit) {
+
+        Result<Record3<OffsetDateTime, JSONB, String>> result = dsl.select(
+                        jAlarm.TIME.as("time"),
+                        jAlarm.ALARM_DATA.as("alarm_data"),
+                        jAgent.AGENT_NAME.as("agent_name")
+                )
+                .from(jAlarm)
+                .join(jAgent)
+                .on(jAlarm.AGENT_ID.eq(jAgent.ID))
+                .orderBy(jAlarm.TIME.desc())
+                .limit(limit)
+                .fetch();
+
+        return result.stream()
+                .map(record -> {
+                    try {
+                        return new AlarmResponse(
+                                    record.component1().toInstant(),
+                                    objectMapper.readValue(record.component2().data(), Message.class),
+                                    record.component3()
+                                );
+                    } catch (JsonProcessingException e) {
+                        throw new AlarmException("alarm json deserialization failed", e);
+                    }
+                }).toList();
+    }
+
+    @Override
+    @Transactional
+    public void save(final DeadLetter deadLetter) throws JsonProcessingException {
+
+        int execute = dsl.insertInto(jDeadLetter,
+                jDeadLetter.ID,
+                jDeadLetter.DEAD_LETTER_DATA,
+                jDeadLetter.IS_DELETE
+        ).values(
+                deadLetter.getId(),
+                JSONB.jsonb(objectMapper.writeValueAsString(deadLetter.getMessage())),
+                deadLetter.isDelete()
+        ).execute();
+
+        if (execute <= 0) {
+            throw new AlarmException("not save dead letter");
+        }
+    }
+
+    @Override
+    public List<DeadLetterResponse> findAllDeadLetter() {
+
+        Result<DeadLetterRecord> result = dsl.selectFrom(jDeadLetter)
+                .where(jDeadLetter.IS_DELETE.eq(false))
+                .fetch();
+
+        return result.stream()
+                .map(rst -> {
+                    try {
+                        return new DeadLetterResponse(objectMapper.readValue(rst.getDeadLetterData().data(), Message.class));
+                    } catch (JsonProcessingException e) {
+                        throw new AlarmException("dead letter json deserialization failed", e);
+                    }
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void BulkSoftDeleteDeadLetter() {
+
+        List<DeadLetter> deadLetters = dsl.selectFrom(jDeadLetter)
+                .where(jDeadLetter.IS_DELETE.eq(false))
+                .fetchInto(DeadLetter.class);
+
+        List<UpdateSetMoreStep<DeadLetterRecord>> results = deadLetters.stream()
+                .map(deadLetter -> dsl.update(jDeadLetter).set(jDeadLetter.IS_DELETE, true))
+                .toList();
+
+        dsl.batch(results).execute();
     }
 }

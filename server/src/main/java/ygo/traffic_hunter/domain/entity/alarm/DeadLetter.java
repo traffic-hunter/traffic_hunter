@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License
  *
  * Copyright (c) 2024 traffic-hunter.org
@@ -21,48 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.alarm;
+package ygo.traffic_hunter.domain.entity.alarm;
 
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
-import ygo.traffic_hunter.core.repository.AlarmRepository;
-import ygo.traffic_hunter.core.send.AlarmSender;
-import ygo.traffic_hunter.core.alarm.message.Message;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import ygo.traffic_hunter.core.alarm.message.SseMessage;
 
 /**
- * @author JuSeong
+ * @author yungwang-o
  * @version 1.1.0
  */
-@Component
-@RequiredArgsConstructor
-public class AlarmManager {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class DeadLetter {
 
-    private final List<AlarmSender> alarmSenders;
+    private Long id;
 
-    private final AlarmRepository alarmRepository;
+    private SseMessage message;
 
-    public void send(final Message message) {
+    private boolean isDelete;
 
-        for (AlarmSender alarmSender : alarmSenders) {
-            alarmSender.send(message);
-        }
-    }
-
-    // 1 hours interval
-    @Scheduled(cron = "0 0 * * * *")
-    public void afterProcessingDeadLetter() {
-
-        if(!alarmRepository.existDeadLetter()) {
-            return;
-        }
-
-        List<DeadLetterResponse> deadLetters = alarmRepository.findAllDeadLetter();
-
-        deadLetters.stream()
-                .map(DeadLetterResponse::message)
-                .forEach(this::send);
+    public DeadLetter(final SseMessage message) {
+        this.message = message;
+        this.isDelete = false;
     }
 }

@@ -27,12 +27,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import ygo.traffic_hunter.core.alarm.loss.LossPreventionHooker;
+import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.alarm.message.SseMessage;
 import ygo.traffic_hunter.core.repository.MemberRepository;
 import ygo.traffic_hunter.core.schedule.Scheduler;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.send.ViewSender;
-import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
@@ -48,6 +49,8 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
     private final Map<Member, Client> clientMap = new ConcurrentHashMap<>();
 
     private final MemberRepository memberRepository;
+
+    private final LossPreventionHooker lossPreventionHooker;
 
     public SseEmitter register(final Member member, final SseEmitter emitter) {
 
@@ -77,8 +80,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
                                   final Runnable runnable) {
 
         if (!clientMap.containsKey(member)) {
-            throw new IllegalStateException(
-                    "The client with the given identification does not exist. Please subscribe first.");
+            throw new IllegalStateException("The client with the given identification does not exist. Please subscribe first.");
         }
 
         log.info("schedule broadcasting sse emitter {}", timeInterval);
@@ -107,7 +109,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
     @Override
     public <T> void send(final List<T> data) {
-        // TODO: view list send
+        this.sendAll(data);
     }
 
     private <T> void sendAll(final T data) {
@@ -121,7 +123,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
                 .forEach(client -> client.send(data));
     }
 
-    private <T> void asyncSend(final T data) {
+    private <T> void asyncSendAll(final T data) {
 
         List<Member> members = memberRepository.findAll();
 
@@ -129,7 +131,15 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
                 .filter(clientMap::containsKey)
                 .filter(Member::isAlarm)
                 .map(clientMap::get)
-                .forEach(client -> CompletableFuture.runAsync(() -> client.send(data)));
+                .forEach(client -> CompletableFuture.runAsync(() -> client.send(data))
+                        .exceptionally(throwable -> {
+
+                            lossPreventionHooker.hook(data);
+
+                            log.error("async sse connection = {}", throwable.getMessage());
+                            throw new ServerSentEventException("async sse connection exception set up dead letter", throwable);
+                        })
+                );
     }
 
     public static class ServerSentEventException extends RuntimeException {

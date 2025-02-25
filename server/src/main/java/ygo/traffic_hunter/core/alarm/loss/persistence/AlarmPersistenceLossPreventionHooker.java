@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License
  *
  * Copyright (c) 2024 traffic-hunter.org
@@ -21,48 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.alarm;
+package ygo.traffic_hunter.core.alarm.loss.persistence;
 
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
+import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.core.alarm.loss.LossPreventionHooker;
+import ygo.traffic_hunter.core.alarm.message.SseMessage;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
-import ygo.traffic_hunter.core.send.AlarmSender;
-import ygo.traffic_hunter.core.alarm.message.Message;
+import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
+import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
 
 /**
- * @author JuSeong
+ * @author yungwang-o
  * @version 1.1.0
  */
 @Component
 @RequiredArgsConstructor
-public class AlarmManager {
-
-    private final List<AlarmSender> alarmSenders;
+public class AlarmPersistenceLossPreventionHooker implements LossPreventionHooker {
 
     private final AlarmRepository alarmRepository;
 
-    public void send(final Message message) {
+    @Override
+    @Transactional
+    public <T> void hook(final T lossMessage) {
 
-        for (AlarmSender alarmSender : alarmSenders) {
-            alarmSender.send(message);
+        if(lossMessage instanceof SseMessage message) {
+
+            try {
+                alarmRepository.save(new DeadLetter(message));
+            } catch (JsonProcessingException e) {
+                throw new AlarmException("Failed to serialize message", e);
+            }
+        } else {
+            throw new IllegalStateException("only message");
         }
-    }
-
-    // 1 hours interval
-    @Scheduled(cron = "0 0 * * * *")
-    public void afterProcessingDeadLetter() {
-
-        if(!alarmRepository.existDeadLetter()) {
-            return;
-        }
-
-        List<DeadLetterResponse> deadLetters = alarmRepository.findAllDeadLetter();
-
-        deadLetters.stream()
-                .map(DeadLetterResponse::message)
-                .forEach(this::send);
     }
 }

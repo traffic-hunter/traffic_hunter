@@ -28,6 +28,7 @@ import ygo.traffic_hunter.domain.entity.user.Member;
 
 
 /**
+ * The view sender allows data loss.
  * @author yungwang-o
  * @version 1.1.0
  */
