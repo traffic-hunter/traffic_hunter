@@ -31,7 +31,7 @@ jobs:
           distribution: "liberica"
           cache: "gradle"
       - name: Build Asciidoc
-        run: ./gradlew :server:asciidoctor --no-daemon
+        run: ./gradlew :server:asciidoctor --exclude-task :server:generateJooq --no-daemon
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
