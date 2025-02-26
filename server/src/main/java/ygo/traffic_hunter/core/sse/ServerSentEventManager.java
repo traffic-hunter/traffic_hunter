@@ -72,6 +72,11 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
             emitter.complete();
         });
 
+        emitter.onError(throwable -> {
+            log.error("error sse emitter {}", emitter);
+            throw new ServerSentEventException("sse connection error", throwable);
+        });
+
         return emitter;
     }
 
@@ -91,12 +96,12 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
     @Override
     public void send(final Message message) {
-        this.sendAll(SseMessage.from(message));
+        this.asyncSendAll(SseMessage.from(message));
     }
 
     @Override
     public <T> void send(final T data) {
-        this.sendAll(data);
+        this.asyncSendAll(data);
     }
 
     @Override
@@ -109,7 +114,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
     @Override
     public <T> void send(final List<T> data) {
-        this.sendAll(data);
+        this.asyncSendAll(data);
     }
 
     private <T> void sendAll(final T data) {
@@ -133,11 +138,8 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
                 .map(clientMap::get)
                 .forEach(client -> CompletableFuture.runAsync(() -> client.send(data))
                         .exceptionally(throwable -> {
-
                             lossPreventionHooker.hook(data);
-
-                            log.error("async sse connection = {}", throwable.getMessage());
-                            throw new ServerSentEventException("async sse connection exception set up dead letter", throwable);
+                            return null;
                         })
                 );
     }

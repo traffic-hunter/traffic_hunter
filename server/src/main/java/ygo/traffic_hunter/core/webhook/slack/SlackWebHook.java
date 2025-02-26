@@ -119,21 +119,21 @@ public class SlackWebHook implements WebHookAlarm, AlarmSender {
 
         return Attachment.builder()
                 .color(Color.RED.getStringValue())
-                .authorName(message.getUsername())
-                .title(message.getContent())
+                .authorName(message.username())
+                .title(message.content())
                 .fields(getFields(message))
                 .build();
     }
 
     private List<Field> getFields(final Message message) {
 
-        return message.getEmbeds()
+        return message.embeds()
                 .getFirst()
-                .getFields()
+                .fields()
                 .stream()
                 .map(field -> Field.builder()
-                        .title(field.getName())
-                        .value(field.getValue())
+                        .title(field.name())
+                        .value(field.value())
                         .build()
                 ).toList();
     }

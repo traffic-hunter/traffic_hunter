@@ -16,14 +16,14 @@ public record SseMessage(
 
     public static SseMessage from(final Message message) {
 
-        Embed embed = message.getEmbeds().getFirst();
+        Embed embed = message.embeds().getFirst();
 
         return SseMessage.builder()
-                .timestamp(message.getTimestamp())
-                .title(embed.getTitle())
-                .color(embed.getColor())
-                .username(message.getUsername())
-                .fields(convertFields(embed.getFields()))
+                .timestamp(message.timestamp())
+                .title(embed.title())
+                .color(embed.color())
+                .username(message.username())
+                .fields(convertFields(embed.fields()))
                 .build();
     }
 
@@ -37,7 +37,7 @@ public record SseMessage(
     public record Field(String title, String value) {
 
         public static Field from(final Message.Field field) {
-            return new Field(field.getName(), field.getValue());
+            return new Field(field.name(), field.value());
         }
     }
 }

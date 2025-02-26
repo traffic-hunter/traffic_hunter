@@ -27,31 +27,18 @@ import lombok.Getter;
  * @author yungwang-o
  * @version 1.1.0
  */
-@Getter
-public class Message {
+public record Message(
 
-    private final Instant timestamp;
+        Instant timestamp,
 
-    private final String url;
+        String url,
 
-    private final String username;
+        String username,
 
-    private final String content;
+        String content,
 
-    private final List<Embed> embeds;
-
-    private Message(final Instant timestamp,
-                    final String url,
-                    final String username,
-                    final String content,
-                    final List<Embed> embeds) {
-
-        this.url = url;
-        this.username = username;
-        this.content = content;
-        this.embeds = embeds;
-        this.timestamp = timestamp;
-    }
+        List<Embed> embeds
+) {
 
     public static Builder builder() {
         return new Builder();
@@ -99,29 +86,18 @@ public class Message {
         }
     }
 
-    @Getter
-    public static class Embed {
+    public record Embed(
 
-        private final String title;
+            String title,
 
-        private final String description;
+            String description,
 
-        private final int color;
+            List<Field> fields,
 
-        private final List<Field> fields;
+            int color
+    ) {
 
-        private Embed(final String title,
-                      final String description,
-                      final List<Field> fields,
-                      final int color) {
-
-            this.title = title;
-            this.description = description;
-            this.fields = fields;
-            this.color = color;
-        }
-
-        public static EmbedBuilder builder() {
+    public static EmbedBuilder builder() {
             return new EmbedBuilder();
         }
 
@@ -160,26 +136,17 @@ public class Message {
             }
         }
     }
+    
+    public record Field(
 
-    @Getter
-    public static class Field {
+            String name,
 
-        private final String name;
+            String value,
 
-        private final String value;
+            boolean inline
+    ) {
 
-        private final boolean inline;
-
-        private Field(final String name,
-                      final String value,
-                      final boolean inline) {
-
-            this.name = name;
-            this.value = value;
-            this.inline = inline;
-        }
-
-        public static Field of(final String name,
+    public static Field of(final String name,
                                final String value,
                                final boolean inline) {
 
