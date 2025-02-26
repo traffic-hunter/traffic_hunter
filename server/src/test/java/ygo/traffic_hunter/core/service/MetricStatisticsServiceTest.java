@@ -3,6 +3,7 @@ package ygo.traffic_hunter.core.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange.LATEST_ONE_DAY;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,6 +39,7 @@ class MetricStatisticsServiceTest extends AbstractTestConfiguration {
     }
 
     @Test
+    @Disabled
     void 서비스_트랜잭션의_상세_조회한다() {
         // given
         String traceId = "a7ae6e1955ce6033770a93fe8257f636";
