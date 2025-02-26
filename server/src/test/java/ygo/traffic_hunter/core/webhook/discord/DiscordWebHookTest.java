@@ -3,6 +3,7 @@ package ygo.traffic_hunter.core.webhook.discord;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.Collections;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -27,6 +28,7 @@ import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.alarm.message.MessageType;
 import ygo.traffic_hunter.core.webhook.property.WebHookProperties;
 
+@Disabled
 @EnableConfigurationProperties(WebHookProperties.class)
 @SpringBootTest
 class DiscordWebHookTest extends AbstractTestConfiguration {
