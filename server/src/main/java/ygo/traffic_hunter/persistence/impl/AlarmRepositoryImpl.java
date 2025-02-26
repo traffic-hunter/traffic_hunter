@@ -37,7 +37,6 @@ import org.jooq.Record3;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.UpdateConditionStep;
-import org.jooq.UpdateSetMoreStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.traffichunter.query.jooq.tables.Agent;
@@ -46,7 +45,6 @@ import org.traffichunter.query.jooq.tables.records.DeadLetterRecord;
 import org.traffichunter.query.jooq.tables.records.ThresholdRecord;
 import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.dto.response.alarm.AlarmResponse;
-import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
@@ -183,11 +181,9 @@ public class AlarmRepositoryImpl implements AlarmRepository {
     public void save(final DeadLetter deadLetter) throws JsonProcessingException {
 
         int execute = dsl.insertInto(jDeadLetter,
-                jDeadLetter.ID,
                 jDeadLetter.DEAD_LETTER_DATA,
                 jDeadLetter.IS_DELETE
         ).values(
-                deadLetter.getId(),
                 JSONB.jsonb(objectMapper.writeValueAsString(deadLetter.getMessage())),
                 deadLetter.isDelete()
         ).execute();
@@ -198,7 +194,7 @@ public class AlarmRepositoryImpl implements AlarmRepository {
     }
 
     @Override
-    public List<DeadLetterResponse> findAllDeadLetter() {
+    public List<DeadLetter> findAllDeadLetter() {
 
         Result<DeadLetterRecord> result = dsl.selectFrom(jDeadLetter)
                 .where(jDeadLetter.IS_DELETE.eq(false))
@@ -207,10 +203,11 @@ public class AlarmRepositoryImpl implements AlarmRepository {
         return result.stream()
                 .map(rst -> {
                     try {
-                        return new DeadLetterResponse(
-                                rst.getId(),
-                                objectMapper.readValue(rst.getDeadLetterData().data(), Message.class)
-                        );
+                        return DeadLetter.builder()
+                                .id(rst.getId())
+                                .message(objectMapper.readValue(rst.getDeadLetterData().data(), Message.class))
+                                .isDelete(rst.getIsDelete())
+                                .build();
                     } catch (JsonProcessingException e) {
                         throw new AlarmException("dead letter json deserialization failed", e);
                     }
@@ -220,14 +217,26 @@ public class AlarmRepositoryImpl implements AlarmRepository {
 
     @Override
     @Transactional
-    public void bulkSoftDeleteDeadLetter(final List<DeadLetterResponse> deadLetters) {
+    public void bulkSoftDeleteDeadLetter(final List<DeadLetter> deadLetters) {
 
         List<UpdateConditionStep<DeadLetterRecord>> results = deadLetters.stream()
                 .map(deadLetter -> dsl.update(jDeadLetter)
                         .set(jDeadLetter.IS_DELETE, true)
-                        .where(jDeadLetter.ID.eq(deadLetter.id()))
+                        .where(jDeadLetter.ID.eq(deadLetter.getId()))
                 ).toList();
 
         dsl.batch(results).execute();
+    }
+
+    @Override
+    @Transactional
+    public void clearAlarm() {
+        dsl.deleteFrom(jAlarm).execute();
+    }
+
+    @Override
+    @Transactional
+    public void clearDeadLetter() {
+        dsl.deleteFrom(jDeadLetter).execute();
     }
 }

@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.core.alarm.loss.LossPreventionHooker;
-import ygo.traffic_hunter.core.alarm.message.SseMessage;
+import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
 import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
@@ -47,7 +47,7 @@ public class AlarmPersistenceLossPreventionHooker implements LossPreventionHooke
     @Transactional
     public <T> void hook(final T lossMessage) {
 
-        if(lossMessage instanceof SseMessage message) {
+        if(lossMessage instanceof Message message) {
 
             try {
                 alarmRepository.save(new DeadLetter(message));

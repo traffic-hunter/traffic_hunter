@@ -29,9 +29,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.core.alarm.message.Message;
-import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 import ygo.traffic_hunter.core.send.AlarmSender;
+import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
 
 /**
  * @author JuSeong
@@ -52,19 +52,19 @@ public class AlarmManager {
         }
     }
 
-    // 1 hours interval
+    // 30 minutes interval
     @Transactional
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 */30 * * * *")
     public void afterProcessingDeadLetter() {
 
         if(!alarmRepository.existDeadLetter()) {
             return;
         }
 
-        List<DeadLetterResponse> deadLetters = alarmRepository.findAllDeadLetter();
+        List<DeadLetter> deadLetters = alarmRepository.findAllDeadLetter();
 
         deadLetters.stream()
-                .map(DeadLetterResponse::message)
+                .map(DeadLetter::getMessage)
                 .forEach(this::send);
 
         alarmRepository.bulkSoftDeleteDeadLetter(deadLetters);

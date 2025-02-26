@@ -26,7 +26,6 @@ package ygo.traffic_hunter.core.repository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import ygo.traffic_hunter.core.dto.response.alarm.AlarmResponse;
-import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.domain.entity.alarm.Alarm;
 import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
@@ -54,7 +53,11 @@ public interface AlarmRepository {
 
     boolean existDeadLetter();
 
-    List<DeadLetterResponse> findAllDeadLetter();
+    List<DeadLetter> findAllDeadLetter();
 
-    void bulkSoftDeleteDeadLetter(List<DeadLetterResponse> deadLetters);
+    void bulkSoftDeleteDeadLetter(List<DeadLetter> deadLetters);
+
+    void clearAlarm();
+
+    void clearDeadLetter();
 }

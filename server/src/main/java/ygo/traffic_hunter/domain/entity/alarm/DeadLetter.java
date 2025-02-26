@@ -24,9 +24,10 @@
 package ygo.traffic_hunter.domain.entity.alarm;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ygo.traffic_hunter.core.alarm.message.SseMessage;
+import ygo.traffic_hunter.core.alarm.message.Message;
 
 /**
  * @author yungwang-o
@@ -38,12 +39,19 @@ public class DeadLetter {
 
     private Long id;
 
-    private SseMessage message;
+    private Message message;
 
     private boolean isDelete;
 
-    public DeadLetter(final SseMessage message) {
+    public DeadLetter(final Message message) {
         this.message = message;
         this.isDelete = false;
+    }
+
+    @Builder
+    public DeadLetter(final Long id, final Message message, final boolean isDelete) {
+        this.id = id;
+        this.message = message;
+        this.isDelete = isDelete;
     }
 }
