@@ -27,10 +27,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.dto.response.alarm.DeadLetterResponse;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 import ygo.traffic_hunter.core.send.AlarmSender;
-import ygo.traffic_hunter.core.alarm.message.Message;
 
 /**
  * @author JuSeong
@@ -52,6 +53,7 @@ public class AlarmManager {
     }
 
     // 1 hours interval
+    @Transactional
     @Scheduled(cron = "0 0 * * * *")
     public void afterProcessingDeadLetter() {
 
@@ -64,5 +66,7 @@ public class AlarmManager {
         deadLetters.stream()
                 .map(DeadLetterResponse::message)
                 .forEach(this::send);
+
+        alarmRepository.bulkSoftDeleteDeadLetter(deadLetters);
     }
 }

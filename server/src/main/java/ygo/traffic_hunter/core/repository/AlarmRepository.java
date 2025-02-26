@@ -56,5 +56,5 @@ public interface AlarmRepository {
 
     List<DeadLetterResponse> findAllDeadLetter();
 
-    void BulkSoftDeleteDeadLetter();
+    void bulkSoftDeleteDeadLetter(List<DeadLetterResponse> deadLetters);
 }

@@ -36,6 +36,7 @@ import org.jooq.Record1;
 import org.jooq.Record3;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
+import org.jooq.UpdateConditionStep;
 import org.jooq.UpdateSetMoreStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -206,7 +207,10 @@ public class AlarmRepositoryImpl implements AlarmRepository {
         return result.stream()
                 .map(rst -> {
                     try {
-                        return new DeadLetterResponse(objectMapper.readValue(rst.getDeadLetterData().data(), Message.class));
+                        return new DeadLetterResponse(
+                                rst.getId(),
+                                objectMapper.readValue(rst.getDeadLetterData().data(), Message.class)
+                        );
                     } catch (JsonProcessingException e) {
                         throw new AlarmException("dead letter json deserialization failed", e);
                     }
@@ -216,15 +220,13 @@ public class AlarmRepositoryImpl implements AlarmRepository {
 
     @Override
     @Transactional
-    public void BulkSoftDeleteDeadLetter() {
+    public void bulkSoftDeleteDeadLetter(final List<DeadLetterResponse> deadLetters) {
 
-        List<DeadLetter> deadLetters = dsl.selectFrom(jDeadLetter)
-                .where(jDeadLetter.IS_DELETE.eq(false))
-                .fetchInto(DeadLetter.class);
-
-        List<UpdateSetMoreStep<DeadLetterRecord>> results = deadLetters.stream()
-                .map(deadLetter -> dsl.update(jDeadLetter).set(jDeadLetter.IS_DELETE, true))
-                .toList();
+        List<UpdateConditionStep<DeadLetterRecord>> results = deadLetters.stream()
+                .map(deadLetter -> dsl.update(jDeadLetter)
+                        .set(jDeadLetter.IS_DELETE, true)
+                        .where(jDeadLetter.ID.eq(deadLetter.id()))
+                ).toList();
 
         dsl.batch(results).execute();
     }

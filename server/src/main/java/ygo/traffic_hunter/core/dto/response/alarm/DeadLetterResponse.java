@@ -29,5 +29,5 @@ import ygo.traffic_hunter.core.alarm.message.Message;
  * @author yungwang-o
  * @version 1.1.0
  */
-public record DeadLetterResponse(Message message) {
+public record DeadLetterResponse(Long id, Message message) {
 }
