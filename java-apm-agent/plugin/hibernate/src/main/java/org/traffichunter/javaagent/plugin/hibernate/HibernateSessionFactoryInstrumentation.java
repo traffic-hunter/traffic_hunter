@@ -28,8 +28,8 @@ import static net.bytebuddy.matcher.ElementMatchers.namedOneOf;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.util.Collections;
+import java.util.List;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Return;
 import net.bytebuddy.description.method.MethodDescription;
@@ -38,8 +38,8 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.hibernate.SharedSessionContract;
 import org.traffichunter.javaagent.plugin.hibernate.helper.SessionInfo;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.sdk.field.PluginSupportField;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 
 /**
  * @author yungwang-o
@@ -48,13 +48,17 @@ import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInst
 public class HibernateSessionFactoryInstrumentation extends AbstractPluginInstrumentation {
 
     public HibernateSessionFactoryInstrumentation() {
-        super("hibernate", HibernateSessionFactoryInstrumentation.class.getSimpleName(), "6.0");
+        super("hibernate", HibernateSessionFactoryInstrumentation.class.getName(), "6.0");
     }
 
     @Override
-    public Transformer transform() {
-        return ((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(SessionFactoryAdvice.class)));
+    public List<Advice> transform() {
+        return Collections.singletonList(
+                Advice.create(
+                        isMethod(),
+                        Advice.combineClassBinaryPath(HibernateSessionFactoryInstrumentation.class, SessionFactoryAdvice.class)
+                )
+        );
     }
 
     @Override

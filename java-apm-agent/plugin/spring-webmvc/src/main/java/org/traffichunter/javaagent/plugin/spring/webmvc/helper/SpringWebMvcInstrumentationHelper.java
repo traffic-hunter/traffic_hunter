@@ -23,6 +23,7 @@
  */
 package org.traffichunter.javaagent.plugin.spring.webmvc.helper;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Scope;
@@ -30,8 +31,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import org.springframework.http.HttpStatus;
-import org.traffichunter.javaagent.trace.manager.TraceManager;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
  * @author yungwang-o
@@ -45,7 +45,7 @@ public class SpringWebMvcInstrumentationHelper {
                                   final HttpServletRequest request,
                                   final HttpServletResponse response) {
 
-        Span span = TraceManager.getTracer(SPRING_WEBMVC_INSTRUMENTATION_SCOPE_NAME)
+        Span span = GlobalOpenTelemetry.getTracer(SPRING_WEBMVC_INSTRUMENTATION_SCOPE_NAME)
                 .spanBuilder(generateSpanName(request))
                 .setAttribute("method.name", method.getName())
                 .setAttribute("http.method", request.getMethod())

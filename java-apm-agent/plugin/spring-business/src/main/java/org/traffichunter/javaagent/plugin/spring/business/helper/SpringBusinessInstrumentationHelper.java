@@ -1,12 +1,12 @@
 package org.traffichunter.javaagent.plugin.spring.business.helper;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import java.lang.reflect.Method;
-import org.traffichunter.javaagent.trace.manager.TraceManager;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 public class SpringBusinessInstrumentationHelper {
 
@@ -18,7 +18,7 @@ public class SpringBusinessInstrumentationHelper {
 
         public static SpanScope start(final Method method, final Context parentContext) {
 
-            Span span = TraceManager.getTracer(SPRING_BUSINESS_SERVICE_TRACE_SCOPE)
+            Span span = GlobalOpenTelemetry.getTracer(SPRING_BUSINESS_SERVICE_TRACE_SCOPE)
                     .spanBuilder(generateSpanName(method))
                     .setParent(parentContext)
                     .startSpan();
@@ -31,7 +31,7 @@ public class SpringBusinessInstrumentationHelper {
 
         public static SpanScope start(final Method method, final Context parentContext) {
 
-            Span span = TraceManager.getTracer(SPRING_BUSINESS_REPOSITORY_TRACE_SCOPE)
+            Span span = GlobalOpenTelemetry.getTracer(SPRING_BUSINESS_REPOSITORY_TRACE_SCOPE)
                     .spanBuilder(generateSpanName(method))
                     .setParent(parentContext)
                     .startSpan();

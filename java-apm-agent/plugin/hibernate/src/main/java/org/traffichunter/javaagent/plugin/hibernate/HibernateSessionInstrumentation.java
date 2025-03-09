@@ -34,8 +34,7 @@ import static org.traffichunter.javaagent.plugin.hibernate.helper.EntityNameHook
 
 import io.opentelemetry.context.Context;
 import jakarta.persistence.criteria.CriteriaQuery;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.util.List;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -47,14 +46,15 @@ import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.hibernate.SharedSessionContract;
 import org.hibernate.Transaction;
 import org.hibernate.query.CommonQueryContract;
 import org.traffichunter.javaagent.plugin.hibernate.helper.HibernateInstrumentationHelper;
 import org.traffichunter.javaagent.plugin.hibernate.helper.SessionInfo;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.sdk.field.PluginSupportField;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
  * @author yungwang-o
@@ -63,39 +63,52 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 public class HibernateSessionInstrumentation extends AbstractPluginInstrumentation {
 
     public HibernateSessionInstrumentation() {
-        super("hibernate", HibernateSessionInstrumentation.class.getSimpleName(), "6.0");
+        super("hibernate", HibernateSessionInstrumentation.class.getName(), "6.0");
     }
 
     @Override
-    public Transformer transform() {
-            return (builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(namedOneOf(
-                        "save",
-                        "replicate",
-                        "saveOrUpdate",
-                        "update",
-                        "merge",
-                        "persist",
-                        "lock",
-                        "fireLock",
-                        "refresh",
-                        "insert",
-                        "delete"
-                        ).and(takesArgument(0, any()))
-                        ).intercept(Advice.to(SessionMethodAdvice.class))
+    public List<Advice> transform() {
+        return List.of(
+                Advice.create(
+                        ElementMatchers.isMethod()
+                                .and(namedOneOf(
+                                "save",
+                                "replicate",
+                                "saveOrUpdate",
+                                "update",
+                                "merge",
+                                "persist",
+                                "lock",
+                                "fireLock",
+                                "refresh",
+                                "insert",
+                                "delete")
+                                .and(takesArgument(0, any()))),
+                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, SessionMethodAdvice.class)
+                ),
 
-                        .method(namedOneOf("get", "find")
-                                        .and(returns(Object.class))
-                                        .and(takesArgument(0, String.class).or(takesArgument(0, Class.class)))
-                        ).intercept(Advice.to(SessionMethodAdvice.class))
+                Advice.create(
+                        ElementMatchers.isMethod()
+                                .and(namedOneOf("get", "find")
+                                .and(returns(Object.class))
+                                .and(takesArgument(0, String.class).or(takesArgument(0, Class.class)))),
+                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, SessionMethodAdvice.class)
+                ),
 
-                        .method(namedOneOf("beginTransaction", "getTransaction")
-                                .and(returns(named("org.hibernate.Transaction")))
-                        ).intercept(Advice.to(GetTransactionAdvice.class))
+                Advice.create(
+                        ElementMatchers.isMethod()
+                                .and(namedOneOf("beginTransaction", "getTransaction")
+                                .and(returns(named("org.hibernate.Transaction")))),
+                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, GetTransactionAdvice.class)
+                ),
 
-                        .method(returns(hasSuperType(named("org.hibernate.query.CommonQueryContract")))
-                                .or(named("org.hibernate.query.spi.QueryImplementor"))
-                        ).intercept(Advice.to(GetQueryAdvice.class));
+                Advice.create(
+                        ElementMatchers.isMethod()
+                                .and(returns(hasSuperType(named("org.hibernate.query.CommonQueryContract")))
+                                .or(named("org.hibernate.query.spi.QueryImplementor"))),
+                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, GetQueryAdvice.class)
+                )
+        );
     }
 
     @Override
@@ -145,7 +158,7 @@ public class HibernateSessionInstrumentation extends AbstractPluginInstrumentati
     @SuppressWarnings("unused")
     public static class GetQueryAdvice {
 
-        @OnMethodExit(suppress = Throwable.class)
+        @OnMethodExit(inline = false, suppress = Throwable.class)
         public static void exit(@This final SharedSessionContract session, @Return final Object queryObject) {
 
             if(!(queryObject instanceof CommonQueryContract)) {

@@ -23,13 +23,13 @@
  */
 package org.traffichunter.javaagent.plugin.jdbc.helper;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseRequest;
-import org.traffichunter.javaagent.trace.manager.TraceManager;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
  * @author yungwang-o
@@ -43,7 +43,7 @@ public class JdbcInstrumentationHelper {
 
         public static SpanScope start(final DatabaseRequest request, final Context parentContext) {
 
-            Span span = TraceManager.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
+            Span span = GlobalOpenTelemetry.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
                     .spanBuilder(request.getStatementString())
                     .setParent(parentContext)
                     .setAttribute("sql", request.getStatementString())
@@ -63,7 +63,7 @@ public class JdbcInstrumentationHelper {
 
         public static SpanScope start(final Context parentContext, final DatabaseRequest request) {
 
-            Span span = TraceManager.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
+            Span span = GlobalOpenTelemetry.getTracer(JDBC_INSTRUMENTATION_SCOPE_NAME)
                     .spanBuilder(request.getStatementString())
                     .setParent(parentContext)
                     .setAttribute("sql", request.getStatementString())

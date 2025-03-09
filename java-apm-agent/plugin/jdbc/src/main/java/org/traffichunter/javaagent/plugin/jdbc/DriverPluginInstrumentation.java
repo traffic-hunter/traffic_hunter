@@ -30,20 +30,20 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import java.sql.Connection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Return;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseInfo;
 import org.traffichunter.javaagent.plugin.jdbc.library.JdbcData;
 import org.traffichunter.javaagent.plugin.jdbc.library.JdbcInformationParser;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 
 /**
  * @author yungwang-o
@@ -52,13 +52,16 @@ import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInst
 public class DriverPluginInstrumentation extends AbstractPluginInstrumentation {
 
     public DriverPluginInstrumentation() {
-        super("jdbc", DriverPluginInstrumentation.class.getSimpleName(), "");
+        super("jdbc", DriverPluginInstrumentation.class.getName(), "");
     }
 
     @Override
-    public Transformer transform() {
-        return ((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(DriverAdvice.class)));
+    public List<Advice> transform() {
+        return Collections.singletonList(
+                Advice.create(
+                isMethod(),
+                Advice.combineClassBinaryPath(DriverPluginInstrumentation.class, DriverAdvice.class)
+        ));
     }
 
     @Override

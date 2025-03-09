@@ -30,16 +30,16 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import java.sql.PreparedStatement;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.util.Collections;
+import java.util.List;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Return;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.jdbc.library.JdbcData;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
 
 /**
  * @author yungwang-o
@@ -48,13 +48,16 @@ import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInst
 public class ConnectionPluginInstrumentation extends AbstractPluginInstrumentation {
 
     public ConnectionPluginInstrumentation() {
-        super("jdbc", ConnectionPluginInstrumentation.class.getSimpleName(), "");
+        super("jdbc", ConnectionPluginInstrumentation.class.getName(), "");
     }
 
     @Override
-    public Transformer transform() {
-        return (builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(ConnectionAdvice.class));
+    public List<Advice> transform() {
+        return Collections.singletonList(
+                Advice.create(
+                isMethod(),
+                Advice.combineClassBinaryPath(ConnectionPluginInstrumentation.class, ConnectionAdvice.class)
+        ));
     }
 
     @Override

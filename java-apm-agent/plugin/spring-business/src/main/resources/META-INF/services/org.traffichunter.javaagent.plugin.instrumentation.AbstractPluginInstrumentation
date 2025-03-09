@@ -1,0 +1,2 @@
+org.traffichunter.javaagent.plugin.spring.business.SpringBusinessRepositoryInstrumentation
+org.traffichunter.javaagent.plugin.spring.business.SpringBusinessServiceInstrumentation

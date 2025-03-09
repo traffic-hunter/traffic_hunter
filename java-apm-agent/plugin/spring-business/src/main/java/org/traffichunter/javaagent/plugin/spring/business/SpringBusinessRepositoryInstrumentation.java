@@ -5,8 +5,8 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import io.opentelemetry.context.Context;
 import java.lang.reflect.Method;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.util.Collections;
+import java.util.List;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Origin;
@@ -14,20 +14,23 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 import org.traffichunter.javaagent.plugin.spring.business.helper.SpringBusinessInstrumentationHelper;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
 public class SpringBusinessRepositoryInstrumentation extends AbstractPluginInstrumentation {
 
     public SpringBusinessRepositoryInstrumentation() {
-        super("spring-business", "repository", "3.3");
+        super("spring-business", SpringBusinessRepositoryInstrumentation.class.getName(), "3.3");
     }
 
     @Override
-    public Transformer transform() {
-        return ((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(RepositoryAdvice.class)));
+    public List<Advice> transform() {
+        return Collections.singletonList(
+                Advice.create(
+                isMethod(),
+                SpringBusinessRepositoryInstrumentation.class.getName() + "$RepositoryAdvice"
+        ));
     }
 
     @Override

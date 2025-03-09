@@ -28,8 +28,8 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.namedOneOf;
 
 import io.opentelemetry.context.Context;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.util.Collections;
+import java.util.List;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
@@ -44,9 +44,9 @@ import org.hibernate.query.Query;
 import org.hibernate.query.spi.SqmQuery;
 import org.traffichunter.javaagent.plugin.hibernate.helper.HibernateInstrumentationHelper;
 import org.traffichunter.javaagent.plugin.hibernate.helper.SessionInfo;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.sdk.field.PluginSupportField;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
  * @author yungwang-o
@@ -55,13 +55,17 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 public class HibernateQueryInstrumentation extends AbstractPluginInstrumentation {
 
     public HibernateQueryInstrumentation() {
-        super("hibernate", HibernateQueryInstrumentation.class.getSimpleName(), "6.0");
+        super("hibernate", HibernateQueryInstrumentation.class.getName(), "6.0");
     }
 
     @Override
-    public Transformer transform() {
-        return ((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(QueryAdvice.class)));
+    public List<Advice> transform() {
+        return Collections.singletonList(
+                    Advice.create(
+                        isMethod(),
+                        Advice.combineClassBinaryPath(HibernateQueryInstrumentation.class, QueryAdvice.class)
+                    )
+        );
     }
 
     @Override

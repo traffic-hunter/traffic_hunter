@@ -1,0 +1,42 @@
+plugins {
+    id("java")
+}
+
+group = "org.traffichunter.javaagent.extension"
+version = "0.0.1-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+
+    implementation(project(":java-apm-agent:java-agent-retry"))
+    implementation(project(":java-apm-agent:java-agent-bootstrap"))
+    implementation(project(":java-apm-agent:java-agent-event"))
+    implementation(project(":java-apm-agent:java-agent-commons"))
+    implementation(project(":java-apm-agent:java-agent-websocket"))
+    implementation(project(":java-apm-agent:java-agent-jmx"))
+    implementation(project(":java-apm-agent:plugin-instrumentation"))
+    implementation(project(":java-apm-agent:plugin:jdbc"))
+    implementation(project(":java-apm-agent:plugin:spring-business"))
+    implementation(project(":java-apm-agent:plugin:spring-webmvc"))
+
+    compileOnly(project(":java-apm-agent:plugin-sdk"))
+
+    implementation("org.java-websocket:Java-WebSocket:1.5.7")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.18.0")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.0")
+
+    implementation("io.opentelemetry:opentelemetry-api:1.45.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:1.45.0")
+    implementation("org.yaml:snakeyaml:2.3")
+    implementation("net.bytebuddy:byte-buddy:1.15.5")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}

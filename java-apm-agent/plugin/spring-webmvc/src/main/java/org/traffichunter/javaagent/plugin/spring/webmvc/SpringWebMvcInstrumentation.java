@@ -28,8 +28,8 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.util.Collections;
+import java.util.List;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -39,9 +39,9 @@ import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 import org.traffichunter.javaagent.plugin.spring.webmvc.helper.SpringWebMvcInstrumentationHelper;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 
 /**
  * @author yungwang-o
@@ -50,13 +50,16 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 public class SpringWebMvcInstrumentation extends AbstractPluginInstrumentation {
 
     public SpringWebMvcInstrumentation() {
-        super("spring-webmvc", SpringWebMvcInstrumentation.class.getSimpleName(),"spring-webmvc-6.2.0");
+        super("spring-webmvc", SpringWebMvcInstrumentation.class.getName(),"spring-webmvc-6.2.0");
     }
 
     @Override
-    public Transformer transform() {
-        return ((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(SpringWebMvcDispatcherServletAdvice.class)));
+    public List<Advice> transform() {
+        return Collections.singletonList(
+                Advice.create(
+                isMethod(),
+                SpringWebMvcInstrumentation.class.getName() + "$SpringWebMvcDispatcherServletAdvice"
+        ));
     }
 
     @Override

@@ -28,8 +28,8 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import io.opentelemetry.context.Context;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.util.Collections;
+import java.util.List;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
@@ -41,9 +41,9 @@ import net.bytebuddy.matcher.ElementMatcher;
 import org.hibernate.Transaction;
 import org.traffichunter.javaagent.plugin.hibernate.helper.HibernateInstrumentationHelper;
 import org.traffichunter.javaagent.plugin.hibernate.helper.SessionInfo;
+import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.sdk.field.PluginSupportField;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
  * @author yungwang-o
@@ -52,13 +52,17 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 public class HibernateTransactionInstrumentation extends AbstractPluginInstrumentation {
 
     public HibernateTransactionInstrumentation() {
-        super("hibernate", HibernateTransactionInstrumentation.class.getSimpleName(), "6.0");
+        super("hibernate", HibernateTransactionInstrumentation.class.getName(), "6.0");
     }
 
     @Override
-    public Transformer transform() {
-        return ((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(TransactionCommitAdvice.class)));
+    public List<Advice> transform() {
+        return Collections.singletonList(
+                Advice.create(
+                        isMethod(),
+                        Advice.combineClassBinaryPath(HibernateTransactionInstrumentation.class, TransactionCommitAdvice.class)
+                )
+        );
     }
 
     @Override
@@ -74,7 +78,7 @@ public class HibernateTransactionInstrumentation extends AbstractPluginInstrumen
     @SuppressWarnings("unused")
     public static class TransactionCommitAdvice {
 
-        @OnMethodEnter(suppress = Throwable.class)
+        @OnMethodEnter(inline = false, suppress = Throwable.class)
         public static SpanScope enter(@This final Transaction transaction) {
 
             Context parentContext = Context.current();
@@ -89,7 +93,7 @@ public class HibernateTransactionInstrumentation extends AbstractPluginInstrumen
                     .start(transaction, parentContext, sessionInfo);
         }
 
-        @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
+        @OnMethodExit(inline = false, suppress = Throwable.class, onThrowable = Throwable.class)
         public static void exit(@Enter final SpanScope spanScope, @Thrown Throwable throwable) {
 
             HibernateInstrumentationHelper.end(spanScope, throwable);

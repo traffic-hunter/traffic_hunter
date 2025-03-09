@@ -23,13 +23,13 @@
  */
 package org.traffichunter.javaagent.plugin.hibernate.helper;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.hibernate.Transaction;
-import org.traffichunter.javaagent.trace.manager.TraceManager;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
  * @author yungwang-o
@@ -45,7 +45,7 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            Span span = TraceManager.getTracer(HIBERNATE_TRACE_SCOPE)
+            Span span = GlobalOpenTelemetry.getTracer(HIBERNATE_TRACE_SCOPE)
                     .spanBuilder("hibernate-transaction")
                     .setParent(parentContext)
                     .setAttribute("transaction.commit", sessionInfo.getSessionId())
@@ -63,7 +63,7 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            Span span = TraceManager.getTracer(HIBERNATE_TRACE_SCOPE)
+            Span span = GlobalOpenTelemetry.getTracer(HIBERNATE_TRACE_SCOPE)
                     .spanBuilder("hibernate-session-span")
                     .setParent(parentContext)
                     .setAttribute("session.method", name)
@@ -81,7 +81,7 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            Span span = TraceManager.getTracer(HIBERNATE_TRACE_SCOPE)
+            Span span = GlobalOpenTelemetry.getTracer(HIBERNATE_TRACE_SCOPE)
                     .spanBuilder("hibernate-query-span")
                     .setParent(parentContext)
                     .setAttribute("query", queryStr)
