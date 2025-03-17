@@ -14,9 +14,9 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
-import org.traffichunter.javaagent.plugin.spring.business.helper.SpringBusinessInstrumentationHelper;
 
 public class SpringBusinessRepositoryInstrumentation extends AbstractPluginInstrumentation {
 
@@ -25,12 +25,15 @@ public class SpringBusinessRepositoryInstrumentation extends AbstractPluginInstr
     }
 
     @Override
-    public List<Advice> transform() {
-        return Collections.singletonList(
+    public void transform(final Transformer transformer) {
+
+        List<Advice> advice = Collections.singletonList(
                 Advice.create(
-                isMethod(),
-                SpringBusinessRepositoryInstrumentation.class.getName() + "$RepositoryAdvice"
-        ));
+                        isMethod(),
+                        SpringBusinessRepositoryInstrumentation.class.getName() + "$RepositoryAdvice"
+                ));
+
+        transformer.processAdvice(advice);
     }
 
     @Override
@@ -46,7 +49,7 @@ public class SpringBusinessRepositoryInstrumentation extends AbstractPluginInstr
     @SuppressWarnings("unused")
     public static class RepositoryAdvice {
 
-        @OnMethodEnter
+        @OnMethodEnter(suppress = Throwable.class)
         public static SpanScope enter(@Origin final Method method) {
 
             Context parentContext = Context.current();

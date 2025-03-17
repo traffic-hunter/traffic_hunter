@@ -38,7 +38,8 @@ import net.bytebuddy.asm.Advice.Return;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.jdbc.library.JdbcData;
 
 /**
@@ -52,12 +53,15 @@ public class ConnectionPluginInstrumentation extends AbstractPluginInstrumentati
     }
 
     @Override
-    public List<Advice> transform() {
-        return Collections.singletonList(
+    public void transform(final Transformer transformer) {
+
+        List<Advice> advice = Collections.singletonList(
                 Advice.create(
-                isMethod(),
-                Advice.combineClassBinaryPath(ConnectionPluginInstrumentation.class, ConnectionAdvice.class)
-        ));
+                        isMethod(),
+                        Advice.combineClassBinaryPath(ConnectionPluginInstrumentation.class, ConnectionAdvice.class)
+                ));
+
+        transformer.processAdvice(advice);
     }
 
     @Override

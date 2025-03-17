@@ -21,37 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.bootstrap;
+package org.traffichunter.javaagent.extension.bytebuddy;
 
-import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.traffichunter.javaagent.plugin.sdk.cache.Cache;
+import java.util.ArrayList;
+import java.util.List;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.dynamic.ClassFileLocator;
+import net.bytebuddy.utility.JavaModule;
+import org.traffichunter.javaagent.extension.Utilizr;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public class SharedClassLoaderManager {
+public class AgentLocationStrategy implements AgentBuilder.LocationStrategy {
 
-    private static final Cache<ClassLoader, Map<String, URL>> SHARED_RESOURCES_STORE = Cache.weak();
+    private final ClassLoader bootstrapClassLoader = Utilizr.getBootstrapClassLoader();
 
-    private SharedClassLoaderManager() {}
+    @Override
+    public ClassFileLocator classFileLocator(final ClassLoader classLoader, final JavaModule javaModule) {
 
-    public static void create(final ClassLoader classLoader, final String path, final URL url) {
+        List<ClassFileLocator> classFileLocators = new ArrayList<>();
 
-        SHARED_RESOURCES_STORE.computeIfAbsent(classLoader, unused -> new ConcurrentHashMap<>())
-                .put(path, url);
-    }
-
-    public static URL load(final ClassLoader classLoader, final String path) {
-
-        Map<String, URL> map = SHARED_RESOURCES_STORE.get(classLoader);
-
-        if(map == null) {
-            return null;
+        if(classLoader != null) {
+            classFileLocators.add(ClassFileLocator.ForClassLoader.WeaklyReferenced.of(classLoader));
         }
 
-        return map.get(path);
+        classFileLocators.add(ClassFileLocator.ForClassLoader.of(bootstrapClassLoader));
+
+        return new ClassFileLocator.Compound(classFileLocators);
     }
 }

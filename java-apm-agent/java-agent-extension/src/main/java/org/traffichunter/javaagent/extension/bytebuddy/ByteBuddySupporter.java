@@ -88,13 +88,32 @@ public class ByteBuddySupporter {
         }
 
         @Override
+        public void onComplete(final String typeName,
+                               final ClassLoader classLoader,
+                               final JavaModule module,
+                               final boolean loaded) {
+        }
+
+        @Override
         public void onTransformation(final TypeDescription typeDescription,
                                      final ClassLoader classLoader,
                                      final JavaModule module,
                                      final boolean loaded,
                                      final DynamicType dynamicType) {
 
-            log.info("Transforming " + typeDescription.getName() + " " + classLoader);
+            log.info("Transforming - " + typeDescription.getName() + " loaded: " + loaded);
+        }
+    }
+
+    public static class ClassLoaderLoggingAdapter extends Listener.Adapter {
+
+        @Override
+        public void onComplete(final String typeName,
+                               final ClassLoader classLoader,
+                               final JavaModule module,
+                               final boolean loaded) {
+
+
         }
     }
 }

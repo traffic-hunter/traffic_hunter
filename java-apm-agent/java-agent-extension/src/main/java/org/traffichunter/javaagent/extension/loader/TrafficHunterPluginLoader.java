@@ -26,7 +26,7 @@ package org.traffichunter.javaagent.extension.loader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
 
 /**
  * @author yungwang-o

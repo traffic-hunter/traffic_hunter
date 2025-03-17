@@ -26,7 +26,8 @@ package org.traffichunter.javaagent.extension.bootstrap;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
-import java.util.logging.Logger;
+import org.traffichunter.javaagent.bootstrap.BootstrapLogger;
+import org.traffichunter.javaagent.bootstrap.OpenTelemetrySdkBridge;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentShutdownHook;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentStarter;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
@@ -45,7 +46,7 @@ import org.traffichunter.javaagent.extension.sender.manager.MetricSendSessionMan
 @SuppressWarnings("unused")
 public final class TrafficHunterAgentStartAction implements TrafficHunterAgentStarter {
 
-    private static final Logger log = Logger.getLogger(TrafficHunterAgentStartAction.class.getName());
+    private static final BootstrapLogger log = BootstrapLogger.getLogger(TrafficHunterAgentStartAction.class);
 
     private final TrafficHunterAgentShutdownHook shutdownHook;
 
@@ -89,7 +90,7 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
                 AgentStatus.INITIALIZED
         );
         context.addAgentStateEventListener(metadata);
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetryManager.manageOpenTelemetrySdk();
+        OpenTelemetrySdk openTelemetrySdk = initializeOpenTelemetry();
         configurableContextInitializer.retransform(inst);
 
         AgentRunner runner = new AgentRunner(property, context, metadata);
@@ -102,6 +103,19 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
             runnerThread.start();
             context.close();
         }
+    }
+
+    private OpenTelemetrySdk initializeOpenTelemetry() {
+
+        OpenTelemetrySdk openTelemetrySdk = OpenTelemetryManager.manageOpenTelemetrySdk();
+
+        OpenTelemetrySdkBridge.setOpenTelemetrySdkForceFlush((timeout, unit) -> {
+                openTelemetrySdk.getSdkTracerProvider().forceFlush().join(timeout, unit);
+                openTelemetrySdk.getSdkMeterProvider().forceFlush().join(timeout, unit);
+                openTelemetrySdk.getSdkLoggerProvider().forceFlush().join(timeout, unit);
+        });
+
+        return openTelemetrySdk;
     }
 
     @Override

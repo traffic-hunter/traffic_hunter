@@ -16,9 +16,9 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
-import org.traffichunter.javaagent.plugin.spring.business.helper.SpringBusinessInstrumentationHelper;
 
 public class SpringBusinessServiceInstrumentation extends AbstractPluginInstrumentation {
 
@@ -27,12 +27,15 @@ public class SpringBusinessServiceInstrumentation extends AbstractPluginInstrume
     }
 
     @Override
-    public List<Advice> transform() {
-        return Collections.singletonList(
+    public void transform(final Transformer transformer) {
+
+        List<Advice> advice = Collections.singletonList(
                 Advice.create(
-                isMethod(),
-                SpringBusinessServiceInstrumentation.class.getName() + "$ServiceAdvice"
-        ));
+                        isMethod(),
+                        SpringBusinessServiceInstrumentation.class.getName() + "$ServiceAdvice"
+                ));
+
+        transformer.processAdvice(advice);
     }
 
     @Override
@@ -48,7 +51,7 @@ public class SpringBusinessServiceInstrumentation extends AbstractPluginInstrume
     @SuppressWarnings("unused")
     public static class ServiceAdvice {
 
-        @OnMethodEnter(inline = false)
+        @OnMethodEnter(suppress = Throwable.class)
         public static SpanScope enter(@Origin final Method method) {
 
             Context parentContext = Context.current();
@@ -56,7 +59,7 @@ public class SpringBusinessServiceInstrumentation extends AbstractPluginInstrume
             return SpringBusinessInstrumentationHelper.Service.start(method, parentContext);
         }
 
-        @OnMethodExit(inline = false, suppress = Throwable.class, onThrowable = Throwable.class)
+        @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
         public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
 
             SpringBusinessInstrumentationHelper.end(spanScope, throwable);

@@ -21,19 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bytebuddy;
+package org.traffichunter.javaagent.bootstrap;
 
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.TypeConstantAdjustment;
+import java.lang.instrument.Instrumentation;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public class Transformer {
+public class InstrumentationHolder {
 
-    public static AgentBuilder.Transformer defaultTransform() {
-        return (builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.visit(TypeConstantAdjustment.INSTANCE);
+    private static volatile Instrumentation INSTRUMENTATION;
+
+    public static void setInstrumentation(final Instrumentation instrumentation) {
+
+        if(INSTRUMENTATION != null) {
+            INSTRUMENTATION = instrumentation;
+        }
+    }
+
+    public static Instrumentation getInstrumentation() {
+        return INSTRUMENTATION;
     }
 }

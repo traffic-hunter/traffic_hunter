@@ -19,10 +19,6 @@ dependencies {
     implementation(project(":java-apm-agent:java-agent-commons"))
     implementation(project(":java-apm-agent:java-agent-websocket"))
     implementation(project(":java-apm-agent:java-agent-jmx"))
-    implementation(project(":java-apm-agent:plugin-instrumentation"))
-    implementation(project(":java-apm-agent:plugin:jdbc"))
-    implementation(project(":java-apm-agent:plugin:spring-business"))
-    implementation(project(":java-apm-agent:plugin:spring-webmvc"))
 
     compileOnly(project(":java-apm-agent:plugin-sdk"))
 

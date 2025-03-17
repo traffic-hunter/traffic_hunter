@@ -23,27 +23,31 @@
  */
 package org.traffichunter.javaagent.extension.bootstrap;
 
+import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
+
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
+import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.DiscoveryStrategy.Reiterating;
+import net.bytebuddy.agent.builder.AgentBuilder.TypeStrategy.Default;
+import org.traffichunter.javaagent.bootstrap.BootstrapLogger;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.commons.util.UUIDGenerator;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.extension.InstrumentationHelper;
 import org.traffichunter.javaagent.extension.bootstrap.env.ConfigurableEnvironment;
 import org.traffichunter.javaagent.extension.bootstrap.env.Environment;
 import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
+import org.traffichunter.javaagent.extension.bytebuddy.AgentLocationStrategy;
 import org.traffichunter.javaagent.extension.bytebuddy.ByteBuddySupporter;
 import org.traffichunter.javaagent.extension.loader.PluginLoader;
 import org.traffichunter.javaagent.extension.loader.TrafficHunterPluginLoader;
 import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.plugin.spring.webmvc.SpringWebMvcInstrumentation;
 
 /**
  * The {@code ConfigurableContextInitializer} class is responsible for initializing the environment,
@@ -66,7 +70,7 @@ import org.traffichunter.javaagent.plugin.spring.webmvc.SpringWebMvcInstrumentat
  */
 public class ConfigurableContextInitializer {
 
-    private static final Logger log = Logger.getLogger(ConfigurableContextInitializer.class.getName());
+    private static final BootstrapLogger log = BootstrapLogger.getLogger(ConfigurableContextInitializer.class);
 
     private final ConfigurableEnvironment env;
 
@@ -87,19 +91,31 @@ public class ConfigurableContextInitializer {
      */
     public void retransform(final Instrumentation inst) {
 
-        List<AbstractPluginInstrumentation> plugins = loadPlugins(SpringWebMvcInstrumentation.class.getClassLoader());
+        List<AbstractPluginInstrumentation> plugins = loadPlugins(TrafficHunterAgentStartAction.class.getClassLoader());
 
         plugins.forEach(pluginInstrumentation ->
-                System.out.println(pluginInstrumentation.getPluginDetailName() + " -> " + pluginInstrumentation.getClass().getClassLoader())
+                log.info("{} -> {}",
+                        pluginInstrumentation.getPluginDetailName(),
+                        pluginInstrumentation.getClass().getClassLoader()
+                )
         );
 
         InstrumentationHelper instrumentationHelper = new InstrumentationHelper(plugins);
 
         AgentBuilder agentBuilder = new AgentBuilder.Default()
+                .disableClassFormatChanges()
                 .with(RedefinitionStrategy.RETRANSFORMATION)
-                .with(new ByteBuddySupporter.RedefinitionStrategyLoggingAdapter())
+                .with(Reiterating.INSTANCE)
+                .with(Default.REDEFINE)
+                .with(AgentBuilder.Listener.StreamWriting.toSystemError().withErrorsOnly())
                 .with(new ByteBuddySupporter.TransformLoggingListenAdapter())
-                .disableClassFormatChanges();
+                .with(new AgentLocationStrategy())
+                .ignore(
+                        nameStartsWith("net.bytebuddy.")
+                                .or(nameStartsWith("jdk.internal.reflect."))
+                                .or(nameStartsWith("java.lang.invoke."))
+                                .or(nameStartsWith("com.sun.proxy."))
+                );
 
         agentBuilder = instrumentationHelper.instrument(agentBuilder);
 

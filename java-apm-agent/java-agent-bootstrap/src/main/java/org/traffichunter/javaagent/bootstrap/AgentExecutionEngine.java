@@ -35,10 +35,10 @@ import java.time.Instant;
  */
 public final class AgentExecutionEngine {
 
+    private static final BootstrapLogger log = BootstrapLogger.getLogger(AgentExecutionEngine.class);
+
     private static final String CALL_AGENT_STARTER =
             "org.traffichunter.javaagent.extension.bootstrap.TrafficHunterAgentStartAction";
-
-    private static ClassLoader agentClassLoader = null;
 
     private final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
@@ -58,10 +58,6 @@ public final class AgentExecutionEngine {
         StartUp startUp = new StartUp();
         Instant startTime = startUp.getStartTime();
 
-        if(agentClassLoader != null) {
-            return;
-        }
-
         if(AgentExecutionEngine.class.getClassLoader() != null) {
             throw new IllegalStateException("AgentExecutionEngine is not loaded in bootstrap class loader");
         }
@@ -70,9 +66,12 @@ public final class AgentExecutionEngine {
             shutdownHook.enableShutdownHook();
         }
 
-        agentClassLoader = createAgentClassLoader(agentBootstrapJar);
-
         try {
+
+            InstrumentationHolder.setInstrumentation(inst);
+
+            ClassLoader agentClassLoader = getAgentClassLoader(agentBootstrapJar);
+
             TrafficHunterAgentStarter trafficHunterAgentStarter = startAgent(agentClassLoader);
 
             trafficHunterAgentStarter.start(inst, agentArgs, startTime);
@@ -80,7 +79,7 @@ public final class AgentExecutionEngine {
             throw new IllegalStateException("Failed to start agent", e);
         }
 
-        System.out.printf("Started TrafficHunter Agent in " + String.format("%.3f", startUp.getUpTime()) + " second");
+        log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime());
     }
 
     public static void run(final File agentBootstrapJar, final String args, final Instrumentation inst) {
@@ -135,8 +134,8 @@ public final class AgentExecutionEngine {
         return (TrafficHunterAgentStarter) agentStartActionConstructor.newInstance(shutdownHook);
     }
 
-    private static ClassLoader createAgentClassLoader(final File agentBootstrapJar) {
+    private static ClassLoader getAgentClassLoader(final File agentFile) {
 
-        return new TrafficHunterAgentClassLoader(agentBootstrapJar);
+        return new TrafficHunterAgentClassLoader(agentFile);
     }
 }

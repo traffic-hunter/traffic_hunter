@@ -24,49 +24,43 @@
 package org.traffichunter.javaagent.extension;
 
 import java.util.List;
-import java.util.logging.Logger;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.agent.builder.AgentBuilder.Identified.Extendable;
+import net.bytebuddy.agent.builder.AgentBuilder.Transformer.ForAdvice;
+import net.bytebuddy.asm.TypeConstantAdjustment;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation.Advice;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public class InstrumentationHelper {
+public final class Transformer {
 
-    private static final Logger log = Logger.getLogger(InstrumentationHelper.class.getName());
+    private AgentBuilder.Identified.Extendable agentBuilder;
 
-    private final List<AbstractPluginInstrumentation> pluginInstrumentation;
-
-    public InstrumentationHelper(final List<AbstractPluginInstrumentation> pluginInstrumentation) {
-        this.pluginInstrumentation = pluginInstrumentation;
+    public Transformer(final Extendable agentBuilder) {
+        this.agentBuilder = agentBuilder;
     }
 
-    public AgentBuilder instrument(final AgentBuilder originalAgentBuilder) {
+    public void processAdvice(final List<Advice> advices) {
 
-        if(isEnabled()) {
-            log.warning("Instrumenting is empty!");
-            return originalAgentBuilder;
-        }
+        advices.forEach(advice -> {
 
-        AgentBuilder agentBuilder = originalAgentBuilder;
+            ForAdvice forAdvice = new ForAdvice()
+                    .include(
+                            Utilizr.getBootstrapClassLoader(),
+                            Utilizr.getSystemClassLoader(),
+                            Utilizr.getAgentClassLoader()
+                    )
+                    .advice(advice.methodMatcher(), advice.adviceName());
 
-        for(final AbstractPluginInstrumentation plugin : pluginInstrumentation) {
+            agentBuilder = agentBuilder.transform(forAdvice);
+        });
 
-            AgentBuilder.Identified.Extendable extendableAgentBuilder = agentBuilder
-                    .type(plugin.typeMatcher())
-                    .transform(Transformer.defaultTransform());
-
-            Transformer transformer = new Transformer(extendableAgentBuilder);
-
-            plugin.transform(transformer);
-
-            agentBuilder = extendableAgentBuilder;
-        }
-
-        return agentBuilder;
     }
 
-    private boolean isEnabled() {
-        return pluginInstrumentation == null || pluginInstrumentation.isEmpty();
+    public static AgentBuilder.Transformer defaultTransform() {
+        return (builder, typeDescription, classLoader, javaModule, protectionDomain) ->
+                builder.visit(TypeConstantAdjustment.INSTANCE);
     }
 }

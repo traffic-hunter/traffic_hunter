@@ -24,21 +24,18 @@
 package org.traffichunter.javaagent.extension.bootstrap;
 
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import java.util.List;
-import org.traffichunter.javaagent.bootstrap.OpenTelemetrySdkBridge;
 import org.traffichunter.javaagent.extension.otel.TrafficHunterExporter;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public final class OpenTelemetryManager {
+final class OpenTelemetryManager {
 
     private OpenTelemetryManager() {}
 
@@ -52,20 +49,9 @@ public final class OpenTelemetryManager {
                 .setSampler(Sampler.alwaysOn())
                 .build();
 
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
+        return OpenTelemetrySdk.builder()
                 .setTracerProvider(provider)
                 .buildAndRegisterGlobal();
-
-        OpenTelemetrySdkBridge.setOpenTelemetrySdkForceFlush(((timeout, unit) -> {
-            CompletableResultCode traceProvider = openTelemetrySdk.getSdkTracerProvider().forceFlush();
-            CompletableResultCode metricProvider = openTelemetrySdk.getSdkMeterProvider().forceFlush();
-            CompletableResultCode logProvider = openTelemetrySdk.getSdkLoggerProvider().forceFlush();
-            CompletableResultCode
-                    .ofAll(List.of(traceProvider, metricProvider, logProvider))
-                    .join(timeout, unit);
-        }));
-
-        return openTelemetrySdk;
     }
 
     public static void flush() {

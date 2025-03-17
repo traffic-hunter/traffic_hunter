@@ -69,7 +69,7 @@ public class TrafficHunterAgentClassLoader extends URLClassLoader {
     }
 
     public TrafficHunterAgentClassLoader(final File javaagentFile) {
-        super(new URL[] {}, ClassLoader.getPlatformClassLoader());
+        super(new URL[] {}, getSystemClassLoader());
 
         Objects.requireNonNull(javaagentFile, "javaagentFile");
 
@@ -88,27 +88,11 @@ public class TrafficHunterAgentClassLoader extends URLClassLoader {
 
     @Override
     protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-
-        synchronized (getClassLoadingLock(name)) {
-            Class<?> clazz = findLoadedClass(name);
-
-            if (clazz == null) {
-                clazz = findAgentClass(name);
-            }
-
-            if (clazz == null) {
-                clazz = super.loadClass(name, false);
-            }
-            if (resolve) {
-                resolveClass(clazz);
-            }
-
-            return clazz;
-        }
+        return super.loadClass(name, resolve);
     }
 
-    //
-    private Class<?> findAgentClass(final String name) throws ClassNotFoundException {
+    @Override
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
         JarEntry jarEntry = findAgentJarEntry(name.replace('.', '/') + ".class");
 
         if(jarEntry == null) {

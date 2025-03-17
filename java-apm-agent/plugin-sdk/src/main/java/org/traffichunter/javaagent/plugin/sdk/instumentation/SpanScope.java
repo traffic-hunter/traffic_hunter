@@ -33,4 +33,8 @@ import io.opentelemetry.context.Scope;
 public record SpanScope(Span span, Scope scope) {
 
     public static SpanScope NOOP = new SpanScope(Span.current(), Scope.noop());
+
+    public static SpanScope create(final Span span, final Scope scope) {
+        return new SpanScope(span, scope);
+    }
 }

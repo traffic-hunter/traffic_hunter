@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.plugin.instrumentation;
+package org.traffichunter.javaagent.extension;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
 
-import java.util.List;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -51,17 +50,17 @@ public abstract class AbstractPluginInstrumentation {
         this.pluginModuleVersion = pluginModuleVersion;
     }
 
-    public abstract List<Advice> transform();
+    public abstract void transform(Transformer transformer);
 
-    public abstract ElementMatcher<TypeDescription> typeMatcher();
+    public abstract ElementMatcher<? super TypeDescription> typeMatcher();
+
+    protected abstract ElementMatcher<? super MethodDescription> isMethod();
 
     protected Junction<ClassLoader> classLoaderMatcher() { return any(); }
 
     public Junction<TypeDescription> ignorePackage() {
         return null;
     }
-
-    protected abstract ElementMatcher<? super MethodDescription> isMethod();
 
     public String getPluginName() {
         return pluginName;
@@ -102,6 +101,14 @@ public abstract class AbstractPluginInstrumentation {
 
         public String adviceName() {
             return adviceName;
+        }
+
+        @Override
+        public String toString() {
+            return "Advice{" +
+                    "methodMatcher=" + methodMatcher +
+                    ", adviceName='" + adviceName + '\'' +
+                    '}';
         }
     }
 }

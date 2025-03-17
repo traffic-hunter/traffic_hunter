@@ -37,8 +37,9 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.hibernate.SharedSessionContract;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.hibernate.helper.SessionInfo;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.sdk.field.PluginSupportField;
 
 /**
@@ -52,17 +53,21 @@ public class HibernateSessionFactoryInstrumentation extends AbstractPluginInstru
     }
 
     @Override
-    public List<Advice> transform() {
-        return Collections.singletonList(
+    public void transform(final Transformer transformer) {
+
+        List<Advice> advice = Collections.singletonList(
                 Advice.create(
                         isMethod(),
-                        Advice.combineClassBinaryPath(HibernateSessionFactoryInstrumentation.class, SessionFactoryAdvice.class)
+                        Advice.combineClassBinaryPath(HibernateSessionFactoryInstrumentation.class,
+                                SessionFactoryAdvice.class)
                 )
         );
+
+        transformer.processAdvice(advice);
     }
 
     @Override
-    public ElementMatcher<TypeDescription> typeMatcher() {
+    public ElementMatcher<? super TypeDescription> typeMatcher() {
         return hasSuperType(namedOneOf("org.hibernate.SessionFactory", "org.hibernate.SessionBuilder"));
     }
 

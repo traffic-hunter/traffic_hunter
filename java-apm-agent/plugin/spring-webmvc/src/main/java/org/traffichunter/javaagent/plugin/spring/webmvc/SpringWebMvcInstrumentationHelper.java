@@ -21,16 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.plugin.spring.webmvc.helper;
+package org.traffichunter.javaagent.plugin.spring.webmvc;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.context.Scope;
+import io.opentelemetry.context.Context;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import org.springframework.http.HttpStatus;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.Instrumentor;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
@@ -39,45 +37,32 @@ import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
  */
 public class SpringWebMvcInstrumentationHelper {
 
-    private static final String SPRING_WEBMVC_INSTRUMENTATION_SCOPE_NAME = "spring-webmvc-tracer";
-
     public static SpanScope start(final Method method,
+                                  final Context parentContext,
                                   final HttpServletRequest request,
                                   final HttpServletResponse response) {
 
-        Span span = GlobalOpenTelemetry.getTracer(SPRING_WEBMVC_INSTRUMENTATION_SCOPE_NAME)
-                .spanBuilder(generateSpanName(request))
-                .setAttribute("method.name", method.getName())
-                .setAttribute("http.method", request.getMethod())
-                .setAttribute("http.url", request.getRequestURL().toString())
-                .setAttribute("http.status", HttpStatus.valueOf(response.getStatus()).name().toUpperCase())
-                .setAttribute("http.statusCode", response.getStatus())
-                .setAttribute("http.requestURI", request.getRequestURI())
-                .setAttribute("http.queryString", request.getQueryString())
-                .setAttribute("http.serverName", request.getServerName())
-                .setAttribute("http.serverPort", request.getServerPort())
-                .startSpan();
-
-        request.setAttribute("dispatch.span", span);
-
-        return new SpanScope(span, span.makeCurrent());
+        return Instrumentor.builder(request)
+                .spanName(SpringWebMvcInstrumentationHelper::generateSpanName)
+                .context(parentContext)
+                .spanAttribute((span, req) ->
+                        span.setAttribute("method.name", method.getName())
+                        .setAttribute("http.method", request.getMethod())
+                        .setAttribute("http.url", request.getRequestURL().toString())
+                        .setAttribute("http.status", HttpStatus.valueOf(response.getStatus()).name().toUpperCase())
+                        .setAttribute("http.statusCode", response.getStatus())
+                        .setAttribute("http.requestURI", request.getRequestURI())
+                        .setAttribute("http.queryString", request.getQueryString())
+                        .setAttribute("http.serverName", request.getServerName())
+                        .setAttribute("http.serverPort", request.getServerPort())
+                ).start();
     }
 
     public static void end(final SpanScope spanScope, final Throwable throwable) {
-
-        Span span = spanScope.span();
-        Scope scope = spanScope.scope();
-
-        if (throwable != null) {
-            span.recordException(throwable);
-            span.setStatus(StatusCode.ERROR, throwable.getMessage());
-        }
-
-        span.end();
-        scope.close();
+        Instrumentor.end(spanScope, throwable);
     }
 
-    private static String generateSpanName(final HttpServletRequest request) {
+    public static String generateSpanName(final HttpServletRequest request) {
 
         return request.getMethod() + " " + request.getRequestURI();
     }

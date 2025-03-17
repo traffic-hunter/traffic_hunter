@@ -39,9 +39,9 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.hibernate.Transaction;
-import org.traffichunter.javaagent.plugin.hibernate.helper.HibernateInstrumentationHelper;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.hibernate.helper.SessionInfo;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.plugin.sdk.field.PluginSupportField;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
@@ -56,17 +56,21 @@ public class HibernateTransactionInstrumentation extends AbstractPluginInstrumen
     }
 
     @Override
-    public List<Advice> transform() {
-        return Collections.singletonList(
+    public void transform(final Transformer transformer) {
+
+        List<Advice> advice = Collections.singletonList(
                 Advice.create(
                         isMethod(),
-                        Advice.combineClassBinaryPath(HibernateTransactionInstrumentation.class, TransactionCommitAdvice.class)
+                        Advice.combineClassBinaryPath(HibernateTransactionInstrumentation.class,
+                                TransactionCommitAdvice.class)
                 )
         );
+
+        transformer.processAdvice(advice);
     }
 
     @Override
-    public ElementMatcher<TypeDescription> typeMatcher() {
+    public ElementMatcher<? super TypeDescription> typeMatcher() {
         return hasSuperType(named("org.hibernate.Transaction"));
     }
 
@@ -78,7 +82,7 @@ public class HibernateTransactionInstrumentation extends AbstractPluginInstrumen
     @SuppressWarnings("unused")
     public static class TransactionCommitAdvice {
 
-        @OnMethodEnter(inline = false, suppress = Throwable.class)
+        @OnMethodEnter(suppress = Throwable.class)
         public static SpanScope enter(@This final Transaction transaction) {
 
             Context parentContext = Context.current();
@@ -93,7 +97,7 @@ public class HibernateTransactionInstrumentation extends AbstractPluginInstrumen
                     .start(transaction, parentContext, sessionInfo);
         }
 
-        @OnMethodExit(inline = false, suppress = Throwable.class, onThrowable = Throwable.class)
+        @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
         public static void exit(@Enter final SpanScope spanScope, @Thrown Throwable throwable) {
 
             HibernateInstrumentationHelper.end(spanScope, throwable);

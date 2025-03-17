@@ -77,7 +77,7 @@ import org.traffichunter.javaagent.extension.bootstrap.env.ConfigurableEnvironme
  * @author yungwang-o
  * @version 1.0.0
  */
-public class TrafficHunterAgentExecutableContext extends AgentStateEventStore implements AgentExecutableContext {
+final class TrafficHunterAgentExecutableContext extends AgentStateEventStore implements AgentExecutableContext {
 
     private static final Logger log = Logger.getLogger(TrafficHunterAgentExecutableContext.class.getName());
 
@@ -91,7 +91,7 @@ public class TrafficHunterAgentExecutableContext extends AgentStateEventStore im
 
     private boolean isShutdown = false;
 
-    public TrafficHunterAgentExecutableContext(final ConfigurableEnvironment environment,
+    TrafficHunterAgentExecutableContext(final ConfigurableEnvironment environment,
                                                final TrafficHunterAgentShutdownHook shutdownHook) {
         this.environment = environment;
         this.shutdownHook = shutdownHook;

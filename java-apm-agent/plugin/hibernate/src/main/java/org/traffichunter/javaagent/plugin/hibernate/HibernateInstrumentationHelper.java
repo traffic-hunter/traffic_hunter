@@ -21,14 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.plugin.hibernate.helper;
+package org.traffichunter.javaagent.plugin.hibernate;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.context.Scope;
 import org.hibernate.Transaction;
+import org.traffichunter.javaagent.plugin.hibernate.helper.SessionInfo;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.Instrumentor;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
@@ -37,22 +35,19 @@ import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
  */
 public class HibernateInstrumentationHelper {
 
-    private static final String HIBERNATE_TRACE_SCOPE = "hibernate-trace";
-
     public static class TransactionHelper {
 
         public static SpanScope start(final Transaction transaction,
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            Span span = GlobalOpenTelemetry.getTracer(HIBERNATE_TRACE_SCOPE)
-                    .spanBuilder("hibernate-transaction")
-                    .setParent(parentContext)
-                    .setAttribute("transaction.commit", sessionInfo.getSessionId())
-                    .setAttribute("transaction.status", transaction.getStatus().name())
-                    .startSpan();
-
-            return new SpanScope(span, span.makeCurrent());
+            return Instrumentor.builder(transaction)
+                    .spanName(tx -> generateHibernateInstrumentName(tx.getClass()))
+                    .context(parentContext)
+                    .spanAttribute((span, tx) ->
+                            span.setAttribute("transaction.commit", sessionInfo.getSessionId())
+                            .setAttribute("transaction.status", tx.getStatus().name())
+                    ).start();
         }
     }
 
@@ -63,15 +58,14 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            Span span = GlobalOpenTelemetry.getTracer(HIBERNATE_TRACE_SCOPE)
-                    .spanBuilder("hibernate-session-span")
-                    .setParent(parentContext)
-                    .setAttribute("session.method", name)
-                    .setAttribute("session.entity.name", entityName)
-                    .setAttribute("session.id", sessionInfo.getSessionId())
-                    .startSpan();
-
-            return new SpanScope(span, span.makeCurrent());
+            return Instrumentor.builder(name)
+                    .spanName(methodName -> "hibernate-session")
+                    .context(parentContext)
+                    .spanAttribute(((span, s) ->
+                            span.setAttribute("session.method", s)
+                            .setAttribute("session.entity.name", entityName)
+                            .setAttribute("session.id", sessionInfo.getSessionId()))
+                    ).start();
         }
     }
 
@@ -81,32 +75,21 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            Span span = GlobalOpenTelemetry.getTracer(HIBERNATE_TRACE_SCOPE)
-                    .spanBuilder("hibernate-query-span")
-                    .setParent(parentContext)
-                    .setAttribute("query", queryStr)
-                    .setAttribute("session.id", sessionInfo.getSessionId())
-                    .startSpan();
-
-            return new SpanScope(span, span.makeCurrent());
+            return Instrumentor.builder(queryStr)
+                    .spanName(methodName -> "hibernate-query")
+                    .context(parentContext)
+                    .spanAttribute(((span, query) ->
+                            span.setAttribute("query", query)
+                            .setAttribute("session.id", sessionInfo.getSessionId()))
+                    ).start();
         }
     }
 
     public static void end(final SpanScope spanScope, final Throwable throwable) {
-
-        Span span = spanScope.span();
-        Scope scope = spanScope.scope();
-
-        if (throwable != null) {
-            span.recordException(throwable);
-            span.setStatus(StatusCode.ERROR, throwable.getMessage());
-        }
-
-        span.end();
-        scope.close();
+        Instrumentor.end(spanScope, throwable);
     }
 
-    public static String get() {
-        return HIBERNATE_TRACE_SCOPE;
+    private static String generateHibernateInstrumentName(final Class<?> clazz) {
+        return "hibernate-" + clazz.getSimpleName();
     }
 }

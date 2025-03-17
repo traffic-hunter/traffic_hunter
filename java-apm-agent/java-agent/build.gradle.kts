@@ -29,6 +29,9 @@ dependencies {
     bootstrapDeps(project(":java-apm-agent:java-agent-bootstrap"))
 
     javaagentDeps(project(":java-apm-agent:java-agent-extension"))
+    javaagentDeps(project(":java-apm-agent:plugin:jdbc"))
+    javaagentDeps(project(":java-apm-agent:plugin:spring-webmvc"))
+    javaagentDeps(project(":java-apm-agent:plugin:spring-business"))
 }
 
 tasks.test {
@@ -56,8 +59,6 @@ tasks {
 
         excludeBootstrapModuleIncludedClasses()
 
-        exclude("io/opentelemetry/api/**")
-
         mergeServiceFiles()
 
         duplicatesStrategy = DuplicatesStrategy.FAIL
@@ -74,6 +75,7 @@ tasks {
     }
 
     named<ShadowJar>("shadowJar") {
+
         dependsOn(relocateJavaagentDepsTask)
 
         from(zipTree(buildBootstrapTask.get().archiveFile))
@@ -81,6 +83,8 @@ tasks {
         from(zipTree(relocateJavaagentDepsTask.get().archiveFile)) {
             into("extension")
         }
+
+        duplicatesStrategy = DuplicatesStrategy.FAIL
 
         manifest {
             attributes(
@@ -91,8 +95,6 @@ tasks {
             )
         }
 
-        duplicatesStrategy = DuplicatesStrategy.FAIL
-
         archiveFileName.set("traffic-hunter-agent.jar")
     }
 }
@@ -101,7 +103,10 @@ fun ShadowJar.excludeBootstrapModuleIncludedClasses() {
     dependencies {
         exclude(project(":java-apm-agent:java-agent-bootstrap"))
         exclude(project(":java-apm-agent:plugin-sdk"))
+        exclude(
+            "io/opentelemetry/api/**",
+            "io/opentelemetry/context/**",
+            "io/opentelemetry/internal/**"
+        )
     }
-
-    exclude("org/traffichunter/javaagent/bootstrap/**")
 }

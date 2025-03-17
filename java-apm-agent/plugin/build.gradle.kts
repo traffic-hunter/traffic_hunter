@@ -16,11 +16,11 @@ subprojects {
         testImplementation(platform("org.junit:junit-bom:5.10.0"))
         testImplementation("org.junit.jupiter:junit-jupiter")
 
-        implementation(project(":java-apm-agent:plugin-instrumentation"))
-        implementation(project(":java-apm-agent:plugin-sdk"))
+        implementation(project(":java-apm-agent:java-agent-extension"))
+        compileOnly(project(":java-apm-agent:plugin-sdk"))
 
-        implementation("net.bytebuddy:byte-buddy:1.15.5")
-        implementation("io.opentelemetry:opentelemetry-api:1.45.0")
+        compileOnly("net.bytebuddy:byte-buddy:1.15.5")
+        compileOnly("io.opentelemetry:opentelemetry-api:1.45.0")
     }
 }
 

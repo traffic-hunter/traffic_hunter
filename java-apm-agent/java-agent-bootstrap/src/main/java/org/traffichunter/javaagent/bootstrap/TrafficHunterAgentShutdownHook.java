@@ -25,7 +25,6 @@ package org.traffichunter.javaagent.bootstrap;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 /**
  * The {@code TrafficHunterAgentShutdownHook} class is responsible for managing and
@@ -40,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class TrafficHunterAgentShutdownHook implements Runnable {
 
-    private static final Logger log = Logger.getLogger(TrafficHunterAgentShutdownHook.class.getName());
+    private static final BootstrapLogger log = BootstrapLogger.getLogger(TrafficHunterAgentShutdownHook.class);
 
     private volatile boolean enabledShutdownHook = false;
 

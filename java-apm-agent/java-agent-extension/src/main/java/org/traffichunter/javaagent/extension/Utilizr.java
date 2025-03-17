@@ -23,8 +23,14 @@
  */
 package org.traffichunter.javaagent.extension;
 
+import static net.bytebuddy.matcher.ElementMatchers.named;
+
+import java.util.List;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDefinition;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentClassLoader;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentClassLoader.BootStrapClassLoderProxy;
+import org.traffichunter.javaagent.extension.bootstrap.ConfigurableContextInitializer;
 
 /**
  * @author yungwang-o
@@ -32,12 +38,21 @@ import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentClassLoader.BootS
  */
 public class Utilizr {
 
-    public static ClassLoader getBootstrapClassLoader() {
-        return new BootStrapClassLoderProxy((TrafficHunterAgentClassLoader) getAgentClassLoader());
+    public static final List<String> BOOTSTRAP_PACKAGE_PREFIXES = List.of(
+            "org.traffichunter.javaagent.bootstrap",
+            "org.traffichunter.javaagent.plugin.sdk"
+    );
+
+    public static BootStrapClassLoderProxy getBootstrapClassLoader() {
+        if (getAgentClassLoader() instanceof TrafficHunterAgentClassLoader trafficHunterAgentClassLoader) {
+            return new BootStrapClassLoderProxy(trafficHunterAgentClassLoader);
+        }
+
+        return new BootStrapClassLoderProxy(null);
     }
 
     public static ClassLoader getAgentClassLoader() {
-        return TrafficHunterAgentClassLoader.class.getClassLoader();
+        return ConfigurableContextInitializer.class.getClassLoader();
     }
 
     public static ClassLoader getPlatformClassLoader() {
@@ -46,5 +61,25 @@ public class Utilizr {
 
     public static ClassLoader getSystemClassLoader() {
         return ClassLoader.getSystemClassLoader();
+    }
+
+    public static String replaceInternalPath(final Class<?> clazz) {
+        return clazz.getName().replace('.', '/');
+    }
+
+    public static String replaceClassPath(final String internalPath) {
+        return internalPath.replace('/', '.');
+    }
+
+    public static String replaceInnerClass(final String className) {
+        return className.replace('.', '$');
+    }
+
+    public static String replaceInternalPathClass(final Class<?> clazz) {
+        return clazz.getName().replace('.', '/') + ".class";
+    }
+
+    public static MethodDescription getMethodDefinition(final TypeDefinition type, final String methodName) {
+        return type.getDeclaredMethods().filter(named(methodName)).getOnly();
     }
 }

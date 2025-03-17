@@ -42,8 +42,8 @@ import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.traffichunter.javaagent.plugin.instrumentation.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.plugin.jdbc.helper.JdbcInstrumentationHelper;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseRequest;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
@@ -58,12 +58,15 @@ public class StatementPluginInstrumentation extends AbstractPluginInstrumentatio
     }
 
     @Override
-    public List<Advice> transform() {
-        return Collections.singletonList(
+    public void transform(final Transformer transformer) {
+
+        List<Advice> advice = Collections.singletonList(
                 Advice.create(
-                isMethod(),
-                Advice.combineClassBinaryPath(StatementPluginInstrumentation.class, StatementAdvice.class)
-        ));
+                        isMethod(),
+                        Advice.combineClassBinaryPath(StatementPluginInstrumentation.class, StatementAdvice.class)
+                ));
+
+        transformer.processAdvice(advice);
     }
 
     @Override
