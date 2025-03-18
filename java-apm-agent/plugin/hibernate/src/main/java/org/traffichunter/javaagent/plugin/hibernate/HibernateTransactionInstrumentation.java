@@ -28,8 +28,6 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import io.opentelemetry.context.Context;
-import java.util.Collections;
-import java.util.List;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
@@ -58,15 +56,12 @@ public class HibernateTransactionInstrumentation extends AbstractPluginInstrumen
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = Collections.singletonList(
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         isMethod(),
-                        Advice.combineClassBinaryPath(HibernateTransactionInstrumentation.class,
-                                TransactionCommitAdvice.class)
+                        TransactionCommitAdvice.class
                 )
         );
-
-        transformer.processAdvice(advice);
     }
 
     @Override

@@ -29,8 +29,6 @@ import io.opentelemetry.context.Context;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -57,13 +55,12 @@ public class SpringWebMvcInstrumentation extends AbstractPluginInstrumentation {
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = Collections.singletonList(
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         isMethod(),
-                        SpringWebMvcDispatcherServletAdvice.class.getName()
-                ));
-
-        transformer.processAdvice(advice);
+                        SpringWebMvcDispatcherServletAdvice.class
+                )
+        );
     }
 
     @Override

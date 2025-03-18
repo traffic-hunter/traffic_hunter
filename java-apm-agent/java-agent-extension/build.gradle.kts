@@ -27,7 +27,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.18.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.0")
 
-    implementation("io.opentelemetry:opentelemetry-api:1.45.0")
+    compileOnly("io.opentelemetry:opentelemetry-api:1.45.0")
     implementation("io.opentelemetry:opentelemetry-sdk:1.45.0")
     implementation("org.yaml:snakeyaml:2.3")
     implementation("net.bytebuddy:byte-buddy:1.15.5")

@@ -28,15 +28,12 @@ import java.util.List;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.utility.JavaModule;
-import org.traffichunter.javaagent.extension.Utilizr;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
 public class AgentLocationStrategy implements AgentBuilder.LocationStrategy {
-
-    private final ClassLoader bootstrapClassLoader = Utilizr.getBootstrapClassLoader();
 
     @Override
     public ClassFileLocator classFileLocator(final ClassLoader classLoader, final JavaModule javaModule) {
@@ -46,8 +43,6 @@ public class AgentLocationStrategy implements AgentBuilder.LocationStrategy {
         if(classLoader != null) {
             classFileLocators.add(ClassFileLocator.ForClassLoader.WeaklyReferenced.of(classLoader));
         }
-
-        classFileLocators.add(ClassFileLocator.ForClassLoader.of(bootstrapClassLoader));
 
         return new ClassFileLocator.Compound(classFileLocators);
     }

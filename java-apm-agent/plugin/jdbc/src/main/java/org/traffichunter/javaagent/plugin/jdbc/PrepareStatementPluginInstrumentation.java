@@ -31,8 +31,6 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import io.opentelemetry.context.Context;
 import java.sql.PreparedStatement;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -61,14 +59,12 @@ public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrum
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = Collections.singletonList(
-                Advice.create(
-                        isMethod(),
-                        Advice.combineClassBinaryPath(PrepareStatementPluginInstrumentation.class,
-                                PrepareStatementAdvice.class)
-                ));
-
-        transformer.processAdvice(advice);
+        transformer.processAdvice(
+                Advices.create(
+                    isMethod(),
+                    PrepareStatementAdvice.class
+                )
+        );
     }
 
     @Override

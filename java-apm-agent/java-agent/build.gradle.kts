@@ -49,6 +49,15 @@ tasks {
 
         exclude("org/traffichunter/javaagent/extension/**")
 
+        manifest {
+            attributes(
+                "Premain-Class" to "org.traffichunter.javaagent.TrafficHunterAgentMain",
+                "Can-Redefine-Classes" to true,
+                "Can-Retransform-Classes" to true,
+                "Permissions" to "all-permissions"
+            )
+        }
+
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
         archiveFileName.set("javaagent-bootstrap.jar")
@@ -75,28 +84,36 @@ tasks {
     }
 
     named<ShadowJar>("shadowJar") {
-
-        dependsOn(relocateJavaagentDepsTask)
-
         from(zipTree(buildBootstrapTask.get().archiveFile))
-
-        from(zipTree(relocateJavaagentDepsTask.get().archiveFile)) {
-            into("extension")
-        }
-
-        duplicatesStrategy = DuplicatesStrategy.FAIL
-
-        manifest {
-            attributes(
-                "Premain-Class" to "org.traffichunter.javaagent.TrafficHunterAgentMain",
-                "Can-Redefine-Classes" to true,
-                "Can-Retransform-Classes" to true,
-                "Permissions" to "all-permissions"
-            )
-        }
-
-        archiveFileName.set("traffic-hunter-agent.jar")
     }
+
+    named<ShadowJar>("shadowJar") {
+        from(relocateJavaagentDepsTask.get().archiveFile)
+    }
+
+//    named<ShadowJar>("shadowJar") {
+//
+//        dependsOn(relocateJavaagentDepsTask)
+//
+//        from(zipTree(buildBootstrapTask.get().archiveFile))
+//
+//        from(zipTree(relocateJavaagentDepsTask.get().archiveFile)) {
+//            into("extension")
+//        }
+//
+//        duplicatesStrategy = DuplicatesStrategy.FAIL
+//
+//        manifest {
+//            attributes(
+//                "Premain-Class" to "org.traffichunter.javaagent.TrafficHunterAgentMain",
+//                "Can-Redefine-Classes" to true,
+//                "Can-Retransform-Classes" to true,
+//                "Permissions" to "all-permissions"
+//            )
+//        }
+//
+//        archiveFileName.set("traffic-hunter-agent.jar")
+//    }
 }
 
 fun ShadowJar.excludeBootstrapModuleIncludedClasses() {

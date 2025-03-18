@@ -34,7 +34,6 @@ import static org.traffichunter.javaagent.plugin.hibernate.helper.EntityNameHook
 
 import io.opentelemetry.context.Context;
 import jakarta.persistence.criteria.CriteriaQuery;
-import java.util.List;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -69,8 +68,8 @@ public class HibernateSessionInstrumentation extends AbstractPluginInstrumentati
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = List.of(
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         ElementMatchers.isMethod()
                                 .and(namedOneOf(
                                         "save",
@@ -85,33 +84,37 @@ public class HibernateSessionInstrumentation extends AbstractPluginInstrumentati
                                         "insert",
                                         "delete")
                                         .and(takesArgument(0, any()))),
-                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, SessionMethodAdvice.class)
-                ),
+                        SessionMethodAdvice.class
+                )
+        );
 
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         ElementMatchers.isMethod()
                                 .and(namedOneOf("get", "find")
                                         .and(returns(Object.class))
                                         .and(takesArgument(0, String.class).or(takesArgument(0, Class.class)))),
-                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, SessionMethodAdvice.class)
-                ),
-
-                Advice.create(
-                        ElementMatchers.isMethod()
-                                .and(namedOneOf("beginTransaction", "getTransaction")
-                                        .and(returns(named("org.hibernate.Transaction")))),
-                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, GetTransactionAdvice.class)
-                ),
-
-                Advice.create(
-                        ElementMatchers.isMethod()
-                                .and(returns(hasSuperType(named("org.hibernate.query.CommonQueryContract")))
-                                        .or(named("org.hibernate.query.spi.QueryImplementor"))),
-                        Advice.combineClassBinaryPath(HibernateSessionInstrumentation.class, GetQueryAdvice.class)
+                        SessionMethodAdvice.class
                 )
         );
 
-        transformer.processAdvice(advice);
+        transformer.processAdvice(
+                Advices.create(
+                        ElementMatchers.isMethod()
+                                .and(namedOneOf("beginTransaction", "getTransaction")
+                                        .and(returns(named("org.hibernate.Transaction")))),
+                        GetTransactionAdvice.class
+                )
+        );
+
+        transformer.processAdvice(
+                Advices.create(
+                        ElementMatchers.isMethod()
+                                .and(returns(hasSuperType(named("org.hibernate.query.CommonQueryContract")))
+                                        .or(named("org.hibernate.query.spi.QueryImplementor"))),
+                        GetQueryAdvice.class
+                )
+        );
     }
 
     @Override

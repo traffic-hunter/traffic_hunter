@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class AsciiBanner {
 
-    private static final String BANNER_NAME = "extension/agent-banner.txt";
+    private static final String BANNER_NAME = "agent-banner.txt";
 
     public void print(final Mode mode) {
         if(mode == Mode.OFF) {

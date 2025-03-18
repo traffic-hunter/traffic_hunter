@@ -21,34 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension;
+package org.traffichunter.javaagent.extension.bytebuddy;
 
+import java.security.ProtectionDomain;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.AgentBuilder.Identified.Extendable;
-import net.bytebuddy.asm.Advice;
-import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation.Advices;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType.Builder;
+import net.bytebuddy.utility.JavaModule;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public final class Transformer {
+public class AdjustTransformer implements AgentBuilder.Transformer {
 
-    private AgentBuilder.Identified.Extendable agentBuilder;
+    @Override
+    public Builder<?> transform(final Builder<?> builder,
+                                final TypeDescription typeDescription,
+                                final ClassLoader classLoader,
+                                final JavaModule javaModule,
+                                final ProtectionDomain protectionDomain) {
 
-    public Transformer(final Extendable agentBuilder) {
-        this.agentBuilder = agentBuilder;
-    }
-
-    public void processAdvice(final Advices advices) {
-
-        agentBuilder = agentBuilder.transform(
-                (builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                        builder.visit(Advice.to(advices.adviceClass()).on(advices.methodMatcher()))
-        );
-    }
-
-    AgentBuilder.Identified.Extendable agentBuilder() {
-        return agentBuilder;
+        return builder;
     }
 }

@@ -30,8 +30,6 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import java.sql.PreparedStatement;
-import java.util.Collections;
-import java.util.List;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Return;
@@ -55,13 +53,12 @@ public class ConnectionPluginInstrumentation extends AbstractPluginInstrumentati
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = Collections.singletonList(
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         isMethod(),
-                        Advice.combineClassBinaryPath(ConnectionPluginInstrumentation.class, ConnectionAdvice.class)
-                ));
-
-        transformer.processAdvice(advice);
+                        ConnectionAdvice.class
+                )
+        );
     }
 
     @Override

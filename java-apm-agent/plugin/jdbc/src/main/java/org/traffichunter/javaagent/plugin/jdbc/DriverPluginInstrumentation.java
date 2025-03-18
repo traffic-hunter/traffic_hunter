@@ -30,8 +30,6 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import java.sql.Connection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import net.bytebuddy.asm.Advice.Argument;
@@ -59,13 +57,12 @@ public class DriverPluginInstrumentation extends AbstractPluginInstrumentation {
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = Collections.singletonList(
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         isMethod(),
-                        Advice.combineClassBinaryPath(DriverPluginInstrumentation.class, DriverAdvice.class)
-                ));
-
-        transformer.processAdvice(advice);
+                        DriverAdvice.class
+                )
+        );
     }
 
     @Override

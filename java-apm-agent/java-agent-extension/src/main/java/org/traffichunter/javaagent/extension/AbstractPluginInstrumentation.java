@@ -74,19 +74,19 @@ public abstract class AbstractPluginInstrumentation {
         return pluginModuleVersion;
     }
 
-    public static final class Advice {
+    public static final class Advices {
 
         private final ElementMatcher<? super MethodDescription> methodMatcher;
 
-        private final String adviceName;
+        private final Class<?> adviceClass;
 
-        private Advice(final ElementMatcher<? super MethodDescription> methodMatcher, final String adviceName) {
+        private Advices(final ElementMatcher<? super MethodDescription> methodMatcher, final Class<?> adviceClass) {
             this.methodMatcher = methodMatcher;
-            this.adviceName = adviceName;
+            this.adviceClass = adviceClass;
         }
 
-        public static Advice create(final ElementMatcher<? super MethodDescription> methodMatcher, final String adviceName) {
-            return new Advice(methodMatcher, adviceName);
+        public static Advices create(final ElementMatcher<? super MethodDescription> methodMatcher, final Class<?> adviceClass) {
+            return new Advices(methodMatcher, adviceClass);
         }
 
         public static String combineClassBinaryPath(final Class<?> pluginClassName,
@@ -99,15 +99,15 @@ public abstract class AbstractPluginInstrumentation {
             return methodMatcher;
         }
 
-        public String adviceName() {
-            return adviceName;
+        public Class<?> adviceClass() {
+            return adviceClass;
         }
 
         @Override
         public String toString() {
             return "Advice{" +
                     "methodMatcher=" + methodMatcher +
-                    ", adviceName='" + adviceName + '\'' +
+                    ", adviceClass=" + adviceClass +
                     '}';
         }
     }

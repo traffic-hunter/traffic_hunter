@@ -26,6 +26,8 @@ package org.traffichunter.javaagent.extension;
 import java.util.List;
 import java.util.logging.Logger;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.agent.builder.AgentBuilder.Identified.Extendable;
+import org.traffichunter.javaagent.extension.bytebuddy.AdjustTransformer;
 
 /**
  * @author yungwang-o
@@ -41,29 +43,27 @@ public class InstrumentationHelper {
         this.pluginInstrumentation = pluginInstrumentation;
     }
 
-    public AgentBuilder instrument(final AgentBuilder originalAgentBuilder) {
+    public AgentBuilder instrument(AgentBuilder originalAgentBuilder) {
 
         if(isEnabled()) {
             log.warning("Instrumenting is empty!");
             return originalAgentBuilder;
         }
 
-        AgentBuilder agentBuilder = originalAgentBuilder;
-
         for(final AbstractPluginInstrumentation plugin : pluginInstrumentation) {
 
-            AgentBuilder.Identified.Extendable extendableAgentBuilder = agentBuilder
+            Extendable transform = originalAgentBuilder
                     .type(plugin.typeMatcher())
-                    .transform(Transformer.defaultTransform());
+                    .transform(new AdjustTransformer());
 
-            Transformer transformer = new Transformer(extendableAgentBuilder);
+            Transformer transformer = new Transformer(transform);
 
             plugin.transform(transformer);
 
-            agentBuilder = extendableAgentBuilder;
+            originalAgentBuilder = transformer.agentBuilder();
         }
 
-        return agentBuilder;
+        return originalAgentBuilder;
     }
 
     private boolean isEnabled() {

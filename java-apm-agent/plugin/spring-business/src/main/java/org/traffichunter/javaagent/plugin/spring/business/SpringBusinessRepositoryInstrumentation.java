@@ -5,8 +5,6 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import io.opentelemetry.context.Context;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Origin;
@@ -27,13 +25,12 @@ public class SpringBusinessRepositoryInstrumentation extends AbstractPluginInstr
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = Collections.singletonList(
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         isMethod(),
-                        SpringBusinessRepositoryInstrumentation.class.getName() + "$RepositoryAdvice"
-                ));
-
-        transformer.processAdvice(advice);
+                        RepositoryAdvice.class
+                )
+        );
     }
 
     @Override

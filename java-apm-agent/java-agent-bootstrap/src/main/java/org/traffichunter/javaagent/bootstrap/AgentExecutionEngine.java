@@ -28,6 +28,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.jar.JarFile;
 
 /**
  * @author yungwang-o
@@ -70,9 +71,13 @@ public final class AgentExecutionEngine {
 
             InstrumentationHolder.setInstrumentation(inst);
 
-            ClassLoader agentClassLoader = getAgentClassLoader(agentBootstrapJar);
+            File file = new File(agentBootstrapJar.getParent() + "/javaagent-extension.jar");
 
-            TrafficHunterAgentStarter trafficHunterAgentStarter = startAgent(agentClassLoader);
+            JarFile jarFile = new JarFile(file, false);
+
+            inst.appendToSystemClassLoaderSearch(jarFile);
+
+            TrafficHunterAgentStarter trafficHunterAgentStarter = startAgent(ClassLoader.getSystemClassLoader());
 
             trafficHunterAgentStarter.start(inst, agentArgs, startTime);
         } catch (Exception e) {

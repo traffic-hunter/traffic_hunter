@@ -28,8 +28,6 @@ import static net.bytebuddy.matcher.ElementMatchers.namedOneOf;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
-import java.util.Collections;
-import java.util.List;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Return;
 import net.bytebuddy.description.method.MethodDescription;
@@ -55,15 +53,12 @@ public class HibernateSessionFactoryInstrumentation extends AbstractPluginInstru
     @Override
     public void transform(final Transformer transformer) {
 
-        List<Advice> advice = Collections.singletonList(
-                Advice.create(
+        transformer.processAdvice(
+                Advices.create(
                         isMethod(),
-                        Advice.combineClassBinaryPath(HibernateSessionFactoryInstrumentation.class,
-                                SessionFactoryAdvice.class)
+                        SessionFactoryAdvice.class
                 )
         );
-
-        transformer.processAdvice(advice);
     }
 
     @Override

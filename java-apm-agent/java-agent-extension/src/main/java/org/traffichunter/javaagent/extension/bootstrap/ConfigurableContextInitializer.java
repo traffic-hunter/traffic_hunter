@@ -23,8 +23,6 @@
  */
 package org.traffichunter.javaagent.extension.bootstrap;
 
-import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
-
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.time.Instant;
@@ -34,7 +32,6 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.DiscoveryStrategy.Reiterating;
-import net.bytebuddy.agent.builder.AgentBuilder.TypeStrategy.Default;
 import org.traffichunter.javaagent.bootstrap.BootstrapLogger;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.commons.util.UUIDGenerator;
@@ -43,7 +40,6 @@ import org.traffichunter.javaagent.extension.InstrumentationHelper;
 import org.traffichunter.javaagent.extension.bootstrap.env.ConfigurableEnvironment;
 import org.traffichunter.javaagent.extension.bootstrap.env.Environment;
 import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
-import org.traffichunter.javaagent.extension.bytebuddy.AgentLocationStrategy;
 import org.traffichunter.javaagent.extension.bytebuddy.ByteBuddySupporter;
 import org.traffichunter.javaagent.extension.loader.PluginLoader;
 import org.traffichunter.javaagent.extension.loader.TrafficHunterPluginLoader;
@@ -106,16 +102,7 @@ public class ConfigurableContextInitializer {
                 .disableClassFormatChanges()
                 .with(RedefinitionStrategy.RETRANSFORMATION)
                 .with(Reiterating.INSTANCE)
-                .with(Default.REDEFINE)
-                .with(AgentBuilder.Listener.StreamWriting.toSystemError().withErrorsOnly())
-                .with(new ByteBuddySupporter.TransformLoggingListenAdapter())
-                .with(new AgentLocationStrategy())
-                .ignore(
-                        nameStartsWith("net.bytebuddy.")
-                                .or(nameStartsWith("jdk.internal.reflect."))
-                                .or(nameStartsWith("java.lang.invoke."))
-                                .or(nameStartsWith("com.sun.proxy."))
-                );
+                .with(new ByteBuddySupporter.TransformLoggingListenAdapter());
 
         agentBuilder = instrumentationHelper.instrument(agentBuilder);
 
