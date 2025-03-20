@@ -30,7 +30,6 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.namedOneOf;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
-import com.google.auto.service.AutoService;
 import io.opentelemetry.context.Context;
 import java.net.HttpURLConnection;
 import net.bytebuddy.asm.Advice.Enter;
@@ -49,11 +48,7 @@ import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.sdk.CallDepth;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
-/**
- * @author yungwang-o
- * @version 1.1.0
- */
-@AutoService(AbstractPluginInstrumentation.class)
+
 public class HttpUrlConnectionPluginInstrumentation extends AbstractPluginInstrumentation {
 
     public HttpUrlConnectionPluginInstrumentation() {
