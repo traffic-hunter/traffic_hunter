@@ -56,6 +56,7 @@ public abstract class AbstractPluginInstrumentation {
 
     protected abstract ElementMatcher<? super MethodDescription> isMethod();
 
+    // no override
     protected Junction<ClassLoader> classLoaderMatcher() { return any(); }
 
     public Junction<TypeDescription> ignorePackage() {
@@ -87,12 +88,6 @@ public abstract class AbstractPluginInstrumentation {
 
         public static Advices create(final ElementMatcher<? super MethodDescription> methodMatcher, final Class<?> adviceClass) {
             return new Advices(methodMatcher, adviceClass);
-        }
-
-        public static String combineClassBinaryPath(final Class<?> pluginClassName,
-                                                    final Class<?> innerPluginAdviceClassName) {
-
-            return pluginClassName.getName() + "$" + innerPluginAdviceClassName.getSimpleName();
         }
 
         public ElementMatcher<? super MethodDescription> methodMatcher() {
