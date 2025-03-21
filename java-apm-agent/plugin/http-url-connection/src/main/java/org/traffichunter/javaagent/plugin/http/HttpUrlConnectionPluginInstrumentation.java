@@ -23,7 +23,7 @@
  */
 package org.traffichunter.javaagent.plugin.http;
 
-import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperClass;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -48,7 +48,10 @@ import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.sdk.CallDepth;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
-
+/**
+ * @author yungwang-o
+ * @version 1.1.0
+ */
 public class HttpUrlConnectionPluginInstrumentation extends AbstractPluginInstrumentation {
 
     public HttpUrlConnectionPluginInstrumentation() {
@@ -73,7 +76,7 @@ public class HttpUrlConnectionPluginInstrumentation extends AbstractPluginInstru
                 .or(nameStartsWith("sun.net"))
                 .or(named("weblogic.net.http.HttpURLConnection"))
                 .and(not(named("sun.net.www.protocol.https.HttpsURLConnectionImpl")))
-                .and(hasSuperType(named("java.net.HttpURLConnection")));
+                .and(hasSuperClass(named("java.net.HttpURLConnection")));
     }
 
     @Override
@@ -81,6 +84,7 @@ public class HttpUrlConnectionPluginInstrumentation extends AbstractPluginInstru
         return null;
     }
 
+    @SuppressWarnings("unused")
     public static class HttpUrlConnectionAdvice {
 
         @OnMethodEnter(suppress = Throwable.class)

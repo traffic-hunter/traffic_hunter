@@ -40,7 +40,7 @@ public class Instrumentor {
 
     private static final String INSTRUMENTATION_NAME = "traffichunter.instrumentation";
 
-    public Instrumentor() {}
+    Instrumentor() {}
 
     @FunctionalInterface
     public interface SpanNameGenerator<OPERATION> {
@@ -54,8 +54,12 @@ public class Instrumentor {
         void get(Span span, OPERATION operation);
     }
 
-    public static <OPERATION> InstrumentationBuilder<OPERATION> builder(final OPERATION operation) {
-        return new InstrumentationBuilder<>(operation);
+    public static <OPERATION> InstrumentationStartBuilder<OPERATION> startBuilder(final OPERATION operation) {
+        return new InstrumentationStartBuilder<>(operation);
+    }
+
+    public static <OPERATION> InstrumentationEndBuilder<OPERATION> endBuilder(final OPERATION operation) {
+        return new InstrumentationEndBuilder<>(operation);
     }
 
     public static void end(final SpanScope spanScope, final Throwable throwable) {
@@ -72,7 +76,52 @@ public class Instrumentor {
         scope.close();
     }
 
-    public static class InstrumentationBuilder<OPERATION> {
+    public static final class InstrumentationEndBuilder<OPERATION> {
+
+        private final OPERATION operation;
+
+        private SpanScope spanScope;
+
+        private SpanAttributeSupplier<OPERATION> spanAttributeSupplier;
+
+        private Throwable throwable;
+
+        InstrumentationEndBuilder(final OPERATION operation) {
+            this.operation = operation;
+            this.spanAttributeSupplier = (span, oper) -> {};
+        }
+
+        public InstrumentationEndBuilder<OPERATION> spanAttribute(final SpanAttributeSupplier<OPERATION> supplier) {
+            this.spanAttributeSupplier = supplier;
+            return this;
+        }
+
+        public InstrumentationEndBuilder<OPERATION> spanScope(final SpanScope spanScope) {
+            this.spanScope = spanScope;
+            return this;
+        }
+
+        public InstrumentationEndBuilder<OPERATION> throwable(final Throwable throwable) {
+            this.throwable = throwable;
+            return this;
+        }
+
+        public void end() {
+            Span span = spanScope.span();
+            Scope scope = spanScope.scope();
+            spanAttributeSupplier.get(span, operation);
+
+            if (throwable != null) {
+                span.recordException(throwable);
+                span.setStatus(StatusCode.ERROR, throwable.getMessage());
+            }
+
+            span.end();
+            scope.close();
+        }
+    }
+
+    public static final class InstrumentationStartBuilder<OPERATION> {
 
         private final OPERATION operation;
 
@@ -82,22 +131,22 @@ public class Instrumentor {
 
         private SpanAttributeSupplier<OPERATION> spanAttributeSupplier;
 
-        public InstrumentationBuilder(final OPERATION operation) {
+        InstrumentationStartBuilder(final OPERATION operation) {
             this.operation = operation;
             this.spanAttributeSupplier = (span, oper) -> {};
         }
 
-        public InstrumentationBuilder<OPERATION> spanName(final SpanNameGenerator<OPERATION> spanNameGenerator) {
+        public InstrumentationStartBuilder<OPERATION> spanName(final SpanNameGenerator<OPERATION> spanNameGenerator) {
             this.spanName = spanNameGenerator.generate(operation);
             return this;
         }
 
-        public InstrumentationBuilder<OPERATION> context(final Context parentContext) {
+        public InstrumentationStartBuilder<OPERATION> context(final Context parentContext) {
             this.parentContext = parentContext;
             return this;
         }
 
-        public InstrumentationBuilder<OPERATION> spanAttribute(final SpanAttributeSupplier<OPERATION> supplier) {
+        public InstrumentationStartBuilder<OPERATION> spanAttribute(final SpanAttributeSupplier<OPERATION> supplier) {
             this.spanAttributeSupplier = supplier;
             return this;
         }

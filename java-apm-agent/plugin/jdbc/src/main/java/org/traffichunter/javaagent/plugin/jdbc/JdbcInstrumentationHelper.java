@@ -49,7 +49,7 @@ public class JdbcInstrumentationHelper {
     }
 
     private static SpanScope start(final DatabaseRequest request, final Context parentContext) {
-        return Instrumentor.builder(request)
+        return Instrumentor.startBuilder(request)
                 .spanName(DatabaseRequest::getStatementString)
                 .context(parentContext)
                 .spanAttribute((span, req) ->

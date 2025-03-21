@@ -41,7 +41,7 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            return Instrumentor.builder(transaction)
+            return Instrumentor.startBuilder(transaction)
                     .spanName(tx -> generateHibernateInstrumentName(tx.getClass()))
                     .context(parentContext)
                     .spanAttribute((span, tx) ->
@@ -58,7 +58,7 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            return Instrumentor.builder(name)
+            return Instrumentor.startBuilder(name)
                     .spanName(methodName -> "hibernate-session")
                     .context(parentContext)
                     .spanAttribute(((span, s) ->
@@ -75,7 +75,7 @@ public class HibernateInstrumentationHelper {
                                       final Context parentContext,
                                       final SessionInfo sessionInfo) {
 
-            return Instrumentor.builder(queryStr)
+            return Instrumentor.startBuilder(queryStr)
                     .spanName(methodName -> "hibernate-query")
                     .context(parentContext)
                     .spanAttribute(((span, query) ->

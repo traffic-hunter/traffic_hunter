@@ -33,22 +33,23 @@ import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
  * @author yungwang-o
  * @version 1.1.0
  */
-public class HttpUrlConnectionInstrumentationHelper {
+class HttpUrlConnectionInstrumentationHelper {
 
     public static SpanScope start(final HttpURLConnection httpURLConnection,
                                   final boolean connected,
                                   final Context currentContext) {
 
-        return Instrumentor.builder(httpURLConnection)
+        return Instrumentor.startBuilder(httpURLConnection)
                 .spanName(urlConnection -> urlConnection.getURL().toString())
                 .context(currentContext)
                 .spanAttribute((span, urlConnection) ->
                         span.setAttribute("connected", connected)
                                 .setAttribute("url", urlConnection.getURL().toExternalForm())
+                                .setAttribute("host", urlConnection.getURL().getHost())
+                                .setAttribute("port", urlConnection.getURL().getPort())
                                 .setAttribute("req_method", urlConnection.getRequestMethod())
                                 .setAttribute("using_proxy", urlConnection.usingProxy())
                                 .setAttribute("status", getResponseCode(urlConnection))
-                                .setAttribute("req_header", requestProperty(urlConnection, "host"))
                 ).start();
     }
 
