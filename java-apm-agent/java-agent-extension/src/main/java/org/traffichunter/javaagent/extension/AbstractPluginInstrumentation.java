@@ -54,7 +54,7 @@ public abstract class AbstractPluginInstrumentation {
 
     public abstract ElementMatcher<? super TypeDescription> typeMatcher();
 
-    protected abstract ElementMatcher<? super MethodDescription> isMethod();
+    protected ElementMatcher<? super MethodDescription> isMethod() { return any(); }
 
     // no override
     protected Junction<ClassLoader> classLoaderMatcher() { return any(); }
