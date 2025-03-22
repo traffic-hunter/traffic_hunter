@@ -1,0 +1,2 @@
+org.traffichunter.javaagent.plugin.servlet.ServletFilterPluginInstrumentation
+org.traffichunter.javaagent.plugin.servlet.ServletPluginInstrumentation
