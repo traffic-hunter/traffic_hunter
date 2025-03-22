@@ -32,7 +32,7 @@ dependencies {
     javaagentDeps(project(":java-apm-agent:plugin:http-client"))
     javaagentDeps(project(":java-apm-agent:plugin:http-url-connection"))
     javaagentDeps(project(":java-apm-agent:plugin:jdbc"))
-    javaagentDeps(project(":java-apm-agent:plugin:spring-webmvc"))
+    javaagentDeps(project(":java-apm-agent:plugin:servlet"))
     javaagentDeps(project(":java-apm-agent:plugin:spring-business"))
 }
 
