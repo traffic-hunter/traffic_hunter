@@ -136,6 +136,11 @@ public class Instrumentor {
             this.spanAttributeSupplier = (span, oper) -> {};
         }
 
+        public InstrumentationStartBuilder<OPERATION> spanName(final String name) {
+            this.spanName = name;
+            return this;
+        }
+
         public InstrumentationStartBuilder<OPERATION> spanName(final SpanNameGenerator<OPERATION> spanNameGenerator) {
             this.spanName = spanNameGenerator.generate(operation);
             return this;
@@ -164,7 +169,9 @@ public class Instrumentor {
             }
 
             Span span = spanBuilder.startSpan();
-            spanAttributeSupplier.get(span, operation);
+            if(spanAttributeSupplier != null) {
+                spanAttributeSupplier.get(span, operation);
+            }
 
             return SpanScope.create(span, span.makeCurrent());
         }
