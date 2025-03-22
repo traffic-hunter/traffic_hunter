@@ -31,8 +31,10 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import io.opentelemetry.context.Context;
 import java.sql.Statement;
+import java.util.Objects;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
+import net.bytebuddy.asm.Advice.Local;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.This;
@@ -43,6 +45,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseRequest;
+import org.traffichunter.javaagent.plugin.sdk.CallDepth;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
@@ -82,7 +85,14 @@ public class StatementPluginInstrumentation extends AbstractPluginInstrumentatio
     public static class StatementAdvice {
 
         @OnMethodEnter(suppress = Throwable.class)
-        public static SpanScope enter(@Argument(0) String sql, @This Statement statement) {
+        public static SpanScope enter(@Argument(0) String sql,
+                                      @Local("callDepth") CallDepth callDepth,
+                                      @This Statement statement) {
+
+            callDepth = CallDepth.forClass(Statement.class);
+            if(callDepth.getAndIncrement() > 0) {
+                return SpanScope.NOOP;
+            }
 
             DatabaseRequest databaseRequest = DatabaseRequest.create(statement, sql);
 
@@ -92,7 +102,14 @@ public class StatementPluginInstrumentation extends AbstractPluginInstrumentatio
         }
 
         @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
-        public static void exit(@Enter SpanScope spanScope, @Thrown Throwable throwable) {
+        public static void exit(@Enter SpanScope spanScope,
+                                @Local("callDepth") CallDepth callDepth,
+                                @Thrown Throwable throwable) {
+
+            if(callDepth.getAndDecrement() > 0 || Objects.equals(spanScope, SpanScope.NOOP)) {
+                return;
+            }
+
             JdbcInstrumentationHelper.end(spanScope, throwable);
         }
     }
