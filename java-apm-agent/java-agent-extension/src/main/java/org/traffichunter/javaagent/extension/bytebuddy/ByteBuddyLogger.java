@@ -23,43 +23,34 @@
  */
 package org.traffichunter.javaagent.extension.bytebuddy;
 
-import static java.util.logging.Level.FINE;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import net.bytebuddy.agent.builder.AgentBuilder.Listener;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
+import org.traffichunter.javaagent.bootstrap.BootstrapLogger;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-public class ByteBuddySupporter {
+public class ByteBuddyLogger {
 
     public static class RedefinitionStrategyLoggingAdapter implements RedefinitionStrategy.Listener {
 
-        private static final Logger log = Logger.getLogger(RedefinitionStrategyLoggingAdapter.class.getName());
+        private static final BootstrapLogger log = BootstrapLogger.getLogger(RedefinitionStrategyLoggingAdapter.class);
 
         @Override
         public void onBatch(final int i, final List<Class<?>> list, final List<Class<?>> list1) {}
 
         @Override
-        public Iterable<? extends List<Class<?>>> onError(final int i, final List<Class<?>> list,
+        public Iterable<? extends List<Class<?>>> onError(final int i,
+                                                          final List<Class<?>> list,
                                                           final Throwable throwable,
                                                           final List<Class<?>> list1) {
-
-            if(log.isLoggable(FINE)) {
-                log.log(
-                        FINE,
-                        "RedefinitionStrategy batch : " + list.size(),
-                        throwable
-                );
-            }
 
             return Collections.emptyList();
         }
@@ -70,7 +61,7 @@ public class ByteBuddySupporter {
 
     public static class TransformLoggingListenAdapter extends Listener.Adapter {
 
-        private static final Logger log = Logger.getLogger(TransformLoggingListenAdapter.class.getName());
+        private static final BootstrapLogger log = BootstrapLogger.getLogger(TransformLoggingListenAdapter.class);
 
         @Override
         public void onError(final String typeName,
@@ -79,12 +70,7 @@ public class ByteBuddySupporter {
                             final boolean loaded,
                             final Throwable throwable) {
 
-            if (log.isLoggable(FINE)) {
-                log.log(
-                        FINE,
-                        "Failed to handle for transformation on class loader" + typeName,
-                        throwable);
-            }
+            log.error("Failed to handle for transformation on class loader = {} {}", typeName, throwable);
         }
 
         @Override
@@ -101,7 +87,7 @@ public class ByteBuddySupporter {
                                      final boolean loaded,
                                      final DynamicType dynamicType) {
 
-            log.info("Transforming - " + typeDescription.getName() + " loaded: " + loaded);
+            log.info("Transforming - {}, cl: {}, loaded: {}", typeDescription.getName(), classLoader, loaded);
         }
     }
 

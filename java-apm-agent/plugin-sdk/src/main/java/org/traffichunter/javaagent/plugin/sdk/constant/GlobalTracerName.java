@@ -27,11 +27,14 @@ package org.traffichunter.javaagent.plugin.sdk.constant;
  * @author yungwang-o
  * @version 1.1.0
  */
-public enum PluginConstant {
+public enum GlobalTracerName {
 
-    SPRING_BOOT,
-    MYSQL,
-    KAFKA,
-    ELASTICSEARCH,
-    POSTGRES
+    SPRING_WEB_MVC,
+    SPRING_BUSINESS,
+    JDBC,
+    HIBERNATE,
+    HTTP_CLIENT,
+    HTTP_URL_CONNECTION,
+    SERVLET
+    ;
 }
