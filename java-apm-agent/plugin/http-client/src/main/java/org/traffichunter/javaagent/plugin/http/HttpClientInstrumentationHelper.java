@@ -49,6 +49,7 @@ public class HttpClientInstrumentationHelper {
                 .mapToHeaderName("Host");
 
         return Instrumentor.startBuilder(request)
+                .instrumentationName("http-client-inst")
                 .context(currentContext)
                 .spanAttribute((span, req) ->
                         span.setAttribute("uri", req.uri().toString())
@@ -62,16 +63,21 @@ public class HttpClientInstrumentationHelper {
                            final HttpResponse<?> response,
                            final Throwable throwable) {
 
-        HttpHeaderExtractor headerExtractor = new HttpHeaderExtractor(response.headers());
+        if(response == null) {
+            Instrumentor.end(spanScope, throwable);
+        } else {
 
-        Instrumentor.endBuilder(response)
-                .spanScope(spanScope)
-                .throwable(throwable)
-                .spanAttribute((span, res) ->
-                        span.setAttribute("status_code", res.statusCode())
-                            .setAttribute("version", version(res))
-                            .setAttribute("res_headers", headerExtractor.getHeaderMap().toString())
-                ).end();
+            HttpHeaderExtractor headerExtractor = new HttpHeaderExtractor(response.headers());
+
+            Instrumentor.endBuilder(response)
+                    .spanScope(spanScope)
+                    .throwable(throwable)
+                    .spanAttribute((span, res) ->
+                            span.setAttribute("status_code", res.statusCode())
+                                    .setAttribute("version", version(res))
+                                    .setAttribute("res_headers", headerExtractor.getHeaderMap().toString())
+                    ).end();
+        }
     }
 
     private static String version(final HttpResponse<?> response) {

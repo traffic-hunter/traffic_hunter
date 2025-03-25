@@ -34,13 +34,14 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import io.opentelemetry.context.Context;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandler;
+import java.util.concurrent.CompletableFuture;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Return;
 import net.bytebuddy.asm.Advice.Thrown;
-import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -60,6 +61,7 @@ public class HttpClientPluginInstrumentation extends AbstractPluginInstrumentati
 
     @Override
     public void transform(final Transformer transformer) {
+
         transformer.processAdvice(
                 Advices.create(
                     ElementMatchers.isMethod()
@@ -70,19 +72,26 @@ public class HttpClientPluginInstrumentation extends AbstractPluginInstrumentati
                     SendAdvice.class
                 )
         );
+
+        transformer.processAdvice(
+                Advices.create(
+                    ElementMatchers.isMethod()
+                            .and(named("sendAsync"))
+                            .and(isPublic())
+                            .and(takesArgument(0, named("java.net.http.HttpRequest")))
+                            .and(takesArgument(1, named("java.net.http.HttpResponse$BodyHandler"))),
+                    AsyncSendAdvice.class
+                )
+        );
     }
 
     @Override
     public ElementMatcher<? super TypeDescription> typeMatcher() {
+
         return nameStartsWith("java.net")
                 .or(nameStartsWith("jdk.internal"))
                 .and(not(named("jdk.internal.net.http.HttpClientFacade")))
                 .and(hasSuperClass(named("java.net.http.HttpClient")));
-    }
-
-    @Override
-    protected ElementMatcher<? super MethodDescription> isMethod() {
-        return null;
     }
 
     @SuppressWarnings("unused")
@@ -102,6 +111,37 @@ public class HttpClientPluginInstrumentation extends AbstractPluginInstrumentati
                                @Thrown final Throwable throwable) {
 
             HttpClientInstrumentationHelper.end(spanScope, response, throwable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static class AsyncSendAdvice {
+
+        @OnMethodEnter(suppress = Throwable.class)
+        public static SpanScope enter(@Argument(value = 0) final HttpRequest httpRequest,
+                                      @Argument(value = 1, readOnly = false) BodyHandler<?> bodyHandler) {
+
+            Context context = Context.current();
+
+            if(bodyHandler != null) {
+                bodyHandler = new BodyHandlerWrapper<>(bodyHandler, context);
+            }
+
+            return HttpClientInstrumentationHelper.start(httpRequest, context);
+        }
+
+        @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
+        public static void end(@Argument(0) final HttpRequest httpRequest,
+                               @Return(readOnly = false) CompletableFuture<HttpResponse<?>> future,
+                               @Thrown final Throwable throwable,
+                               @Enter final SpanScope spanScope) {
+
+            if(throwable != null) {
+                HttpClientInstrumentationHelper.end(spanScope, null, throwable);
+            } else {
+                future = future.whenComplete(new ResponseBiConsumer(spanScope));
+                future = CompletableFutureWrapper.wrap(future, spanScope);
+            }
         }
     }
 }
