@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ygo.testapp.dto.TestDto;
+import ygo.testapp.service.TestCallService;
+import ygo.testapp.service.TestCallService.Dto;
 import ygo.testapp.service.TestService;
 
 @RestController
@@ -17,6 +19,7 @@ import ygo.testapp.service.TestService;
 public class TestController {
 
     private final TestService testService;
+    private final TestCallService testCallService;
 
     @PostMapping("/test")
     @ResponseStatus(HttpStatus.OK)
@@ -28,6 +31,12 @@ public class TestController {
     @ResponseStatus(HttpStatus.OK)
     public TestDto findByIdApi(@PathVariable Long id) {
         return testService.findById(id);
+    }
+
+    @GetMapping("/test/call")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Dto> callApi() {
+        return testCallService.test().getBody();
     }
 
     @GetMapping("/test")
