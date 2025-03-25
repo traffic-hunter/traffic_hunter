@@ -40,6 +40,7 @@ class HttpUrlConnectionInstrumentationHelper {
                                   final Context currentContext) {
 
         return Instrumentor.startBuilder(httpURLConnection)
+                .instrumentationName("http-url-connection-inst")
                 .spanName(urlConnection -> urlConnection.getURL().toString())
                 .context(currentContext)
                 .spanAttribute((span, urlConnection) ->
