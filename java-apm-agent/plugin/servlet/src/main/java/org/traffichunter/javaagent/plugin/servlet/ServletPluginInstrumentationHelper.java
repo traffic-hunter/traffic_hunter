@@ -41,6 +41,7 @@ public class ServletPluginInstrumentationHelper {
                                   final HttpServletResponse response) {
 
         return Instrumentor.startBuilder(request)
+                .instrumentationName("servlet-inst")
                 .context(context)
                 .spanName(req -> req.getMethod() + " " + req.getRequestURI())
                 .spanAttribute((span, httpServletRequest) ->

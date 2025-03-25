@@ -12,6 +12,7 @@ public class SpringBusinessInstrumentationHelper {
         public static SpanScope start(final Method method, final Context parentContext) {
 
             return Instrumentor.startBuilder(method)
+                    .instrumentationName("spring-business-service-inst")
                     .spanName(SpringBusinessInstrumentationHelper::generateSpanName)
                     .context(parentContext)
                     .start();
@@ -23,6 +24,7 @@ public class SpringBusinessInstrumentationHelper {
         public static SpanScope start(final Method method, final Context parentContext) {
 
             return Instrumentor.startBuilder(method)
+                    .instrumentationName("spring-business-repo-inst")
                     .spanName(SpringBusinessInstrumentationHelper::generateSpanName)
                     .context(parentContext)
                     .start();

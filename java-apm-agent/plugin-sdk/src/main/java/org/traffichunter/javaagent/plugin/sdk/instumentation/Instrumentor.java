@@ -131,9 +131,16 @@ public class Instrumentor {
 
         private SpanAttributeSupplier<OPERATION> spanAttributeSupplier;
 
+        private String instrumentationName;
+
         InstrumentationStartBuilder(final OPERATION operation) {
             this.operation = operation;
             this.spanAttributeSupplier = (span, oper) -> {};
+        }
+
+        public InstrumentationStartBuilder<OPERATION> instrumentationName(final String instrumentationName) {
+            this.instrumentationName = instrumentationName;
+            return this;
         }
 
         public InstrumentationStartBuilder<OPERATION> spanName(final String name) {
@@ -158,9 +165,11 @@ public class Instrumentor {
 
         public SpanScope start() {
 
+            // null safe
+            String instrumentationNameElseGet = Objects.requireNonNullElse(instrumentationName, INSTRUMENTATION_NAME);
             String spanNamer = Objects.requireNonNullElseGet(spanName, () -> operation.getClass().getSimpleName());
 
-            Tracer tracer = GlobalOpenTelemetry.getTracer(INSTRUMENTATION_NAME);
+            Tracer tracer = GlobalOpenTelemetry.getTracer(instrumentationNameElseGet);
 
             SpanBuilder spanBuilder = tracer.spanBuilder(spanNamer);
 

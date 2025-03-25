@@ -43,6 +43,7 @@ public class SpringWebMvcInstrumentationHelper {
                                   final HttpServletResponse response) {
 
         return Instrumentor.startBuilder(request)
+                .instrumentationName("spring-web-mvc-inst")
                 .spanName(SpringWebMvcInstrumentationHelper::generateSpanName)
                 .context(parentContext)
                 .spanAttribute((span, req) ->
