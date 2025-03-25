@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.env.yaml.root.agent;
+package org.traffichunter.javaagent.extension.env.yaml.root.agent;
 
-import org.traffichunter.javaagent.extension.bootstrap.env.yaml.root.agent.retry.RetrySubProperty;
+import org.traffichunter.javaagent.extension.env.yaml.root.agent.retry.RetrySubProperty;
 
 /**
  * @author yungwang-o

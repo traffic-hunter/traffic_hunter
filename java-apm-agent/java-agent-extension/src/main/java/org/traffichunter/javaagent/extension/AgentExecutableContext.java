@@ -21,32 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.env;
+package org.traffichunter.javaagent.extension;
 
-import java.io.InputStream;
-import org.traffichunter.javaagent.extension.bootstrap.env.yaml.YamlConfigurableEnvironment;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
+import org.traffichunter.javaagent.commons.status.AgentStatus;
+import org.traffichunter.javaagent.event.context.AgentContextStateEventHandler;
+import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
 
 /**
- * The {@code ConfigurableEnvironment} interface defines the contract for loading
- * agent configuration properties. It supports loading configuration from
- * default or provided input sources.
+ * The {@code AgentExecutableContext} interface defines the contract for managing
+ * the lifecycle of an agent's execution context. It includes methods for initializing
+ * the context, managing its state, and handling lifecycle events.
  *
  * <p>Features:</p>
  * <ul>
- *     <li>Loads configuration properties into a {@link TrafficHunterAgentProperty} instance.</li>
- *     <li>Supports default and custom input streams for configuration sources.</li>
+ *     <li>Extends {@link AgentContextStateEventHandler} for state event listener management.</li>
+ *     <li>Provides methods to initialize, close, and query the context's status.</li>
+ *     <li>Supports dynamic updates to the agent's execution status.</li>
  * </ul>
  *
- * @see TrafficHunterAgentProperty
- * @see YamlConfigurableEnvironment
+ * @see AgentContextStateEventHandler
+ * @see ConfigurableContextInitializer
+ * @see ConfigurableEnvironment
+ * @see AgentStatus
  *
  * @author yungwang-o
  * @version 1.0.0
  */
-public interface ConfigurableEnvironment {
+public interface AgentExecutableContext extends AgentContextStateEventHandler {
 
-    TrafficHunterAgentProperty load();
+    ConfigurableContextInitializer init();
 
-    TrafficHunterAgentProperty load(InputStream is);
+    void close();
+
+    ConfigurableEnvironment getEnvironment();
+
+    AgentStatus getStatus();
+
+    boolean isInit();
+
+    boolean isRunning();
+
+    boolean isStopped();
+
+    void setStatus(AgentStatus status);
 }

@@ -1,11 +1,11 @@
-package org.traffichunter.javaagent.extension.otel;
+package org.traffichunter.javaagent.extension;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AttributesParser {
+final class AttributesParser {
 
     public static Map<String, String> doParse(final Attributes attributes) {
         Map<String, String> attributesMap = new HashMap<>();

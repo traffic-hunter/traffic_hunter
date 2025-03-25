@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.otel;
+package org.traffichunter.javaagent.extension;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * @author yungwang-o
  * @version 1.0.0
  */
-public class TrafficHunterExporter implements SpanExporter {
+class TrafficHunterExporter implements SpanExporter {
 
     private static final Logger log = Logger.getLogger(TrafficHunterExporter.class.getName());
 

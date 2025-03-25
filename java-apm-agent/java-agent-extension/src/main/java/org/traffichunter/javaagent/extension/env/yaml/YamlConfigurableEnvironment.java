@@ -21,17 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.env.yaml;
+package org.traffichunter.javaagent.extension.env.yaml;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 import org.traffichunter.javaagent.commons.util.FileUtils;
-import org.traffichunter.javaagent.extension.bootstrap.env.ConfigurableEnvironment;
-import org.traffichunter.javaagent.extension.bootstrap.env.yaml.bind.RelaxedBindingUtils;
-import org.traffichunter.javaagent.extension.bootstrap.env.yaml.root.RootYamlProperty;
-import org.traffichunter.javaagent.extension.bootstrap.env.yaml.root.agent.retry.backoff.BackOffSubProperty;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgent;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
+import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
+import org.traffichunter.javaagent.extension.env.yaml.bind.RelaxedBindingUtils;
+import org.traffichunter.javaagent.extension.env.yaml.root.RootYamlProperty;
+import org.traffichunter.javaagent.extension.env.yaml.root.agent.retry.backoff.BackOffSubProperty;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgent;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.retry.backoff.BackOffPolicy;
 import org.traffichunter.javaagent.retry.backoff.policy.ExponentialBackOffPolicy;
 import org.yaml.snakeyaml.LoaderOptions;

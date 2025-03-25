@@ -21,34 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.env;
+package org.traffichunter.javaagent.extension.env.yaml.root.agent.retry.backoff;
 
 /**
  * @author yungwang-o
  * @version 1.0.0
  */
-public enum Environment {
+public class BackOffSubProperty {
 
-    DEFAULT_PATH("/env/agent-env.yml"),
-    VERSION("1.0.0"),
-    SYSTEM_PROFILE("traffichunter.config"),
-    ;
+    private long intervalMillis;
+    private int multiplier;
 
-    private final String env;
-
-    Environment(final String env) {
-        this.env = env;
+    public BackOffSubProperty() {
     }
 
-    public String path() {
-        return env;
+    public BackOffSubProperty(final long intervalMillis, final int multiplier) {
+        this.intervalMillis = intervalMillis;
+        this.multiplier = multiplier;
     }
 
-    public String version() {
-        return env;
+    public long getIntervalMillis() {
+        return intervalMillis;
     }
 
-    public String systemProfile() {
-        return env;
+    public void setIntervalMillis(final long intervalMillis) {
+        this.intervalMillis = intervalMillis;
+    }
+
+    public int getMultiplier() {
+        return multiplier;
+    }
+
+    public void setMultiplier(final int multiplier) {
+        this.multiplier = multiplier;
     }
 }

@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.property.child;
+package org.traffichunter.javaagent.extension.property.child;
 
 import java.util.logging.Logger;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgent;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgent;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.retry.backoff.BackOffPolicy;
 
 /**

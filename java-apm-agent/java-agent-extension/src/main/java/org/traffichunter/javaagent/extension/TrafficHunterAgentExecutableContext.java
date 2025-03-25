@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap;
+package org.traffichunter.javaagent.extension;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,7 +33,7 @@ import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.event.listener.AgentStateEventListener;
 import org.traffichunter.javaagent.event.object.AgentStateEvent;
 import org.traffichunter.javaagent.event.store.AgentStateEventStore;
-import org.traffichunter.javaagent.extension.bootstrap.env.ConfigurableEnvironment;
+import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
 
 /**
  * The {@code TrafficHunterAgentExecutableContext} class represents the execution context
@@ -92,7 +92,7 @@ final class TrafficHunterAgentExecutableContext extends AgentStateEventStore imp
     private boolean isShutdown = false;
 
     TrafficHunterAgentExecutableContext(final ConfigurableEnvironment environment,
-                                               final TrafficHunterAgentShutdownHook shutdownHook) {
+                                        final TrafficHunterAgentShutdownHook shutdownHook) {
         this.environment = environment;
         this.shutdownHook = shutdownHook;
     }

@@ -21,48 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.env.yaml.root.agent.retry;
+package org.traffichunter.javaagent.extension;
 
-import org.traffichunter.javaagent.extension.bootstrap.env.yaml.root.agent.retry.backoff.BackOffSubProperty;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author yungwang-o
  * @version 1.0.0
  */
-public class RetrySubProperty {
+public enum TraceQueue {
 
-    private int maxAttempt;
-    private BackOffSubProperty backoff;
+    INSTANCE,
+    ;
 
-    public RetrySubProperty() {
+    private final BlockingQueue<TraceInfo> syncQ = new LinkedBlockingQueue<>(100);
+
+    /**
+     * this method is non-blocking
+     * @return success : true, fail : false
+     */
+    public boolean add(final TraceInfo trInfo) {
+        return syncQ.offer(trInfo);
     }
 
-    public RetrySubProperty(final int maxAttempt, final BackOffSubProperty backoff) {
-        this.maxAttempt = maxAttempt;
-        this.backoff = backoff;
+    /**
+     * this method is blocking
+     */
+    public TraceInfo poll() throws InterruptedException {
+        return syncQ.take();
     }
 
-    public int getMaxAttempt() {
-        return maxAttempt;
+    public void removeAll() {
+        syncQ.clear();
     }
 
-    public void setMaxAttempt(final int maxAttempt) {
-        this.maxAttempt = maxAttempt;
-    }
-
-    public BackOffSubProperty getBackoff() {
-        return backoff;
-    }
-
-    public void setBackoff(final BackOffSubProperty backoff) {
-        this.backoff = backoff;
-    }
-
-    @Override
-    public String toString() {
-        return "RetrySubProperty{" +
-                "maxAttempt=" + maxAttempt +
-                ", backoff=" + backoff +
-                '}';
+    public int size() {
+        return syncQ.size();
     }
 }

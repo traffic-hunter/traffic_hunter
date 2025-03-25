@@ -1,7 +1,7 @@
-/**
+/*
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.env.yaml.root.agent.retry.backoff;
+package org.traffichunter.javaagent.extension;
+
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.trace.IdGenerator;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 /**
  * @author yungwang-o
- * @version 1.0.0
+ * @version 1.1.0
  */
-public class BackOffSubProperty {
+final class OpenTelemetryManager {
 
-    private long intervalMillis;
-    private int multiplier;
+    private OpenTelemetryManager() {}
 
-    public BackOffSubProperty() {
+    static final SpanExporter spanExporter = new TrafficHunterExporter();
+
+    static OpenTelemetrySdk manageOpenTelemetrySdk() {
+
+        SdkTracerProvider provider = SdkTracerProvider.builder()
+                .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+                .setIdGenerator(IdGenerator.random())
+                .setSampler(Sampler.alwaysOn())
+                .build();
+
+        return OpenTelemetrySdk.builder()
+                .setTracerProvider(provider)
+                .buildAndRegisterGlobal();
     }
 
-    public BackOffSubProperty(final long intervalMillis, final int multiplier) {
-        this.intervalMillis = intervalMillis;
-        this.multiplier = multiplier;
-    }
-
-    public long getIntervalMillis() {
-        return intervalMillis;
-    }
-
-    public void setIntervalMillis(final long intervalMillis) {
-        this.intervalMillis = intervalMillis;
-    }
-
-    public int getMultiplier() {
-        return multiplier;
-    }
-
-    public void setMultiplier(final int multiplier) {
-        this.multiplier = multiplier;
+    public static void flush() {
+        spanExporter.flush();
     }
 }

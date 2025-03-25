@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.property;
+package org.traffichunter.javaagent.extension.property;
 
 import java.util.concurrent.TimeUnit;
-import org.traffichunter.javaagent.extension.bootstrap.property.child.FaultTolerantTrafficHunterAgent;
+import org.traffichunter.javaagent.extension.property.child.FaultTolerantTrafficHunterAgent;
 
 /**
  * <p>

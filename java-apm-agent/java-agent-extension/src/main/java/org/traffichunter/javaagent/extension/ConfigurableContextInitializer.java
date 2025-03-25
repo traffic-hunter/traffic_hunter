@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap;
+package org.traffichunter.javaagent.extension;
 
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
@@ -30,17 +30,22 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.agent.builder.AgentBuilder.Identified.Extendable;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.DiscoveryStrategy.Reiterating;
 import org.traffichunter.javaagent.bootstrap.BootstrapLogger;
+import org.traffichunter.javaagent.bootstrap.Configurations;
+import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.commons.util.UUIDGenerator;
-import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.extension.InstrumentationHelper;
-import org.traffichunter.javaagent.extension.bootstrap.env.ConfigurableEnvironment;
-import org.traffichunter.javaagent.extension.bootstrap.env.Environment;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
-import org.traffichunter.javaagent.extension.bytebuddy.ByteBuddySupporter;
+import org.traffichunter.javaagent.extension.bytebuddy.AdjustTransformer;
+import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
+import org.traffichunter.javaagent.extension.env.Environment;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
+import org.traffichunter.javaagent.extension.bytebuddy.AgentIgnoreMatcher;
+import org.traffichunter.javaagent.extension.bytebuddy.AgentLocationStrategy;
+import org.traffichunter.javaagent.extension.bytebuddy.ByteBuddyLogger.RedefinitionStrategyLoggingAdapter;
+import org.traffichunter.javaagent.extension.bytebuddy.ByteBuddyLogger.TransformLoggingListenAdapter;
 import org.traffichunter.javaagent.extension.loader.PluginLoader;
 import org.traffichunter.javaagent.extension.loader.TrafficHunterPluginLoader;
 import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
@@ -64,9 +69,11 @@ import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
  * @author yungwang-o
  * @version 1.0.0
  */
-public class ConfigurableContextInitializer {
+public final class ConfigurableContextInitializer {
 
     private static final BootstrapLogger log = BootstrapLogger.getLogger(ConfigurableContextInitializer.class);
+
+    private static final Boolean transformLogging = Configurations.debug(ConfigProperty.TRANSFORM_DEBUG);
 
     private final ConfigurableEnvironment env;
 
@@ -89,24 +96,51 @@ public class ConfigurableContextInitializer {
 
         List<AbstractPluginInstrumentation> plugins = loadPlugins(TrafficHunterAgentStartAction.class.getClassLoader());
 
-        plugins.forEach(pluginInstrumentation ->
-                log.info("{} -> {}",
-                        pluginInstrumentation.getPluginDetailName(),
-                        pluginInstrumentation.getClass().getClassLoader()
-                )
-        );
-
-        InstrumentationHelper instrumentationHelper = new InstrumentationHelper(plugins);
+        printLoadedPlugins(plugins);
 
         AgentBuilder agentBuilder = new AgentBuilder.Default()
+                .ignore(AgentIgnoreMatcher.ignore())
                 .disableClassFormatChanges()
                 .with(RedefinitionStrategy.RETRANSFORMATION)
                 .with(Reiterating.INSTANCE)
-                .with(new ByteBuddySupporter.TransformLoggingListenAdapter());
+                .with(new RedefinitionStrategyLoggingAdapter())
+                .with(new AgentLocationStrategy());
 
-        agentBuilder = instrumentationHelper.instrument(agentBuilder);
+        if(transformLogging) {
+            agentBuilder = agentBuilder.with(new TransformLoggingListenAdapter());
+        }
+
+        agentBuilder = instrument(agentBuilder, plugins);
 
         agentBuilder.installOn(inst);
+    }
+
+    AgentBuilder instrument(AgentBuilder originalAgentBuilder,
+                            final List<AbstractPluginInstrumentation> pluginInstrumentation) {
+
+        if(isEnabled(pluginInstrumentation)) {
+            log.warn("Instrumenting is empty!");
+            return originalAgentBuilder;
+        }
+
+        for(final AbstractPluginInstrumentation plugin : pluginInstrumentation) {
+
+            Extendable transform = originalAgentBuilder
+                    .type(plugin.typeMatcher())
+                    .transform(new AdjustTransformer());
+
+            Transformer transformer = new Transformer(transform);
+
+            plugin.transform(transformer);
+
+            originalAgentBuilder = transformer.agentBuilder();
+        }
+
+        return originalAgentBuilder;
+    }
+
+    private boolean isEnabled(final List<AbstractPluginInstrumentation> pluginInstrumentation) {
+        return pluginInstrumentation == null || pluginInstrumentation.isEmpty();
     }
 
     public AgentMetadata setAgentMetadata(final Instant startTime, final AgentStatus status) {
@@ -127,5 +161,14 @@ public class ConfigurableContextInitializer {
         PluginLoader<AbstractPluginInstrumentation> pluginLoader = new TrafficHunterPluginLoader();
 
         return pluginLoader.loadModules(classLoader);
+    }
+
+    private void printLoadedPlugins(final List<AbstractPluginInstrumentation> plugins) {
+
+        plugins.forEach(pluginInstrumentation ->
+                log.info("loaded : {}", pluginInstrumentation.getPluginDetailName())
+        );
+
+        log.info("Total plugins : {}", plugins.size());
     }
 }

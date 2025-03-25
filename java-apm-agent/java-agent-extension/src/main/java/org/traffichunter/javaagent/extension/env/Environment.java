@@ -21,42 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.otel;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+package org.traffichunter.javaagent.extension.env;
 
 /**
  * @author yungwang-o
  * @version 1.0.0
  */
-public enum TraceQueue {
+public enum Environment {
 
-    INSTANCE,
+    DEFAULT_PATH("/env/agent-env.yml"),
+    VERSION("1.0.0"),
+    SYSTEM_PROFILE("traffichunter.config"),
     ;
 
-    private final BlockingQueue<TraceInfo> syncQ = new LinkedBlockingQueue<>(100);
+    private final String env;
 
-    /**
-     * this method is non-blocking
-     * @return success : true, fail : false
-     */
-    public boolean add(final TraceInfo trInfo) {
-        return syncQ.offer(trInfo);
+    Environment(final String env) {
+        this.env = env;
     }
 
-    /**
-     * this method is blocking
-     */
-    public TraceInfo poll() throws InterruptedException {
-        return syncQ.take();
+    public String path() {
+        return env;
     }
 
-    public void removeAll() {
-        syncQ.clear();
+    public String version() {
+        return env;
     }
 
-    public int size() {
-        return syncQ.size();
+    public String systemProfile() {
+        return env;
     }
 }

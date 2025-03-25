@@ -21,35 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap.env.yaml.bind;
+package org.traffichunter.javaagent.extension.env;
 
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.introspector.PropertyUtils;
+import java.io.InputStream;
+import org.traffichunter.javaagent.extension.env.yaml.YamlConfigurableEnvironment;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 
 /**
+ * The {@code ConfigurableEnvironment} interface defines the contract for loading
+ * agent configuration properties. It supports loading configuration from
+ * default or provided input sources.
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Loads configuration properties into a {@link TrafficHunterAgentProperty} instance.</li>
+ *     <li>Supports default and custom input streams for configuration sources.</li>
+ * </ul>
+ *
+ * @see TrafficHunterAgentProperty
+ * @see YamlConfigurableEnvironment
+ *
  * @author yungwang-o
  * @version 1.0.0
  */
-public class RelaxedBindingUtils extends PropertyUtils {
+public interface ConfigurableEnvironment {
 
-    @Override
-    public Property getProperty(final Class<?> type, final String name) {
-        return super.getProperty(type, kebabToCamel(name));
-    }
+    TrafficHunterAgentProperty load();
 
-    private String kebabToCamel(final String kebab) {
-        final StringBuilder sb = new StringBuilder();
-
-        String[] split = kebab.split("-");
-
-        for(int i = 0; i < split.length; i++) {
-            if(i == 0) {
-                sb.append(split[i]);
-                continue;
-            }
-            sb.append(split[i].replaceFirst("^[a-z]", String.valueOf(split[i].charAt(0)).toUpperCase()));
-        }
-
-        return sb.toString();
-    }
+    TrafficHunterAgentProperty load(InputStream is);
 }

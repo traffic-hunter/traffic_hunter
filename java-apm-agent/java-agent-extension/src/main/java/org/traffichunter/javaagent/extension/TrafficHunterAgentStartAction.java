@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension.bootstrap;
+package org.traffichunter.javaagent.extension;
 
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import java.lang.instrument.Instrumentation;
@@ -33,9 +33,9 @@ import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentStarter;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.extension.banner.AsciiBanner;
 import org.traffichunter.javaagent.extension.banner.AsciiBanner.Mode;
-import org.traffichunter.javaagent.extension.bootstrap.env.ConfigurableEnvironment;
-import org.traffichunter.javaagent.extension.bootstrap.env.yaml.YamlConfigurableEnvironment;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
+import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
+import org.traffichunter.javaagent.extension.env.yaml.YamlConfigurableEnvironment;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
 import org.traffichunter.javaagent.extension.sender.manager.MetricSendSessionManager;
 
@@ -44,7 +44,7 @@ import org.traffichunter.javaagent.extension.sender.manager.MetricSendSessionMan
  * @version 1.1.0
  */
 @SuppressWarnings("unused")
-public final class TrafficHunterAgentStartAction implements TrafficHunterAgentStarter {
+final class TrafficHunterAgentStartAction implements TrafficHunterAgentStarter {
 
     private static final BootstrapLogger log = BootstrapLogger.getLogger(TrafficHunterAgentStartAction.class);
 
