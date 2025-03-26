@@ -39,7 +39,7 @@ public final class AgentExecutionEngine {
     private static final BootstrapLogger log = BootstrapLogger.getLogger(AgentExecutionEngine.class);
 
     private static final String CALL_AGENT_STARTER =
-            "org.traffichunter.javaagent.extension.bootstrap.TrafficHunterAgentStartAction";
+            "org.traffichunter.javaagent.extension.TrafficHunterAgentStartAction";
 
     private final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
