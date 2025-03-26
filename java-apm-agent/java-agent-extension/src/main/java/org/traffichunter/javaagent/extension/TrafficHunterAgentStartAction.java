@@ -44,7 +44,7 @@ import org.traffichunter.javaagent.extension.sender.manager.MetricSendSessionMan
  * @version 1.1.0
  */
 @SuppressWarnings("unused")
-final class TrafficHunterAgentStartAction implements TrafficHunterAgentStarter {
+public final class TrafficHunterAgentStartAction implements TrafficHunterAgentStarter {
 
     private static final BootstrapLogger log = BootstrapLogger.getLogger(TrafficHunterAgentStartAction.class);
 
