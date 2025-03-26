@@ -28,6 +28,8 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
 import java.util.logging.Logger;
+import org.traffichunter.javaagent.bootstrap.Configurations;
+import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
 
 /**
  * @author yungwang-o
@@ -36,6 +38,8 @@ import java.util.logging.Logger;
 class TrafficHunterExporter implements SpanExporter {
 
     private static final Logger log = Logger.getLogger(TrafficHunterExporter.class.getName());
+
+    private static final Boolean exporterLogging = Configurations.debug(ConfigProperty.EXPORTER_DEBUG);
 
     private volatile boolean isShutdown = false;
 
@@ -47,7 +51,9 @@ class TrafficHunterExporter implements SpanExporter {
         }
 
         try {
-            log.info("exporting = " + spans);
+            if(exporterLogging) {
+                log.info("exporting = " + spans);
+            }
 
             spans.stream()
                     .map(TraceInfo::translate)

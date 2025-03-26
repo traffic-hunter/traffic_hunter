@@ -36,6 +36,7 @@ public final class Configurations {
     public enum ConfigProperty {
 
         TRANSFORM_DEBUG("traffichunter.javaagent.transform.debug"),
+        EXPORTER_DEBUG("traffichunter.javaagent.exporter.debug"),
         ;
 
         private final String config;
