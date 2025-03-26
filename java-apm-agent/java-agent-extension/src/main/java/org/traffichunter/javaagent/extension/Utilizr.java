@@ -30,7 +30,6 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDefinition;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentClassLoader;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentClassLoader.BootStrapClassLoderProxy;
-import org.traffichunter.javaagent.extension.bootstrap.ConfigurableContextInitializer;
 
 /**
  * @author yungwang-o
