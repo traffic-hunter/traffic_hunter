@@ -92,6 +92,7 @@ public class ServletFilterPluginInstrumentation extends AbstractPluginInstrument
             }
 
             return Instrumentor.startBuilder(filter)
+                    .instrumentationName("servlet-filter-inst")
                     .spanName(filtering -> filtering.getClass().getSimpleName())
                     .context(Context.current())
                     .start();
@@ -109,7 +110,7 @@ public class ServletFilterPluginInstrumentation extends AbstractPluginInstrument
             try {
                 Instrumentor.end(spanScope, throwable);
             } finally {
-                callDepth.getAndDecrement();
+                callDepth.decrementAndGet();
             }
         }
     }
