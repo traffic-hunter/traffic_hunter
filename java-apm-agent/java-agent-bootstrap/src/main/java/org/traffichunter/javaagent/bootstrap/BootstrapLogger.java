@@ -78,6 +78,7 @@ public final class BootstrapLogger implements Logger {
     @Override
     public void log(final Logger.Level level, final String msg) {
         if(isLoggable(level)) {
+            // TODO: consider SOP io performance...
             System.out.println(format(level, msg, List.of()));
         }
     }

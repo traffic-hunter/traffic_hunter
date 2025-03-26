@@ -36,9 +36,11 @@ import org.traffichunter.javaagent.event.store.AgentStateEventStore;
 import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
 
 /**
+ * <p>
  * The {@code TrafficHunterAgentExecutableContext} class represents the execution context
  * for the TrafficHunter Agent. It manages the agent's state, event listeners, environment
  * configuration, and shutdown operations.
+ * </p>
  *
  * <p>Purpose:</p>
  * <ul>

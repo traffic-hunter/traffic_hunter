@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.util.jar.JarFile;
 
 /**
+ * This class is execution engine
  * @author yungwang-o
  * @version 1.0.0
  */
@@ -130,6 +131,7 @@ public final class AgentExecutionEngine {
         }
     }
 
+    // Agent starter invokes reflection
     private TrafficHunterAgentStarter startAgent(final ClassLoader agentClassLoader) throws Exception {
 
         Class<?> agentStartAction = agentClassLoader.loadClass(CALL_AGENT_STARTER);
@@ -139,6 +141,7 @@ public final class AgentExecutionEngine {
         return (TrafficHunterAgentStarter) agentStartActionConstructor.newInstance(shutdownHook);
     }
 
+    // TODO: I'm considering separating the app and the agent.
     private static ClassLoader getAgentClassLoader(final File agentFile) {
 
         return new TrafficHunterAgentClassLoader(agentFile);

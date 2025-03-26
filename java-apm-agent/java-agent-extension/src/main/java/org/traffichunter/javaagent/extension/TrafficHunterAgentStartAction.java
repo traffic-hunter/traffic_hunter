@@ -40,6 +40,11 @@ import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
 import org.traffichunter.javaagent.extension.sender.manager.MetricSendSessionManager;
 
 /**
+ * <p>
+ *     The {@code TrafficHunterAgentStartAction} class is responsible for initializing and starting the TrafficHunter Agent.
+ *     It serves as the entry point for setting up the agent's execution environment, managing its lifecycle,
+ *     and orchestrating its core functionalities.
+ * </p>
  * @author yungwang-o
  * @version 1.1.0
  */
