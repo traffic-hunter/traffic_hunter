@@ -23,8 +23,6 @@
  */
 package org.traffichunter.javaagent.plugin.sdk;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * <p>Prevent redundant calls to a class.</p>
  *
@@ -55,10 +53,14 @@ public final class CallDepth {
     }
 
     public int getAndIncrement() {
-        return depth++;
+        return this.depth++;
     }
 
     public int decrementAndGet() {
-        return --depth;
+        return --this.depth;
+    }
+
+    public int getDepth() {
+        return this.depth;
     }
 }
