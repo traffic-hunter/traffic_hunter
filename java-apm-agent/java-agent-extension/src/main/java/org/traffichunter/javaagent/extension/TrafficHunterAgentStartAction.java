@@ -24,19 +24,23 @@
 package org.traffichunter.javaagent.extension;
 
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.instrument.Instrumentation;
+import java.time.Duration;
 import java.time.Instant;
 import org.traffichunter.javaagent.bootstrap.BootstrapLogger;
+import org.traffichunter.javaagent.bootstrap.Configurations;
+import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
+import org.traffichunter.javaagent.bootstrap.LifeCycle;
 import org.traffichunter.javaagent.bootstrap.OpenTelemetrySdkBridge;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentShutdownHook;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentStarter;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
 import org.traffichunter.javaagent.extension.banner.AsciiBanner;
-import org.traffichunter.javaagent.extension.banner.AsciiBanner.Mode;
 import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
 import org.traffichunter.javaagent.extension.env.yaml.YamlConfigurableEnvironment;
-import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.extension.sender.manager.MetricSendSessionManager;
 
 /**
@@ -53,18 +57,16 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
 
     private static final BootstrapLogger log = BootstrapLogger.getLogger(TrafficHunterAgentStartAction.class);
 
+    private static final Boolean bannerMode = Configurations.banner(ConfigProperty.BANNER_MODE);
+
     private final TrafficHunterAgentShutdownHook shutdownHook;
 
     private final AsciiBanner banner = new AsciiBanner();
 
+    private final StartUp startUp = new StartUp();
+
     public TrafficHunterAgentStartAction(final TrafficHunterAgentShutdownHook shutdownHook) {
         this.shutdownHook = shutdownHook;
-    }
-
-    private static volatile Instrumentation INSTRUMENTATION;
-
-    public static Instrumentation getInstrumentation() {
-        return INSTRUMENTATION;
     }
 
     /**
@@ -78,13 +80,11 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
      * </ul>
      */
     @Override
-    public void start(final Instrumentation inst,
-                      final String envPath,
-                      final Instant startTime) {
+    public void start(final Instrumentation inst, final String envPath) {
 
-        banner.print(Mode.ON);
+        final Instant startTime = startUp.getStartTime();
 
-        INSTRUMENTATION = inst;
+        banner.print(bannerMode);
 
         ConfigurableEnvironment environment = new YamlConfigurableEnvironment(envPath);
         AgentExecutableContext context = new TrafficHunterAgentExecutableContext(environment, shutdownHook);
@@ -100,6 +100,7 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
 
         AgentRunner runner = new AgentRunner(property, context, metadata);
         Thread runnerThread = new Thread(runner);
+        runnerThread.setUncaughtExceptionHandler(registertUncaughtExceptionHandler());
         runnerThread.setName(setRunnerThreadName());
 
         if(context.isInit()) {
@@ -108,6 +109,8 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
             runnerThread.start();
             context.close();
         }
+
+        log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime());
     }
 
     private OpenTelemetrySdk initializeOpenTelemetry() {
@@ -126,6 +129,45 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
     @Override
     public ClassLoader getAgentStartClassLoader() {
         return TrafficHunterAgentStartAction.class.getClassLoader();
+    }
+
+    /**
+     * The {@code StartUp} class extends {@link LifeCycle} to measure the agent's
+     * startup durations.
+     *
+     * <p>Features:</p>
+     * <ul>
+     *     <li>Tracks the agent's start time and end time.</li>
+     *     <li>Calculates the total uptime.</li>
+     * </ul>
+     */
+    private static class StartUp extends LifeCycle {
+
+        public StartUp() {
+            super();
+        }
+
+        @Override
+        public Instant getStartTime() {
+            return this.startTime;
+        }
+
+        @Override
+        public Instant getEndTime() {
+            if(endTime == null) {
+                this.endTime = Instant.now();
+            }
+            return endTime;
+        }
+
+        @Override
+        public Double getUpTime() {
+            if(getStartTime() == null && getEndTime() == null) {
+                throw new IllegalStateException("No start time or end time specified");
+            }
+
+            return Duration.between(getStartTime(), getEndTime()).toMillis() / 1_000.0;
+        }
     }
 
     private String setRunnerThreadName() {
@@ -162,15 +204,24 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
         public void run() {
             try {
                 log.info("Waiting for Agent Runner...");
-                Thread.sleep(8000);
+                Thread.sleep(10000);
                 sessionManager.run();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
 
+        private void lazyAgentRunner() {
+
+        }
+
         public void close() {
             sessionManager.close();
         }
+    }
+
+    private UncaughtExceptionHandler registertUncaughtExceptionHandler() {
+        return (uncaughtException, throwable) ->
+                log.info("Unhandled exception in {} : {}", uncaughtException.getName(), throwable.getMessage());
     }
 }

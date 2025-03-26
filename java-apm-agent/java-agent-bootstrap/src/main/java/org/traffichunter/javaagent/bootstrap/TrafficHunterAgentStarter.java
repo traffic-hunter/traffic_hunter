@@ -24,7 +24,6 @@
 package org.traffichunter.javaagent.bootstrap;
 
 import java.lang.instrument.Instrumentation;
-import java.time.Instant;
 
 /**
  * @author yungwang-o
@@ -32,7 +31,7 @@ import java.time.Instant;
  */
 public interface TrafficHunterAgentStarter {
 
-    void start(Instrumentation inst, String envPath, Instant startTime);
+    void start(Instrumentation inst, String envPath);
 
     ClassLoader getAgentStartClassLoader();
 }
