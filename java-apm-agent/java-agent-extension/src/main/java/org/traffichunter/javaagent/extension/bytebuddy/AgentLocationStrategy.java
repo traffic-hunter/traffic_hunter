@@ -44,6 +44,9 @@ public class AgentLocationStrategy implements AgentBuilder.LocationStrategy {
             classFileLocators.add(ClassFileLocator.ForClassLoader.WeaklyReferenced.of(classLoader));
         }
 
+        classFileLocators.add(ClassFileLocator.ForClassLoader.ofPlatformLoader());
+        classFileLocators.add(ClassFileLocator.ForClassLoader.ofBootLoader());
+
         return new ClassFileLocator.Compound(classFileLocators);
     }
 }
