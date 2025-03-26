@@ -23,7 +23,24 @@
  */
 package org.traffichunter.javaagent.plugin.sdk;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
+ * <p>Prevent redundant calls to a class.</p>
+ *
+ * <pre>{@code
+ *
+ * void callDepthInc() {
+ *
+ *      // String.class used once
+ *      CallDepth callDepth = CallDepth.forClass(String.class)
+ *      if(callDepth.getAndIncrement() > 0) {
+ *          return;
+ *      }
+ * }
+ * }</pre>
+ * <p>depth is 0. -> is not called</p>
+ * <p>depth is 1. -> is called</p>
  * @author yungwang-o
  * @version 1.1.0
  */
@@ -41,7 +58,7 @@ public final class CallDepth {
         return depth++;
     }
 
-    public int getAndDecrement() {
+    public int decrementAndGet() {
         return --depth;
     }
 }
