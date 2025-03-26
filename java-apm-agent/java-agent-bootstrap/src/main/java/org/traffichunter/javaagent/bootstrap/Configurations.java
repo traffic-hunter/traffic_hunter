@@ -33,10 +33,15 @@ public final class Configurations {
         return Boolean.getBoolean(configProperty.getConfig());
     }
 
+    public static boolean banner(final ConfigProperty configProperty) {
+        return Boolean.getBoolean(configProperty.getConfig());
+    }
+
     public enum ConfigProperty {
 
         TRANSFORM_DEBUG("traffichunter.javaagent.transform.debug"),
         EXPORTER_DEBUG("traffichunter.javaagent.exporter.debug"),
+        BANNER_MODE("traffichunter.javaagent.banner"),
         ;
 
         private final String config;
