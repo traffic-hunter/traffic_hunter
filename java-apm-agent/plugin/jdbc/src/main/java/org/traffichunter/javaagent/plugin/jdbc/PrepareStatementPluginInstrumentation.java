@@ -31,9 +31,7 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import io.opentelemetry.context.Context;
 import java.sql.PreparedStatement;
-import java.util.Objects;
 import net.bytebuddy.asm.Advice.Enter;
-import net.bytebuddy.asm.Advice.Local;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.This;
@@ -45,7 +43,6 @@ import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.jdbc.library.DatabaseRequest;
 import org.traffichunter.javaagent.plugin.jdbc.library.JdbcData;
-import org.traffichunter.javaagent.plugin.sdk.CallDepth;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
@@ -85,11 +82,9 @@ public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrum
     public static class PrepareStatementAdvice {
 
         @OnMethodEnter(suppress = Throwable.class)
-        public static SpanScope enter(@This PreparedStatement statement,
-                                      @Local("callDepth") CallDepth callDepth) {
+        public static SpanScope enter(@This PreparedStatement statement) {
 
-            callDepth = CallDepth.forClass(PreparedStatement.class);
-            if(callDepth.getAndIncrement() > 0 || Objects.isNull(JdbcData.prepareStatementInfo.get(statement))) {
+            if(JdbcData.prepareStatementInfo.get(statement) == null) {
                 return SpanScope.NOOP;
             }
 
@@ -102,11 +97,9 @@ public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrum
         }
 
         @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
-        public static void exit(@Enter SpanScope spanScope,
-                                @Local("callDepth") CallDepth callDepth,
-                                @Thrown Throwable throwable) {
+        public static void exit(@Enter SpanScope spanScope, @Thrown Throwable throwable) {
 
-            if(callDepth.getAndDecrement() > 0 || Objects.equals(spanScope, SpanScope.NOOP)) {
+            if(spanScope.equals(SpanScope.NOOP)) {
                 return;
             }
 

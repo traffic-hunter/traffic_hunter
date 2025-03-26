@@ -34,7 +34,6 @@ import io.opentelemetry.context.Context;
 import java.net.HttpURLConnection;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.FieldValue;
-import net.bytebuddy.asm.Advice.Local;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.This;
@@ -45,7 +44,6 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.extension.Transformer;
-import org.traffichunter.javaagent.plugin.sdk.CallDepth;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
@@ -60,6 +58,7 @@ public class HttpUrlConnectionPluginInstrumentation extends AbstractPluginInstru
 
     @Override
     public void transform(final Transformer transformer) {
+
         transformer.processAdvice(
                 Advices.create(
                         ElementMatchers.isMethod()
@@ -89,14 +88,7 @@ public class HttpUrlConnectionPluginInstrumentation extends AbstractPluginInstru
 
         @OnMethodEnter(suppress = Throwable.class)
         public static SpanScope enter(@This final HttpURLConnection httpURLConnection,
-                                      @FieldValue("connected") boolean connected,
-                                      @Local("callDepth") CallDepth callDepth) {
-
-            callDepth = CallDepth.forClass(HttpURLConnection.class);
-
-            if(callDepth.getAndIncrement() > 0) {
-                return null;
-            }
+                                      @FieldValue("connected") boolean connected) {
 
             Context context = Context.current();
 
@@ -104,19 +96,9 @@ public class HttpUrlConnectionPluginInstrumentation extends AbstractPluginInstru
         }
 
         @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
-        public static void exit(@Enter final SpanScope spanScope,
-                                @Thrown final Throwable throwable,
-                                @Local("callDepth") CallDepth callDepth) {
-
-            if(callDepth.getAndDecrement() > 0) {
-                return;
-            }
-
-            callDepth.getAndIncrement();
+        public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
 
             HttpUrlConnectionInstrumentationHelper.end(spanScope, throwable);
-
-            callDepth.getAndDecrement();
         }
     }
 }

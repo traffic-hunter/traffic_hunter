@@ -25,6 +25,7 @@ package org.traffichunter.javaagent.plugin.servlet;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
+import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
@@ -33,6 +34,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Objects;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -89,7 +91,7 @@ public class ServletPluginInstrumentation extends AbstractPluginInstrumentation 
                                       @Argument(1) final ServletResponse resp) {
 
             // HttpServlet
-            if(!(req instanceof HttpServletRequest httpRequest) || !(resp instanceof HttpServletResponse httpResponse)) {
+            if(!(req instanceof HttpServletRequest httpRequest && resp instanceof HttpServletResponse httpResponse)) {
                 return SpanScope.NOOP;
             }
 
@@ -105,6 +107,10 @@ public class ServletPluginInstrumentation extends AbstractPluginInstrumentation 
 
         @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
         public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
+
+            if(Objects.equals(spanScope, SpanScope.NOOP)) {
+                return;
+            }
 
             ServletPluginInstrumentationHelper.end(spanScope, throwable);
         }
