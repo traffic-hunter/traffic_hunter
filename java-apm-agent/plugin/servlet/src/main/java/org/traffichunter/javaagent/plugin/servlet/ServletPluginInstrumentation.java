@@ -25,7 +25,6 @@ package org.traffichunter.javaagent.plugin.servlet;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
-import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
@@ -74,7 +73,7 @@ public class ServletPluginInstrumentation extends AbstractPluginInstrumentation 
 
     @Override
     public ElementMatcher<? super TypeDescription> typeMatcher() {
-        return hasSuperType(named("javax.servlet.Servlet"));
+        return hasSuperType(named("jakarta.servlet.Servlet"));
     }
 
     @Override
