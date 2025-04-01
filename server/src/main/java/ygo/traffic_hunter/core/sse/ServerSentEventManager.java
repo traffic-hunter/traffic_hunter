@@ -18,11 +18,6 @@
  */
 package ygo.traffic_hunter.core.sse;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -37,6 +32,11 @@ import ygo.traffic_hunter.core.send.ViewSender;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+
 /**
  * @author yungwnag-o, JuSeong
  * @version 1.1.0
@@ -46,7 +46,7 @@ import ygo.traffic_hunter.domain.interval.TimeInterval;
 @RequiredArgsConstructor
 public class ServerSentEventManager implements AlarmSender, ViewSender {
 
-    private final Map<Member, Client> clientMap = new ConcurrentHashMap<>();
+    private final Map<Member, Client> clientMap;
 
     private final MemberRepository memberRepository;
 
