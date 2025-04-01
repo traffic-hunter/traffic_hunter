@@ -1,9 +1,11 @@
 package ygo.traffic_hunter.core.alarm.message;
 
-import java.time.Instant;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import ygo.traffic_hunter.core.alarm.message.Message.Embed;
+
+import java.time.Instant;
+import java.util.List;
 
 @Builder
 public record SseMessage(
@@ -11,7 +13,8 @@ public record SseMessage(
         String title,
         int color,
         String username,
-        List<Field> fields
+        List<Field> fields,
+        @JsonIgnore Message message
 ) {
 
     public static SseMessage from(final Message message) {
@@ -24,6 +27,7 @@ public record SseMessage(
                 .color(embed.color())
                 .username(message.username())
                 .fields(convertFields(embed.fields()))
+                .message(message)
                 .build();
     }
 
