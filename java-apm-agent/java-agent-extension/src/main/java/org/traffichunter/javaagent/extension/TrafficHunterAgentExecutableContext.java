@@ -91,7 +91,7 @@ final class TrafficHunterAgentExecutableContext extends AgentStateEventStore imp
 
     private final ReentrantLock shutdownLock = new ReentrantLock();
 
-    private boolean isShutdown = false;
+    private volatile boolean isShutdown = false;
 
     TrafficHunterAgentExecutableContext(final ConfigurableEnvironment environment,
                                         final TrafficHunterAgentShutdownHook shutdownHook) {
