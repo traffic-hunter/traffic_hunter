@@ -1,40 +1,15 @@
 package ygo.traffic_hunter.presentation.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseBody;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -42,7 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ygo.traffic_hunter.AbstractTestConfiguration;
+import ygo.traffic_hunter.common.util.LoginUtils;
 import ygo.traffic_hunter.common.web.interceptor.LoginInterceptor;
+import ygo.traffic_hunter.common.web.interceptor.RequestMatcherInterceptor;
 import ygo.traffic_hunter.common.web.resolver.MemberArgumentResolver;
 import ygo.traffic_hunter.core.dto.request.member.SignIn;
 import ygo.traffic_hunter.core.dto.request.member.SignUp;
@@ -52,6 +29,26 @@ import ygo.traffic_hunter.core.service.MemberService;
 import ygo.traffic_hunter.domain.entity.user.Role;
 import ygo.traffic_hunter.persistence.impl.MemberRepositoryImpl.MemberNotFoundException;
 import ygo.traffic_hunter.presentation.advice.GlobalControllerAdvice;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(RestDocumentationExtension.class)
 @WebMvcTest(controllers = MemberController.class)
@@ -63,17 +60,25 @@ class MemberControllerTest extends AbstractTestConfiguration {
     @MockitoBean
     MemberService memberService;
 
-    @MockitoBean
+    @Autowired
     LoginInterceptor loginInterceptor;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp(RestDocumentationContextProvider restDocumentation) {
+
+        RequestMatcherInterceptor requestMatcherInterceptor = new RequestMatcherInterceptor(loginInterceptor);
+        requestMatcherInterceptor.addIncludingRequestPattern("/**")
+                .addExcludingRequestPattern("/members", HttpMethod.POST)
+                .addExcludingRequestPattern("/**/sign-in", HttpMethod.POST);
+
+
         this.mockMvc = MockMvcBuilders.standaloneSetup(new MemberController(memberService))
                 .apply(documentationConfiguration(restDocumentation))
                 .setCustomArgumentResolvers(new MemberArgumentResolver())
                 .setControllerAdvice(new GlobalControllerAdvice())
+                .addInterceptors(requestMatcherInterceptor)
                 .build();
     }
 
@@ -153,6 +158,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signIn)))
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andDo(document("members/sign-in",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -179,7 +185,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
         given(memberService.findAll()).willReturn(responses);
 
         // when & then:
-        mockMvc.perform(get("/members")
+        mockMvc.perform(get("/members").session(createMockSession())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document("members/get-members",
@@ -200,7 +206,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
         given(memberService.findById(1)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/members/{id}", 1)
+        mockMvc.perform(get("/members/{id}", 1).session(createMockSession())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(document("members/get-member",
@@ -224,7 +230,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
                 .willThrow(new MemberNotFoundException("not found member"));
 
         // when & then
-        mockMvc.perform(get("/members/{id}", 1)
+        mockMvc.perform(get("/members/{id}", 1).session(createMockSession())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andDo(document("members/failed-get-member",
@@ -239,7 +245,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
         willDoNothing().given(memberService).signOut(any(HttpServletRequest.class));
 
         // when & then
-        mockMvc.perform(post("/members/sign-out"))
+        mockMvc.perform(post("/members/sign-out").session(createMockSession()))
                 .andExpect(status().isNoContent())
                 .andDo(document("members/sign-out",
                         preprocessRequest(prettyPrint()),
@@ -265,7 +271,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
                 );
 
         // when & then
-        mockMvc.perform(put("/members")
+        mockMvc.perform(put("/members").session(createMockSession())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Member", "1")
                         .content(objectMapper.writeValueAsString(updateMember)))
@@ -290,7 +296,7 @@ class MemberControllerTest extends AbstractTestConfiguration {
         willDoNothing().given(memberService).delete(1);
 
         // when & then
-        mockMvc.perform(delete("/members")
+        mockMvc.perform(delete("/members").session(createMockSession())
                         .header("Member", "1"))
                 .andExpect(status().isNoContent())
                 .andDo(document("members/delete",
@@ -301,4 +307,52 @@ class MemberControllerTest extends AbstractTestConfiguration {
                         )
                 ));
     }
+
+    @Test
+    void 회원이_로그인_되어있다_200() throws Exception {
+        // given
+        MemberResponse response = new MemberResponse("test@example.com", true, Role.USER);
+        given(memberService.findById(1)).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/members/check")
+                        .session(createMockSession()))
+                .andExpect(status().isOk())
+                .andDo(document("/members/check",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("email").description("회원 이메일"),
+                                fieldWithPath("isAlarm").description("알림 설정 여부"),
+                                fieldWithPath("role").description("회원 역할")
+                        ))
+                );
+
+    }
+
+    @Test
+    void 회원이_로그인_되어있지_않다_401() throws Exception {
+
+
+        mockMvc.perform(get("/members/check"))
+                .andExpect(status().isUnauthorized())
+                .andDo(document("/members/failed-check",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("type").description("문제 유형을 나타내는 URL (일반적으로 'about:blank')"),
+                                fieldWithPath("title").description("문제의 제목 (예: 'Unauthorized')"),
+                                fieldWithPath("status").description("HTTP 상태 코드 (401 Unauthorized)"),
+                                fieldWithPath("detail").description("문제에 대한 상세 설명 (예: 'Login is required')")
+                        ))
+                );
+    }
+
+    private MockHttpSession createMockSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LoginUtils.SESSION_ID.name(), 1);
+        return session;
+    }
+
+
 }

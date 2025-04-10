@@ -1,18 +1,18 @@
 /**
  * The MIT License
- *
+ * <p>
  * Copyright (c) 2024 traffic-hunter.org
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,9 +23,6 @@
  */
 package ygo.traffic_hunter.persistence.impl;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -40,6 +37,10 @@ import ygo.traffic_hunter.config.cache.CacheConfig.CacheType;
 import ygo.traffic_hunter.core.repository.MemberRepository;
 import ygo.traffic_hunter.domain.entity.user.Member;
 import ygo.traffic_hunter.domain.entity.user.Role;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author yungwang-o
@@ -171,7 +172,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     @Transactional
     public void delete(final Member member) {
-
+        deleteById(member.getId());
     }
 
     @Override

@@ -25,10 +25,12 @@ package ygo.traffic_hunter.core.alarm.loss.persistence;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.core.alarm.loss.LossPreventionHooker;
 import ygo.traffic_hunter.core.alarm.message.Message;
+import ygo.traffic_hunter.core.alarm.message.SseMessage;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 import ygo.traffic_hunter.core.send.AlarmSender.AlarmException;
 import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
@@ -37,6 +39,7 @@ import ygo.traffic_hunter.domain.entity.alarm.DeadLetter;
  * @author yungwang-o
  * @version 1.1.0
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AlarmPersistenceLossPreventionHooker implements LossPreventionHooker {
@@ -47,15 +50,19 @@ public class AlarmPersistenceLossPreventionHooker implements LossPreventionHooke
     @Transactional
     public <T> void hook(final T lossMessage) {
 
-        if(lossMessage instanceof Message message) {
-
-            try {
-                alarmRepository.save(new DeadLetter(message));
-            } catch (JsonProcessingException e) {
-                throw new AlarmException("Failed to serialize message", e);
-            }
-        } else {
-            throw new IllegalStateException("only message");
+        try {
+            log.info("message {}", lossMessage);
+            alarmRepository.save(new DeadLetter(getMessage(lossMessage)));
+        } catch (JsonProcessingException e) {
+            throw new AlarmException("Failed to serialize message", e);
         }
+    }
+
+    private <T> Message getMessage(final T lossMessage) {
+
+        if (lossMessage instanceof SseMessage sseMessage) {
+            return sseMessage.message();
+        }
+        return (Message) lossMessage;
     }
 }
