@@ -27,6 +27,7 @@ import static net.bytebuddy.matcher.ElementMatchers.hasSuperClass;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
+import io.opentelemetry.context.Context;
 import java.net.http.HttpHeaders;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 import net.bytebuddy.asm.Advice.Return;
@@ -71,7 +72,7 @@ public class HttpHeadersPluginInstrumentation extends AbstractPluginInstrumentat
         @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
         public static void exit(@Return(readOnly = false) HttpHeaders httpHeaders) {
 
-            httpHeaders = HttpHeadersSetter.SETTER.inject(httpHeaders);
+            httpHeaders = HttpHeadersSetter.SETTER.inject(httpHeaders, Context.current());
         }
     }
 }
