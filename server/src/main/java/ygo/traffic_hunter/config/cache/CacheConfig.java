@@ -24,6 +24,7 @@
 package ygo.traffic_hunter.config.cache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Scheduler;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -64,6 +65,7 @@ public class CacheConfig {
                 cacheType.cacheName,
                 Caffeine.newBuilder()
                         .maximumSize(cacheType.maximumSize)
+                        .scheduler(Scheduler.systemScheduler())
                         .expireAfterWrite(cacheType.expireAfterWrite, TimeUnit.SECONDS)
                         .build()
         );
