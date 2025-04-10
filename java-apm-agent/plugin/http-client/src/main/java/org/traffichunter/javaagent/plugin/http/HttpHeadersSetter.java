@@ -50,15 +50,19 @@ public class HttpHeadersSetter implements TextMapSetter<HttpHeaders> {
     @Override
     public void set(final HttpHeaders httpHeaders, final String k, final String v) {}
 
-    public HttpHeaders inject(final HttpHeaders httpHeaders) {
+    public HttpHeaders inject(final HttpHeaders httpHeaders, final Context context) {
 
         Map<String, List<String>> headerMap = new HashMap<>(httpHeaders.map());
 
         contextPropagators.getTextMapPropagator()
                 .inject(
-                        Context.current(),
+                        context,
                         headerMap,
-                        (carrier, k, v) -> carrier.put(k, Collections.singletonList(v))
+                        (carrier, k, v) -> {
+                            if(carrier != null) {
+                                carrier.put(k, Collections.singletonList(v));
+                            }
+                        }
                 );
 
         return HttpHeaders.of(headerMap, (s1, s2) -> true);
