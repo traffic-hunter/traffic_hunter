@@ -23,11 +23,11 @@
  */
 package ygo.traffic_hunter.core.schedule;
 
-import java.util.concurrent.ScheduledExecutorService;
+import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.TaskScheduler;
 
 /**
  * @author JuSeong
@@ -37,19 +37,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Scheduler {
 
-    private final ScheduledExecutorService executor;
+    private final TaskScheduler taskScheduler;
 
     private ScheduledFuture<?> currentTask;
 
-    public void schedule(final int interval, final Runnable runnable) {
+    public synchronized void schedule(final int interval, final Runnable runnable) {
+
+        cancel();
+
+        currentTask = taskScheduler.scheduleWithFixedDelay(runnable, Duration.ofMillis(interval));
+    }
+
+    private synchronized void cancel() {
         if (currentTask != null && !currentTask.isCancelled()) {
             currentTask.cancel(true);
         }
-        currentTask = executor.scheduleWithFixedDelay(runnable,
-                0,
-                interval,
-                TimeUnit.MILLISECONDS
-        );
     }
-
 }
