@@ -41,8 +41,8 @@ public class AsciiBanner {
 
     private static final String BANNER_NAME = "agent-banner.txt";
 
-    public void print(final Mode mode) {
-        if(mode == Mode.OFF) {
+    public void print(final boolean mode) {
+        if(!mode) {
             return;
         }
 
@@ -64,9 +64,5 @@ public class AsciiBanner {
         } catch (IOException ignored) {
 
         }
-    }
-
-    public enum Mode {
-        ON, OFF
     }
 }

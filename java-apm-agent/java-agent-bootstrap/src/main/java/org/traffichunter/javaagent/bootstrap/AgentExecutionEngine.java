@@ -26,11 +26,10 @@ package org.traffichunter.javaagent.bootstrap;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Constructor;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.jar.JarFile;
 
 /**
+ * This class is execution engine
  * @author yungwang-o
  * @version 1.0.0
  */
@@ -39,7 +38,7 @@ public final class AgentExecutionEngine {
     private static final BootstrapLogger log = BootstrapLogger.getLogger(AgentExecutionEngine.class);
 
     private static final String CALL_AGENT_STARTER =
-            "org.traffichunter.javaagent.extension.bootstrap.TrafficHunterAgentStartAction";
+            "org.traffichunter.javaagent.extension.TrafficHunterAgentStartAction";
 
     private final TrafficHunterAgentShutdownHook shutdownHook = new TrafficHunterAgentShutdownHook();
 
@@ -56,8 +55,6 @@ public final class AgentExecutionEngine {
     }
 
     private void run() {
-        StartUp startUp = new StartUp();
-        Instant startTime = startUp.getStartTime();
 
         if(AgentExecutionEngine.class.getClassLoader() != null) {
             throw new IllegalStateException("AgentExecutionEngine is not loaded in bootstrap class loader");
@@ -79,57 +76,17 @@ public final class AgentExecutionEngine {
 
             TrafficHunterAgentStarter trafficHunterAgentStarter = startAgent(ClassLoader.getSystemClassLoader());
 
-            trafficHunterAgentStarter.start(inst, agentArgs, startTime);
+            trafficHunterAgentStarter.start(inst, agentArgs);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to start agent", e);
         }
-
-        log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime());
     }
 
     public static void run(final File agentBootstrapJar, final String args, final Instrumentation inst) {
         new AgentExecutionEngine(agentBootstrapJar, System.getProperty(args), inst).run();
     }
 
-    /**
-     * The {@code StartUp} class extends {@link LifeCycle} to measure the agent's
-     * startup durations.
-     *
-     * <p>Features:</p>
-     * <ul>
-     *     <li>Tracks the agent's start time and end time.</li>
-     *     <li>Calculates the total uptime.</li>
-     * </ul>
-     */
-    private static class StartUp extends LifeCycle {
-
-        public StartUp() {
-            super();
-        }
-
-        @Override
-        public Instant getStartTime() {
-            return this.startTime;
-        }
-
-        @Override
-        public Instant getEndTime() {
-            if(endTime == null) {
-                this.endTime = Instant.now();
-            }
-            return endTime;
-        }
-
-        @Override
-        public Double getUpTime() {
-            if(getStartTime() == null && getEndTime() == null) {
-                throw new IllegalStateException("No start time or end time specified");
-            }
-
-            return Duration.between(getStartTime(), getEndTime()).toMillis() / 1_000.0;
-        }
-    }
-
+    // Agent starter invokes reflection
     private TrafficHunterAgentStarter startAgent(final ClassLoader agentClassLoader) throws Exception {
 
         Class<?> agentStartAction = agentClassLoader.loadClass(CALL_AGENT_STARTER);
@@ -139,6 +96,7 @@ public final class AgentExecutionEngine {
         return (TrafficHunterAgentStarter) agentStartActionConstructor.newInstance(shutdownHook);
     }
 
+    // TODO: I'm considering separating the app and the agent.
     private static ClassLoader getAgentClassLoader(final File agentFile) {
 
         return new TrafficHunterAgentClassLoader(agentFile);

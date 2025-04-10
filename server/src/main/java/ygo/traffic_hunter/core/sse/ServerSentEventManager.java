@@ -27,6 +27,7 @@ import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.alarm.message.SseMessage;
 import ygo.traffic_hunter.core.repository.MemberRepository;
 import ygo.traffic_hunter.core.schedule.Scheduler;
+import ygo.traffic_hunter.core.schedule.ThreadPoolTaskSchedulerFactory;
 import ygo.traffic_hunter.core.send.AlarmSender;
 import ygo.traffic_hunter.core.send.ViewSender;
 import ygo.traffic_hunter.domain.entity.user.Member;
@@ -56,7 +57,7 @@ public class ServerSentEventManager implements AlarmSender, ViewSender {
 
         log.info("registering sse emitter {}", emitter);
 
-        Client client = new Client(emitter, new Scheduler(Executors.newSingleThreadScheduledExecutor()));
+        Client client = new Client(emitter, new Scheduler(ThreadPoolTaskSchedulerFactory.create(2)));
 
         clientMap.put(member, client);
 

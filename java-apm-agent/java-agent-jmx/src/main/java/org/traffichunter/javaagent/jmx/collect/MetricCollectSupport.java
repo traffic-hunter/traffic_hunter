@@ -23,12 +23,8 @@
  */
 package org.traffichunter.javaagent.jmx.collect;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.logging.Logger;
-import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
 import org.traffichunter.javaagent.jmx.collect.dbcp.hikari.HikariCPMetricCollector;
 import org.traffichunter.javaagent.jmx.collect.systeminfo.cpu.CpuMetricCollector;
 import org.traffichunter.javaagent.jmx.collect.systeminfo.gc.GarbageCollectionMetricCollector;
@@ -36,7 +32,6 @@ import org.traffichunter.javaagent.jmx.collect.systeminfo.memory.MemoryMetricCol
 import org.traffichunter.javaagent.jmx.collect.systeminfo.runtime.RuntimeMetricCollector;
 import org.traffichunter.javaagent.jmx.collect.systeminfo.thread.ThreadMetricCollector;
 import org.traffichunter.javaagent.jmx.collect.web.tomcat.TomcatMetricCollector;
-import org.traffichunter.javaagent.jmx.jvm.JVMSelector;
 import org.traffichunter.javaagent.jmx.metric.systeminfo.SystemInfo;
 
 /**
@@ -90,29 +85,6 @@ public class MetricCollectSupport {
         this.collectorRuntime = new RuntimeMetricCollector();
         this.collectorTomcat = new TomcatMetricCollector(targetUri);
         this.collectorHikari = new HikariCPMetricCollector();
-    }
-
-    public SystemInfo collect(final String targetJVMPath) {
-
-        try (final JMXConnector jmxConnector = JMXConnectorFactory.connect(JVMSelector.getVMXServiceUrl(targetJVMPath))) {
-
-            final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-
-            return new SystemInfo(
-                    Instant.now(),
-                    collectorMemory.collect(mbsc),
-                    collectorThread.collect(mbsc),
-                    collectorCpu.collect(mbsc),
-                    collectorGC.collect(mbsc),
-                    collectorRuntime.collect(mbsc),
-                    collectorTomcat.collect(mbsc),
-                    collectorHikari.collect(mbsc)
-            );
-
-        } catch (IOException e) {
-            log.severe("Failed to start local management agent : " + e.getMessage());
-            throw new RuntimeException(e);
-        }
     }
 
     public SystemInfo collect() {

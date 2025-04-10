@@ -25,7 +25,8 @@ package org.traffichunter.javaagent.extension;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Identified.Extendable;
-import net.bytebuddy.asm.Advice;
+import net.bytebuddy.agent.builder.AgentBuilder.Transformer.ForAdvice;
+import net.bytebuddy.dynamic.ClassFileLocator.ForClassLoader;
 import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation.Advices;
 
 /**
@@ -42,10 +43,14 @@ public final class Transformer {
 
     public void processAdvice(final Advices advices) {
 
-        agentBuilder = agentBuilder.transform(
-                (builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                        builder.visit(Advice.to(advices.adviceClass()).on(advices.methodMatcher()))
-        );
+        ForAdvice forAdvice = new ForAdvice()
+                .include(
+                        ForClassLoader.ofBootLoader(),
+                        ForClassLoader.ofPlatformLoader(),
+                        ForClassLoader.ofSystemLoader()
+                ).advice(advices.methodMatcher(), advices.adviceClass().getName());
+
+        agentBuilder = agentBuilder.transform(forAdvice);
     }
 
     AgentBuilder.Identified.Extendable agentBuilder() {

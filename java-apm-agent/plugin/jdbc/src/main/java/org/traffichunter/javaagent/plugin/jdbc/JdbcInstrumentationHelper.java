@@ -37,21 +37,33 @@ public class JdbcInstrumentationHelper {
     public static class StatementInstrumentation {
 
         public static SpanScope start(final DatabaseRequest request, final Context parentContext) {
-            return JdbcInstrumentationHelper.start(request, parentContext);
+            return JdbcInstrumentationHelper.start(
+                    request,
+                    parentContext,
+                    "jdbc-statement-inst"
+            );
         }
     }
 
     public static class PreparedStatementInstrumentation {
 
         public static SpanScope start(final Context parentContext, final DatabaseRequest request) {
-            return JdbcInstrumentationHelper.start(request, parentContext);
+            return JdbcInstrumentationHelper.start(
+                    request,
+                    parentContext,
+                    "jdbc-prepared-statement-inst"
+            );
         }
     }
 
-    private static SpanScope start(final DatabaseRequest request, final Context parentContext) {
-        return Instrumentor.builder(request)
+    private static SpanScope start(final DatabaseRequest request,
+                                   final Context parentContext,
+                                   final String instrumentationName) {
+
+        return Instrumentor.startBuilder(request)
                 .spanName(DatabaseRequest::getStatementString)
                 .context(parentContext)
+                .instrumentationName(instrumentationName)
                 .spanAttribute((span, req) ->
                         span.setAttribute("sql", req.getStatementString())
                                 .setAttribute("system", req.getDatabaseInfo().getSystem())

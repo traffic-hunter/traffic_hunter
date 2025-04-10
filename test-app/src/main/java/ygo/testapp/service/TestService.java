@@ -14,11 +14,14 @@ import ygo.testapp.repository.TestRepository;
 public class TestService {
 
     private final TestRepository testRepository;
+    private final TestCallService testCallService;
 
     @Transactional
     public TestDto join(final String name, final String email) {
 
         TestEntity test = new TestEntity(name, email);
+
+        testCallService.test();
 
         TestEntity testEntity = testRepository.save(test);
 

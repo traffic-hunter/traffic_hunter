@@ -29,8 +29,10 @@ dependencies {
     bootstrapDeps(project(":java-apm-agent:java-agent-bootstrap"))
 
     javaagentDeps(project(":java-apm-agent:java-agent-extension"))
+    javaagentDeps(project(":java-apm-agent:plugin:http-client"))
+    javaagentDeps(project(":java-apm-agent:plugin:http-url-connection"))
     javaagentDeps(project(":java-apm-agent:plugin:jdbc"))
-    javaagentDeps(project(":java-apm-agent:plugin:spring-webmvc"))
+    javaagentDeps(project(":java-apm-agent:plugin:servlet"))
     javaagentDeps(project(":java-apm-agent:plugin:spring-business"))
 }
 
@@ -70,6 +72,14 @@ tasks {
 
         mergeServiceFiles()
 
+        relocate("net/bytebuddy", "extension/net/bytebuddy")
+        relocate("META-INF/versions", "extension/META-INF/versions")
+        relocate("org/yaml/snakeyaml", "extension/org/yaml/snakeyaml")
+        relocate("org/slf4j", "extension/org/slf4j")
+        relocate("io/github/resilience4j", "extension/io/github/resilience4j")
+        relocate("com/fasterxml/jackson/", "extension/com/fasterxml/jackson/")
+        relocate("org/java_websocket", "extension/org/java_websocket")
+
         duplicatesStrategy = DuplicatesStrategy.FAIL
         archiveFileName.set("javaagent-extension-tmp.jar")
     }
@@ -88,7 +98,7 @@ tasks {
     }
 
     named<ShadowJar>("shadowJar") {
-        from(relocateJavaagentDepsTask.get().archiveFile)
+        from(zipTree(relocateJavaagentDepsTask.get().archiveFile))
     }
 
 //    named<ShadowJar>("shadowJar") {

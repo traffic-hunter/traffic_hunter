@@ -26,6 +26,7 @@ package org.traffichunter.javaagent.bootstrap;
 import java.lang.instrument.Instrumentation;
 
 /**
+ * This class serves as an "everywhere accessible"
  * @author yungwang-o
  * @version 1.1.0
  */

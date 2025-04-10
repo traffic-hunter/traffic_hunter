@@ -93,6 +93,7 @@ public class StatementPluginInstrumentation extends AbstractPluginInstrumentatio
 
         @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
         public static void exit(@Enter SpanScope spanScope, @Thrown Throwable throwable) {
+
             JdbcInstrumentationHelper.end(spanScope, throwable);
         }
     }

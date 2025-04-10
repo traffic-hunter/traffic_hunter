@@ -24,7 +24,7 @@
 package org.traffichunter.javaagent.extension.sender.websocket;
 
 import java.util.logging.Logger;
-import org.traffichunter.javaagent.extension.bootstrap.property.TrafficHunterAgentProperty;
+import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
 import org.traffichunter.javaagent.extension.metadata.MetadataWrapper;
 import org.traffichunter.javaagent.extension.sender.MetricSender;

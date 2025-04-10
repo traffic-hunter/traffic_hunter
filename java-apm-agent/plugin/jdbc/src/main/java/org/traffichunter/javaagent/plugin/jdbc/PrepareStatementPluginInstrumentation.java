@@ -31,7 +31,6 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import io.opentelemetry.context.Context;
 import java.sql.PreparedStatement;
-import java.util.Objects;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
@@ -85,7 +84,7 @@ public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrum
         @OnMethodEnter(suppress = Throwable.class)
         public static SpanScope enter(@This PreparedStatement statement) {
 
-            if(Objects.isNull(JdbcData.prepareStatementInfo.get(statement))) {
+            if(JdbcData.prepareStatementInfo.get(statement) == null) {
                 return SpanScope.NOOP;
             }
 
@@ -99,6 +98,10 @@ public class PrepareStatementPluginInstrumentation extends AbstractPluginInstrum
 
         @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
         public static void exit(@Enter SpanScope spanScope, @Thrown Throwable throwable) {
+
+            if(spanScope.equals(SpanScope.NOOP)) {
+                return;
+            }
 
             JdbcInstrumentationHelper.end(spanScope, throwable);
         }
