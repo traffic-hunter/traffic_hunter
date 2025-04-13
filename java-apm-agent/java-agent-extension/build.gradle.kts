@@ -29,6 +29,7 @@ dependencies {
 
     compileOnly("io.opentelemetry:opentelemetry-api:1.45.0")
     implementation("io.opentelemetry:opentelemetry-sdk:1.45.0")
+    implementation("io.opentelemetry:opentelemetry-exporter-zipkin:1.45.0")
     implementation("org.yaml:snakeyaml:2.3")
     implementation("net.bytebuddy:byte-buddy:1.15.5")
 }

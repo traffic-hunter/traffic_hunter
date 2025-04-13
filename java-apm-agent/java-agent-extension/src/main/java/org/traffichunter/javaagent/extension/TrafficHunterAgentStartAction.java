@@ -95,7 +95,7 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
                 AgentStatus.INITIALIZED
         );
         context.addAgentStateEventListener(metadata);
-        OpenTelemetrySdk openTelemetrySdk = initializeOpenTelemetry();
+        OpenTelemetrySdk openTelemetrySdk = initializeOpenTelemetry(metadata.agentName());
         configurableContextInitializer.retransform(inst);
 
         AgentRunner runner = new AgentRunner(property, context, metadata);
@@ -113,9 +113,9 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
         log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime());
     }
 
-    private OpenTelemetrySdk initializeOpenTelemetry() {
+    private OpenTelemetrySdk initializeOpenTelemetry(final String serviceName) {
 
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetryManager.manageOpenTelemetrySdk();
+        OpenTelemetrySdk openTelemetrySdk = OpenTelemetryManager.manageOpenTelemetrySdk(serviceName);
 
         OpenTelemetrySdkBridge.setOpenTelemetrySdkForceFlush((timeout, unit) -> {
                 openTelemetrySdk.getSdkTracerProvider().forceFlush().join(timeout, unit);

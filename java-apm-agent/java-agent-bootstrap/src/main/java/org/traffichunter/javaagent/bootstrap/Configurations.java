@@ -37,11 +37,16 @@ public final class Configurations {
         return Boolean.getBoolean(configProperty.getConfig());
     }
 
+    public static String export(final ConfigProperty configProperty) {
+        return System.getProperty(configProperty.getConfig());
+    }
+
     public enum ConfigProperty {
 
         TRANSFORM_DEBUG("traffichunter.javaagent.transform.debug"),
         EXPORTER_DEBUG("traffichunter.javaagent.exporter.debug"),
         BANNER_MODE("traffichunter.javaagent.banner"),
+        ZIPKIN_EXPORTER_ENDPOINT("traffichunter.javaagent.zipkin.endpoint"),
         ;
 
         private final String config;

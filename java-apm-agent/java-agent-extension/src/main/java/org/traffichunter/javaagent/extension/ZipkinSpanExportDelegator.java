@@ -1,7 +1,7 @@
-/**
+/*
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,8 @@
  */
 package org.traffichunter.javaagent.extension;
 
+import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
+import io.opentelemetry.exporter.zipkin.ZipkinSpanExporterBuilder;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -33,59 +35,46 @@ import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
 
 /**
  * @author yungwang-o
- * @version 1.0.0
+ * @version 1.1.0
  */
-class TrafficHunterExporter implements SpanExporter {
+class ZipkinSpanExportDelegator implements SpanExporter {
 
-    private static final Logger log = Logger.getLogger(TrafficHunterExporter.class.getName());
+    private static final Logger log = Logger.getLogger(TrafficHunterSpanExporter.class.getName());
 
     private static final Boolean exporterLogging = Configurations.debug(ConfigProperty.EXPORTER_DEBUG);
 
-    private volatile boolean isShutdown = false;
+    private final ZipkinSpanExporter delegate;
+
+    ZipkinSpanExportDelegator() {
+
+        String endpoint = Configurations.export(ConfigProperty.ZIPKIN_EXPORTER_ENDPOINT);
+
+        ZipkinSpanExporterBuilder builder = ZipkinSpanExporter.builder();
+
+        if(!(endpoint == null || endpoint.isEmpty())) {
+            builder.setEndpoint(endpoint);
+        }
+
+        this.delegate = builder.build();
+    }
 
     @Override
-    public CompletableResultCode export(final Collection<SpanData> spans) {
+    public CompletableResultCode export(final Collection<SpanData> collection) {
 
-        if(isShutdown) {
-            return CompletableResultCode.ofFailure();
+        if(exporterLogging) {
+            log.info("exporting = " + collection);
         }
 
-        try {
-            if(exporterLogging) {
-                log.info("exporting = " + spans);
-            }
-
-            spans.stream()
-                    .map(TraceInfo::translate)
-                    .forEach(TraceQueue.INSTANCE::add);
-
-            return CompletableResultCode.ofSuccess();
-        } catch (RuntimeException e) {
-            return CompletableResultCode.ofFailure();
-        }
+        return delegate.export(collection);
     }
 
     @Override
     public CompletableResultCode flush() {
-        return CompletableResultCode.ofSuccess();
+        return delegate.flush();
     }
 
     @Override
     public CompletableResultCode shutdown() {
-
-        isShutdown = true;
-
-        clear();
-        return CompletableResultCode.ofSuccess();
-    }
-
-    @Override
-    public void close() {
-        clear();
-        SpanExporter.super.close();
-    }
-
-    private void clear() {
-        TraceQueue.INSTANCE.removeAll();
+        return delegate.shutdown();
     }
 }
