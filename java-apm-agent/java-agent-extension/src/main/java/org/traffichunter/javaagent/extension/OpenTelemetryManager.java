@@ -23,12 +23,20 @@
  */
 package org.traffichunter.javaagent.extension;
 
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.logs.LogLimits;
+import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import org.traffichunter.javaagent.bootstrap.Configurations;
+import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
 
 /**
  * @author yungwang-o
@@ -36,24 +44,42 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
  */
 final class OpenTelemetryManager {
 
+    private static final String selectExporter = Configurations.export(ConfigProperty.ZIPKIN_EXPORTER_ENDPOINT);
+
     private OpenTelemetryManager() {}
 
-    static final SpanExporter spanExporter = new TrafficHunterExporter();
+    static OpenTelemetrySdk manageOpenTelemetrySdk(final String serviceName) {
 
-    static OpenTelemetrySdk manageOpenTelemetrySdk() {
-
-        SdkTracerProvider provider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(SimpleSpanProcessor.create(new ZipkinSpanExportDelegator()))
+                .addSpanProcessor(SimpleSpanProcessor.create(new TrafficHunterSpanExporter()))
                 .setIdGenerator(IdGenerator.random())
                 .setSampler(Sampler.alwaysOn())
+                .setResource(Resource.create(Attributes.of(AttributeKey.stringKey("service.name"), serviceName)))
+                .build();
+
+        SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
+                .addLogRecordProcessor(SimpleLogRecordProcessor.create(new TrafficHunterLogExporter()))
+                .setLogLimits(LogLimits::getDefault)
+                .setResource(Resource.create(Attributes.of(AttributeKey.stringKey("service.name"), serviceName)))
                 .build();
 
         return OpenTelemetrySdk.builder()
-                .setTracerProvider(provider)
+                .setTracerProvider(tracerProvider)
+                .setLoggerProvider(loggerProvider)
                 .buildAndRegisterGlobal();
     }
 
-    public static void flush() {
-        spanExporter.flush();
+    private static SpanExporter selectExporter() {
+
+        SpanExporter spanExporter;
+
+        if(selectExporter == null || selectExporter.isEmpty()) {
+            spanExporter = new TrafficHunterSpanExporter();
+        } else {
+            spanExporter = new ZipkinSpanExportDelegator();
+        }
+
+        return spanExporter;
     }
 }

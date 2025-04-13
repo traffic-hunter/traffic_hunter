@@ -4,6 +4,7 @@ rootProject.name = 'traffic_hunter'
 include(':java-apm-agent')
 include(':java-apm-agent:java-agent')
 include(':java-apm-agent:plugin')
+include(':java-apm-agent:plugin:logger')
 include(':java-apm-agent:plugin-sdk')
 include(':java-apm-agent:plugin:http-client')
 include(':java-apm-agent:plugin:http-url-connection')

@@ -33,6 +33,7 @@ import org.traffichunter.javaagent.commons.util.AgentUtil;
 import org.traffichunter.javaagent.extension.AgentExecutableContext;
 import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
 import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
+import org.traffichunter.javaagent.extension.sender.websocket.AgentLogSender;
 import org.traffichunter.javaagent.extension.sender.websocket.AgentSystemMetricSender;
 import org.traffichunter.javaagent.extension.sender.websocket.AgentTransactionMetricSender;
 import org.traffichunter.javaagent.retry.RetryHelper;
@@ -94,6 +95,8 @@ public class MetricSendSessionManager {
 
     private final AgentSystemMetricSender systemMetricSender;
 
+    private final AgentLogSender agentLogSender;
+
     private final ScheduledExecutorService schedule;
 
     private final ExecutorService executor;
@@ -113,10 +116,14 @@ public class MetricSendSessionManager {
         this.metadata = metadata;
         this.context = context;
         this.property = property;
+        this.agentLogSender = new AgentLogSender(client);
         this.transactionMetricSender = new AgentTransactionMetricSender(client);
         this.systemMetricSender = new AgentSystemMetricSender(client, property);
         this.schedule = Executors.newSingleThreadScheduledExecutor(getThreadFactory("TransactionSystemInfoMetricSender"));
-        this.executor = Executors.newVirtualThreadPerTaskExecutor();
+        this.executor = Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors() * 2,
+                getThreadFactory("WebsocketMetricSender")
+        );
     }
 
     public void run() {
@@ -150,7 +157,10 @@ public class MetricSendSessionManager {
 
         context.setStatus(AgentStatus.RUNNING);
 
-        executor.execute(retryExecutor.execute(() -> transactionMetricSender.toSend(metadata)));
+        executor.execute(retryExecutor.execute(() -> {
+            transactionMetricSender.toSend(metadata);
+            agentLogSender.toSend(metadata);
+        }));
 
         schedule.scheduleWithFixedDelay(retryExecutor.execute(() -> systemMetricSender.toSend(metadata)),
                 0,
