@@ -23,6 +23,7 @@
  */
 package org.traffichunter.javaagent.plugin.logger;
 
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperClass;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
@@ -31,7 +32,6 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import io.opentelemetry.api.logs.LoggerProvider;
 import io.opentelemetry.context.Context;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Local;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -43,6 +43,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
 import org.traffichunter.javaagent.extension.Transformer;
 import org.traffichunter.javaagent.plugin.sdk.CallDepth;
+import traffichunter.java.util.logging.Logger;
 
 /**
  * @author yungwang-o
@@ -70,7 +71,7 @@ public class LoggerPluginInstrumentation extends AbstractPluginInstrumentation {
 
     @Override
     public ElementMatcher<? super TypeDescription> typeMatcher() {
-        return named("java.util.Logging.Logger");
+        return hasSuperClass(named("traffichunter.java.util.logging.Logger"));
     }
 
     @SuppressWarnings("unused")
@@ -83,9 +84,11 @@ public class LoggerPluginInstrumentation extends AbstractPluginInstrumentation {
 
             callDepth = CallDepth.forClass(LoggerProvider.class);
 
-            if(callDepth.getAndIncrement() == 0) {
-                LoggerPluginInstrumentationHelper.capture(logger, Context.current(), logRecord);
+            if(callDepth.getAndIncrement() > 0) {
+                return;
             }
+
+            LoggerPluginInstrumentationHelper.capture(logger, Context.current(), logRecord);
         }
 
         @OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)

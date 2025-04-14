@@ -34,7 +34,7 @@ import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import traffichunter.java.util.logging.Logger;
 
 /**
  * @author yungwang-o

@@ -34,7 +34,8 @@ dependencies {
     javaagentDeps(project(":java-apm-agent:plugin:http-url-connection"))
     javaagentDeps(project(":java-apm-agent:plugin:jdbc"))
     javaagentDeps(project(":java-apm-agent:plugin:servlet"))
-    javaagentDeps(project(":java-apm-agent:plugin:logger"))
+    javaagentDeps(project(":java-apm-agent:plugin:logger:javaagent"))
+    javaagentDeps(project(":java-apm-agent:plugin:logger:shaded-logging-module"))
     javaagentDeps(project(":java-apm-agent:plugin:spring-business"))
 }
 
