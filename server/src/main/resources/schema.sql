@@ -72,6 +72,12 @@ CREATE TABLE IF NOT EXISTS transaction_measurement (
     agent_id integer            not null
 );
 
+CREATE TABLE IF NOT EXISTS log_measurement(
+    time timestamptz            not null,
+    log_data jsonb              not null,
+    agent_id integer            not null
+);
+
 CREATE TABLE IF NOT EXISTS alarm (
     time        timestamptz     not null,
     alarm_data  jsonb           not null,
@@ -97,6 +103,12 @@ SELECT create_hypertable(
        );
 
 SELECT create_hypertable(
+                'log_measurement',
+                by_range('time'),
+                if_not_exists := TRUE
+       );
+
+SELECT create_hypertable(
                 'alarm',
                 by_range('time'),
                 if_not_exists := TRUE
@@ -115,6 +127,12 @@ SELECT add_retention_policy(
        );
 
 SELECT add_retention_policy(
+            'log_measurement',
+            interval '1 years',
+            if_not_exists := TRUE
+       );
+
+SELECT add_retention_policy(
                'alarm',
                interval '1 years',
                if_not_exists := TRUE
@@ -127,3 +145,6 @@ CREATE INDEX IF NOT EXISTS metric_measurement_agent_id_idx ON metric_measurement
 
 CREATE INDEX IF NOT EXISTS transaction_measurement_agent_id_time_idx ON transaction_measurement (agent_id, time);
 CREATE INDEX IF NOT EXISTS transaction_measurement_agent_id_idx ON transaction_measurement (agent_id);
+
+CREATE INDEX IF NOT EXISTS log_measurement_agent_id_time_idx ON log_measurement (agent_id, time);
+CREATE INDEX IF NOT EXISTS log_measurement_agent_id_idx ON log_measurement (agent_id);

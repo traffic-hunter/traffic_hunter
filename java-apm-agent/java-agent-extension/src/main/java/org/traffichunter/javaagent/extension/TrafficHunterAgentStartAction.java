@@ -24,10 +24,13 @@
 package org.traffichunter.javaagent.extension;
 
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import java.io.Closeable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.instrument.Instrumentation;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import org.traffichunter.javaagent.bootstrap.BootstrapLogger;
 import org.traffichunter.javaagent.bootstrap.Configurations;
 import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
@@ -36,12 +39,18 @@ import org.traffichunter.javaagent.bootstrap.OpenTelemetrySdkBridge;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentShutdownHook;
 import org.traffichunter.javaagent.bootstrap.TrafficHunterAgentStarter;
 import org.traffichunter.javaagent.commons.status.AgentStatus;
+import org.traffichunter.javaagent.commons.type.MetricType;
+import org.traffichunter.javaagent.commons.util.AgentUtil;
 import org.traffichunter.javaagent.extension.banner.AsciiBanner;
 import org.traffichunter.javaagent.extension.env.ConfigurableEnvironment;
 import org.traffichunter.javaagent.extension.env.yaml.YamlConfigurableEnvironment;
 import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
+import org.traffichunter.javaagent.extension.metadata.MetadataWrapper;
 import org.traffichunter.javaagent.extension.property.TrafficHunterAgentProperty;
-import org.traffichunter.javaagent.extension.sender.manager.MetricSendSessionManager;
+import org.traffichunter.javaagent.jmx.JmxMetricSender;
+import org.traffichunter.javaagent.jmx.metric.systeminfo.SystemInfo;
+import org.traffichunter.javaagent.websocket.TrafficHunterWebsocketClient;
+import org.traffichunter.javaagent.websocket.metadata.Metadata;
 
 /**
  * <p>
@@ -95,7 +104,6 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
                 AgentStatus.INITIALIZED
         );
         context.addAgentStateEventListener(metadata);
-        OpenTelemetrySdk openTelemetrySdk = initializeOpenTelemetry(metadata.agentName());
         configurableContextInitializer.retransform(inst);
 
         AgentRunner runner = new AgentRunner(property, context, metadata);
@@ -104,26 +112,12 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
         runnerThread.setName(setRunnerThreadName());
 
         if(context.isInit()) {
-            shutdownHook.addRuntimeShutdownHook(runner::close)
-                    .addRuntimeShutdownHook(openTelemetrySdk::close);
+            shutdownHook.addRuntimeShutdownHook(runner::close);
             runnerThread.start();
             context.close();
         }
 
         log.info("Started TrafficHunter Agent in {} second", startUp.getUpTime());
-    }
-
-    private OpenTelemetrySdk initializeOpenTelemetry(final String serviceName) {
-
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetryManager.manageOpenTelemetrySdk(serviceName);
-
-        OpenTelemetrySdkBridge.setOpenTelemetrySdkForceFlush((timeout, unit) -> {
-                openTelemetrySdk.getSdkTracerProvider().forceFlush().join(timeout, unit);
-                openTelemetrySdk.getSdkMeterProvider().forceFlush().join(timeout, unit);
-                openTelemetrySdk.getSdkLoggerProvider().forceFlush().join(timeout, unit);
-        });
-
-        return openTelemetrySdk;
     }
 
     @Override
@@ -182,18 +176,35 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
      * <p>Features:</p>
      * <ul>
      *     <li>Introduces a delay to ensure the target application is fully loaded before execution.</li>
-     *     <li>Manages the lifecycle of the {@link MetricSendSessionManager}.</li>
      * </ul>
      */
-    private static final class AgentRunner implements Runnable {
+    private static final class AgentRunner implements Runnable, Closeable {
 
-        private final MetricSendSessionManager sessionManager;
+        private final TrafficHunterWebsocketClient client;
+
+        private final AgentExecutableContext context;
+
+        private final OpenTelemetrySdk openTelemetrySdk;
+
+        private final ScheduledExecutorService schedule;
+
+        private final TrafficHunterAgentProperty property;
+
+        private final AgentMetadata metadata;
+
+        private final JmxMetricSender jmxMetricSender;
 
         public AgentRunner(final TrafficHunterAgentProperty property,
                            final AgentExecutableContext context,
                            final AgentMetadata metadata) {
 
-            this.sessionManager = new MetricSendSessionManager(property, context, metadata);
+            this.client = initializeSender(property, metadata);
+            this.openTelemetrySdk = initializeOpenTelemetry(metadata.agentName(), client, metadata);
+            this.context = context;
+            this.schedule = Executors.newSingleThreadScheduledExecutor();
+            this.property = property;
+            this.jmxMetricSender = new JmxMetricSender(property.targetUri());
+            this.metadata = metadata;
         }
 
         /**
@@ -202,21 +213,72 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
          */
         @Override
         public void run() {
-            try {
-                log.info("Waiting for Agent Runner...");
-                Thread.sleep(10000);
-                sessionManager.run();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            log.info("start agent sender!!");
+            context.setStatus(AgentStatus.RUNNING);
+
+            if(!shouldStart()) {
+                throw new IllegalStateException("Agent has not been started yet");
             }
+
+            schedule.scheduleWithFixedDelay(() -> {
+                        SystemInfo systemInfo = jmxMetricSender.collect();
+                        MetadataWrapper<SystemInfo> metadataWrapper = MetadataWrapper.create(metadata, systemInfo);
+                        client.toSend(metadataWrapper, MetricType.SYSTEM_METRIC);
+                    },
+                    0,
+                    property.scheduleInterval(),
+                    property.timeUnit()
+            );
         }
 
-        private void lazyAgentRunner() {
-
-        }
-
+        @Override
         public void close() {
-            sessionManager.close();
+            openTelemetrySdk.close();
+            schedule.shutdown();
+            client.close();
+        }
+
+        private boolean shouldStart() {
+            return context.isRunning();
+        }
+
+        private TrafficHunterWebsocketClient initializeSender(final TrafficHunterAgentProperty property,
+                                                              final AgentMetadata metadata) {
+            return TrafficHunterWebsocketClient.builder()
+                    .endpoint(AgentUtil.WEBSOCKET_URL.getUri(property.serverUri()))
+                    .maxAttempts(property.maxAttempt())
+                    .backOffPolicy(property.backOffPolicy())
+                    .metadata(getMetadata(metadata))
+                    .build();
+        }
+
+        private Metadata getMetadata(final AgentMetadata metadata) {
+            return Metadata.builder()
+                    .agentId(metadata.agentId())
+                    .agentVersion(metadata.agentVersion())
+                    .agentName(metadata.agentName())
+                    .startTime(metadata.startTime())
+                    .status(metadata.status().get())
+                    .build();
+        }
+
+        private OpenTelemetrySdk initializeOpenTelemetry(final String serviceName,
+                                                         final TrafficHunterWebsocketClient client,
+                                                         final AgentMetadata metadata) {
+
+            OpenTelemetrySdk openTelemetrySdk = OpenTelemetryManager.manageOpenTelemetrySdk(
+                    serviceName,
+                    client,
+                    metadata
+            );
+
+            OpenTelemetrySdkBridge.setOpenTelemetrySdkForceFlush((timeout, unit) -> {
+                openTelemetrySdk.getSdkTracerProvider().forceFlush().join(timeout, unit);
+                openTelemetrySdk.getSdkMeterProvider().forceFlush().join(timeout, unit);
+                openTelemetrySdk.getSdkLoggerProvider().forceFlush().join(timeout, unit);
+            });
+
+            return openTelemetrySdk;
         }
     }
 

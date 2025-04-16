@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension;
+package org.traffichunter.javaagent.extension.exporter.thunter;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -31,18 +31,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.Configurations;
 import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
+import org.traffichunter.javaagent.commons.type.MetricType;
+import org.traffichunter.javaagent.extension.TraceInfo;
+import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
+import org.traffichunter.javaagent.extension.metadata.MetadataWrapper;
+import org.traffichunter.javaagent.websocket.TrafficHunterWebsocketClient;
 
 /**
  * @author yungwang-o
  * @version 1.0.0
  */
-class TrafficHunterSpanExporter implements SpanExporter {
+public class TrafficHunterSpanExporter implements SpanExporter {
 
     private static final Logger log = Logger.getLogger(TrafficHunterSpanExporter.class.getName());
 
     private static final Boolean exporterLogging = Configurations.debug(ConfigProperty.EXPORTER_DEBUG);
 
     private final AtomicBoolean isShutdown = new AtomicBoolean();
+
+    private final TrafficHunterWebsocketClient client;
+
+    private final AgentMetadata metadata;
+
+    public TrafficHunterSpanExporter(final TrafficHunterWebsocketClient client,
+                                     final AgentMetadata metadata) {
+        this.client = client;
+        this.metadata = metadata;
+    }
 
     @Override
     public CompletableResultCode export(final Collection<SpanData> spans) {
@@ -58,7 +73,8 @@ class TrafficHunterSpanExporter implements SpanExporter {
 
             spans.stream()
                     .map(TraceInfo::translate)
-                    .forEach(TraceQueue.INSTANCE::add);
+                    .map(traceInfo -> MetadataWrapper.create(metadata, traceInfo))
+                    .forEach(traceInfo -> client.toSend(traceInfo, MetricType.TRANSACTION_METRIC));
 
             return CompletableResultCode.ofSuccess();
         } catch (RuntimeException e) {
@@ -78,17 +94,8 @@ class TrafficHunterSpanExporter implements SpanExporter {
             return CompletableResultCode.ofSuccess();
         }
 
-        clear();
+        client.close();
+
         return CompletableResultCode.ofSuccess();
-    }
-
-    @Override
-    public void close() {
-        clear();
-        SpanExporter.super.close();
-    }
-
-    private void clear() {
-        TraceQueue.INSTANCE.removeAll();
     }
 }

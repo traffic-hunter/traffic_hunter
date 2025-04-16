@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License
  *
  * Copyright (c) 2024 traffic-hunter.org
@@ -21,42 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.collector.processor.compress;
+package ygo.traffic_hunter.domain.entity;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.core.collector.processor.MetricProcessor.ChannelProcessException;
+import java.time.Instant;
+import ygo.traffic_hunter.domain.metric.LogRecord;
 
 /**
- * unzip metric binary data.
  * @author yungwang-o
- * @version 1.0.0
+ * @version 1.1.0
  */
-@Component
-public class ByteArrayMetricDecompressor {
+public record LogMeasurement(
 
-    public byte[] unzip(final byte[] data) {
+        Instant time,
 
-        byte[] copy = new byte[data.length - 1];
+        Integer agentId,
 
-        System.arraycopy(data, 1, copy, 0, copy.length);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try (GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(copy))) {
-            byte[] result = new byte[data.length - 1];
-
-            int len;
-            while ((len = gzipInputStream.read(result)) != -1) {
-                baos.write(result, 0, len);
-            }
-
-            return baos.toByteArray();
-        } catch (IOException e) {
-            throw new ChannelProcessException(e.getMessage(), e);
-        }
-    }
+        LogRecord logRecord
+) {
 }

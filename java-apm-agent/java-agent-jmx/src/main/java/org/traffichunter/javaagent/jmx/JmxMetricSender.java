@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.jmx.collect;
+package org.traffichunter.javaagent.jmx;
 
 import java.time.Instant;
 import java.util.logging.Logger;
@@ -59,9 +59,9 @@ import org.traffichunter.javaagent.jmx.metric.systeminfo.SystemInfo;
  * @version 1.0.0
  */
 
-public class MetricCollectSupport {
+public class JmxMetricSender {
 
-    private static final Logger log = Logger.getLogger(MetricCollectSupport.class.getName());
+    private static final Logger log = Logger.getLogger(JmxMetricSender.class.getName());
 
     private final MemoryMetricCollector collectorMemory;
 
@@ -77,7 +77,7 @@ public class MetricCollectSupport {
 
     private final HikariCPMetricCollector collectorHikari;
 
-    public MetricCollectSupport(final String targetUri) {
+    public JmxMetricSender(final String targetUri) {
         this.collectorMemory = new MemoryMetricCollector();
         this.collectorCpu = new CpuMetricCollector();
         this.collectorThread = new ThreadMetricCollector();

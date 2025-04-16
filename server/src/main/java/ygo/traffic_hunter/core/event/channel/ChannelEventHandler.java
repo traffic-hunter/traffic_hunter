@@ -33,6 +33,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ygo.traffic_hunter.common.map.LogMapper;
 import ygo.traffic_hunter.common.map.SystemInfoMapper;
 import ygo.traffic_hunter.common.map.TransactionMapper;
 import ygo.traffic_hunter.core.alarm.AlarmManager;
@@ -43,10 +44,12 @@ import ygo.traffic_hunter.core.dto.request.transaction.TransactionInfo;
 import ygo.traffic_hunter.core.dto.response.alarm.ThresholdResponse;
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.service.AlarmService;
+import ygo.traffic_hunter.domain.entity.LogMeasurement;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.entity.alarm.Threshold.CalculatedThreshold;
 import ygo.traffic_hunter.domain.entity.alarm.Threshold.Calculator;
+import ygo.traffic_hunter.domain.metric.LogRecord;
 import ygo.traffic_hunter.domain.metric.TraceInfo;
 
 /**
@@ -102,6 +105,8 @@ public class ChannelEventHandler {
 
     private final TransactionMapper transactionMapper;
 
+    private final LogMapper logMapper;
+
     private final MetricRepository metricRepository;
 
     private final AlarmService alarmService;
@@ -130,6 +135,17 @@ public class ChannelEventHandler {
         MetricMeasurement measurement = systemInfoMapper.map(object);
 
         metricRepository.save(measurement);
+    }
+
+    @EventListener
+    @Transactional
+    public void handle(final LogEvent event) {
+
+        MetadataWrapper<LogRecord> object = event.logRecord();
+
+        LogMeasurement logMeasurement = logMapper.map(object);
+
+        metricRepository.save(logMeasurement);
     }
 
     @EventListener

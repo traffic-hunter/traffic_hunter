@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension;
+package org.traffichunter.javaagent.extension.exporter.zipkin;
 
 import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
 import io.opentelemetry.exporter.zipkin.ZipkinSpanExporterBuilder;
@@ -37,15 +37,15 @@ import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
  * @author yungwang-o
  * @version 1.1.0
  */
-class ZipkinSpanExportDelegator implements SpanExporter {
+public final class ZipkinSpanExportDelegator implements SpanExporter {
 
-    private static final Logger log = Logger.getLogger(TrafficHunterSpanExporter.class.getName());
+    private static final Logger log = Logger.getLogger(ZipkinSpanExportDelegator.class.getName());
 
     private static final Boolean exporterLogging = Configurations.debug(ConfigProperty.EXPORTER_DEBUG);
 
     private final ZipkinSpanExporter delegate;
 
-    ZipkinSpanExportDelegator() {
+    public ZipkinSpanExportDelegator() {
 
         String endpoint = Configurations.export(ConfigProperty.ZIPKIN_EXPORTER_ENDPOINT);
 

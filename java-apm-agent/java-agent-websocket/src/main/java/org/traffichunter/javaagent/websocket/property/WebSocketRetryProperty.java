@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License
  *
  * Copyright (c) 2024 traffic-hunter.org
@@ -21,42 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.collector.processor.compress;
+package org.traffichunter.javaagent.websocket.property;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.core.collector.processor.MetricProcessor.ChannelProcessException;
+import org.traffichunter.javaagent.retry.backoff.BackOffPolicy;
 
 /**
- * unzip metric binary data.
  * @author yungwang-o
- * @version 1.0.0
+ * @version 1.1.0
  */
-@Component
-public class ByteArrayMetricDecompressor {
-
-    public byte[] unzip(final byte[] data) {
-
-        byte[] copy = new byte[data.length - 1];
-
-        System.arraycopy(data, 1, copy, 0, copy.length);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try (GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(copy))) {
-            byte[] result = new byte[data.length - 1];
-
-            int len;
-            while ((len = gzipInputStream.read(result)) != -1) {
-                baos.write(result, 0, len);
-            }
-
-            return baos.toByteArray();
-        } catch (IOException e) {
-            throw new ChannelProcessException(e.getMessage(), e);
-        }
-    }
+public record WebSocketRetryProperty(BackOffPolicy backOffPolicy, int maxAttempt) {
 }

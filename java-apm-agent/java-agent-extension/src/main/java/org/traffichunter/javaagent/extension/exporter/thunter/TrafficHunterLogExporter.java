@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.traffichunter.javaagent.extension;
+package org.traffichunter.javaagent.extension.exporter.thunter;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
@@ -31,18 +31,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.Configurations;
 import org.traffichunter.javaagent.bootstrap.Configurations.ConfigProperty;
+import org.traffichunter.javaagent.commons.type.MetricType;
+import org.traffichunter.javaagent.extension.LogRecord;
+import org.traffichunter.javaagent.extension.metadata.AgentMetadata;
+import org.traffichunter.javaagent.extension.metadata.MetadataWrapper;
+import org.traffichunter.javaagent.websocket.TrafficHunterWebsocketClient;
 
 /**
  * @author yungwang-o
  * @version 1.1.0
  */
-class TrafficHunterLogExporter implements LogRecordExporter {
+public final class TrafficHunterLogExporter implements LogRecordExporter {
 
-    private static final Logger log = Logger.getLogger(TrafficHunterSpanExporter.class.getName());
+    private static final Logger log = Logger.getLogger(TrafficHunterLogExporter.class.getName());
 
     private static final Boolean exporterLogging = Configurations.debug(ConfigProperty.EXPORTER_DEBUG);
 
     private final AtomicBoolean isShutdown = new AtomicBoolean();
+
+    private final TrafficHunterWebsocketClient client;
+
+    private final AgentMetadata metadata;
+
+    public TrafficHunterLogExporter(final TrafficHunterWebsocketClient client,
+                                    final AgentMetadata metadata) {
+        this.client = client;
+        this.metadata = metadata;
+    }
 
     @Override
     public CompletableResultCode export(final Collection<LogRecordData> collection) {
@@ -55,7 +70,10 @@ class TrafficHunterLogExporter implements LogRecordExporter {
             log.info("log exporting = " + collection);
         }
 
-        collection.forEach(LogQueue.INSTANCE::add);
+        collection.stream()
+                .map(TrafficHunterLogExporter::mapToLogRecord)
+                .map(logRecord -> MetadataWrapper.create(metadata, logRecord))
+                .forEach(logRecord -> client.toSend(logRecord, MetricType.LOG_METRIC));
 
         return CompletableResultCode.ofSuccess();
     }
@@ -72,8 +90,21 @@ class TrafficHunterLogExporter implements LogRecordExporter {
             return CompletableResultCode.ofSuccess();
         }
 
-        LogQueue.INSTANCE.removeAll();
+        client.close();
 
         return CompletableResultCode.ofSuccess();
+    }
+
+    private static LogRecord mapToLogRecord(final LogRecordData data) {
+        return LogRecord.builder()
+                .severity(data.getSeverity())
+                .attributes(data.getAttributes())
+                .instrumentationScopeInfo(data.getInstrumentationScopeInfo())
+                .resource(data.getResource())
+                .observedTimestampEpochNanos(data.getObservedTimestampEpochNanos())
+                .severityText(data.getSeverityText())
+                .timestampEpochNanos(data.getTimestampEpochNanos())
+                .totalAttributeCount(data.getTotalAttributeCount())
+                .build();
     }
 }

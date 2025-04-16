@@ -68,6 +68,7 @@ public interface MetricChannel {
     enum MetricHeaderSpec {
         SYSTEM((byte) 1),
         TRANSACTION((byte) 2),
+        LOG((byte) 3)
         ;
 
         private final byte header;

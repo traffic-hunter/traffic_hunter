@@ -103,6 +103,7 @@ public class MetricCollector {
     private final Set<MetricChannel> handlers;
 
     public void collect(final ByteBuffer byteBuffer) {
+
         if(handlers.isEmpty()) {
             throw new IllegalStateException("collector is empty..");
         }

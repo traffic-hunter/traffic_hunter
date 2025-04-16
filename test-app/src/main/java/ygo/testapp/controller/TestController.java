@@ -2,6 +2,7 @@ package ygo.testapp.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import ygo.testapp.service.TestCallService;
 import ygo.testapp.service.TestCallService.Dto;
 import ygo.testapp.service.TestService;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class TestController {
@@ -36,6 +38,8 @@ public class TestController {
     @GetMapping("/test/call")
     @ResponseStatus(HttpStatus.OK)
     public List<Dto> callApi() {
+
+        log.info("call");
         return testCallService.test().getBody();
     }
 

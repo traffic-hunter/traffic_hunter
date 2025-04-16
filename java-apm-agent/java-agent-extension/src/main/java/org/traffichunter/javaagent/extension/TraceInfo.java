@@ -68,7 +68,7 @@ public record TraceInfo(
 
         Duration between = Duration.between(startTime, endTime);
 
-        Map<String, String> map = AttributesParser.doParse(spanData.getAttributes());
+        Map<String, String> map = OpenTelemetryParser.doParse(spanData.getAttributes());
 
         return new TraceInfo(
                 spanData.getName(),

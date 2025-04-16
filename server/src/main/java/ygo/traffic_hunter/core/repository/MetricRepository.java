@@ -33,6 +33,7 @@ import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAv
 import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
 import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
 import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
+import ygo.traffic_hunter.domain.entity.LogMeasurement;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
@@ -47,6 +48,8 @@ public interface MetricRepository extends AgentRepository {
     void save(MetricMeasurement metric);
 
     void save(TransactionMeasurement metric);
+
+    void save(LogMeasurement metric);
 
     List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
                                                                    Integer limit);

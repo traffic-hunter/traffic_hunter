@@ -31,6 +31,7 @@ import static org.jooq.impl.DSL.jsonbGetAttribute;
 import static org.jooq.impl.DSL.jsonbGetAttributeAsText;
 import static org.jooq.impl.DSL.round;
 import static org.traffichunter.query.jooq.Tables.AGENT;
+import static org.traffichunter.query.jooq.Tables.LOG_MEASUREMENT;
 import static org.traffichunter.query.jooq.Tables.METRIC_MEASUREMENT;
 import static org.traffichunter.query.jooq.Tables.TRANSACTION_MEASUREMENT;
 
@@ -70,11 +71,13 @@ import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransa
 import ygo.traffic_hunter.core.repository.MetricRepository;
 import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
 import ygo.traffic_hunter.domain.entity.Agent;
+import ygo.traffic_hunter.domain.entity.LogMeasurement;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 import ygo.traffic_hunter.persistence.mapper.AgentRowMapper;
+import ygo.traffic_hunter.persistence.mapper.LogMeasurementRowMapper;
 import ygo.traffic_hunter.persistence.mapper.SystemMeasurementRowMapper;
 import ygo.traffic_hunter.persistence.mapper.TransactionDataMapper;
 import ygo.traffic_hunter.persistence.mapper.TransactionMeasurementRowMapper;
@@ -100,6 +103,8 @@ public class TimeSeriesRepository implements MetricRepository {
     private final TransactionMeasurementRowMapper txMeasurementRowMapper;
 
     private final TransactionDataMapper transactionDataRowMapper;
+
+    private final LogMeasurementRowMapper logMeasurementRowMapper;
 
     private final AgentRowMapper agentRowMapper;
 
@@ -156,6 +161,22 @@ public class TimeSeriesRepository implements MetricRepository {
                 metric.agentId(),
                 txMeasurementRowMapper.serialize(metric.transactionData())
         );
+    }
+
+    @Override
+    @Transactional
+    public void save(final LogMeasurement metric) {
+
+        int execute = dsl.insertInto(LOG_MEASUREMENT)
+                .values(
+                        Timestamp.from(metric.time()),
+                        JSONB.jsonb(logMeasurementRowMapper.serialize(metric.logRecord())),
+                        metric.agentId())
+                .execute();
+
+        if(execute <= 0) {
+            throw new ObservabilityNotFoundException("Failed to log measurement");
+        }
     }
 
     @Override

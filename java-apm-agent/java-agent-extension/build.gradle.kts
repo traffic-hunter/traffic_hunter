@@ -15,17 +15,12 @@ dependencies {
 
     implementation(project(":java-apm-agent:java-agent-retry"))
     implementation(project(":java-apm-agent:java-agent-bootstrap"))
+    implementation(project(":java-apm-agent:java-agent-websocket"))
     implementation(project(":java-apm-agent:java-agent-event"))
     implementation(project(":java-apm-agent:java-agent-commons"))
-    implementation(project(":java-apm-agent:java-agent-websocket"))
     implementation(project(":java-apm-agent:java-agent-jmx"))
 
     compileOnly(project(":java-apm-agent:plugin-sdk"))
-
-    implementation("org.java-websocket:Java-WebSocket:1.5.7")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.18.0")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.0")
 
     compileOnly("io.opentelemetry:opentelemetry-api:1.45.0")
     implementation("io.opentelemetry:opentelemetry-sdk:1.45.0")

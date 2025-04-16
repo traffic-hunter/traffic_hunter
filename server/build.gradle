@@ -50,6 +50,10 @@ dependencies {
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
     jooqGenerator 'org.postgresql:postgresql:42.7.2'
+
+    // otel
+    implementation "io.opentelemetry:opentelemetry-api:1.45.0"
+    implementation "io.opentelemetry:opentelemetry-sdk:1.45.0"
 }
 
 ext {

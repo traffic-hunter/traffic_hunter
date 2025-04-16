@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import org.traffichunter.javaagent.commons.type.MetricType;
 
 /**
  * The {@code SerializationByteArrayConverter} class provides utility methods for
@@ -73,7 +74,7 @@ public class SerializationByteArrayConverter {
             byte[] compressByteArray = baos.toByteArray();
             byte[] result = new byte[baos.toByteArray().length + 1];
 
-            result[0] = metricType.value;
+            result[0] = metricType.getValue();
 
             System.arraycopy(compressByteArray, 0, result, 1, compressByteArray.length);
 
@@ -88,19 +89,6 @@ public class SerializationByteArrayConverter {
             return objectMapper.writeValueAsBytes(object);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public enum MetricType {
-        SYSTEM_METRIC((byte) 1),
-        TRANSACTION_METRIC((byte) 2),
-        LOG_METRIC((byte) 3),
-        ;
-
-        private final byte value;
-
-        MetricType(final byte value) {
-            this.value = value;
         }
     }
 }

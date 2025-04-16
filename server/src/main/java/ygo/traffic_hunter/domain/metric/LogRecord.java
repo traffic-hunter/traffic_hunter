@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License
  *
  * Copyright (c) 2024 traffic-hunter.org
@@ -21,42 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package ygo.traffic_hunter.core.collector.processor.compress;
+package ygo.traffic_hunter.domain.metric;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.core.collector.processor.MetricProcessor.ChannelProcessException;
+import io.opentelemetry.api.logs.Severity;
+import java.util.Map;
 
 /**
- * unzip metric binary data.
  * @author yungwang-o
- * @version 1.0.0
+ * @version 1.1.0
  */
-@Component
-public class ByteArrayMetricDecompressor {
+public record LogRecord(
 
-    public byte[] unzip(final byte[] data) {
+        Map<String, String> resource,
 
-        byte[] copy = new byte[data.length - 1];
+        Map<String, String> instrumentationScopeInfo,
 
-        System.arraycopy(data, 1, copy, 0, copy.length);
+        Map<String, String> attributes,
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int totalAttributeCount,
 
-        try (GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(copy))) {
-            byte[] result = new byte[data.length - 1];
+        Severity severity,
 
-            int len;
-            while ((len = gzipInputStream.read(result)) != -1) {
-                baos.write(result, 0, len);
-            }
+        String severityText,
 
-            return baos.toByteArray();
-        } catch (IOException e) {
-            throw new ChannelProcessException(e.getMessage(), e);
-        }
-    }
+        long observedTimestampEpochNanos,
+
+        long timestampEpochNanos
+) {
 }
