@@ -30,6 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author yungwang-o
  * @version 1.0.0
  */
+@Deprecated
 public enum TraceQueue {
 
     INSTANCE,
