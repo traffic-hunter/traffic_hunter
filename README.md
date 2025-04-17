@@ -33,7 +33,8 @@ The release version is v1.1.0.
 
 ## Overview 👀
 
-Traffic-Hunter provides full observability support. While you currently need to build your traces using Zipkin, we’ll soon introduce traffic‑hunter‑visualization to eliminate that inconvenience.
+Traffic-Hunter provides full observability support. While you currently need to build your traces using Zipkin, 
+we’ll soon introduce [**traffic‑hunter‑visualization**](https://github.com/traffic-hunter/traffic-hunter-visualization) to eliminate that inconvenience.
 
 - **Application Metric** - cpu, heap memory, thread, web server, dbcp (database connection pool)
 
