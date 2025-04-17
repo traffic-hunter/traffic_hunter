@@ -33,7 +33,6 @@ import ygo.traffic_hunter.core.collector.validator.MetricValidator;
 import ygo.traffic_hunter.core.collector.validator.MetricValidator.ChannelValidatedException;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
-import ygo.traffic_hunter.core.event.channel.AlarmEvent;
 import ygo.traffic_hunter.core.event.channel.ChannelEventHandler;
 import ygo.traffic_hunter.core.event.channel.SystemInfoMetricEvent;
 
@@ -76,6 +75,6 @@ public class SysteminfoMetricChannel implements MetricChannel {
         }
 
         publisher.publishEvent(new SystemInfoMetricEvent(object));
-        publisher.publishEvent(new AlarmEvent(object));
+        //publisher.publishEvent(new AlarmEvent(object));
     }
 }
