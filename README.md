@@ -2,13 +2,10 @@
 
 ## Latest Release 🚀
 
-The pre-release version is v1.0.0. 
+The release version is v1.1.0. 
 
+- 2025/04/25 - 1.1.0 version
 - 2024/12/30 - 1.0.0 version
-
-### Notes
-
-- Agent that is v1.0.0 supports only `spring framework 6.x` and `boot 3.x`
 
 ## Intro. Traffic-Hunter
 
@@ -36,24 +33,43 @@ The pre-release version is v1.0.0.
 
 ## Overview 👀
 
-- **Application Health Check** - cpu, heap memory, thread, web server, dbcp (database connection pool)
+- **Application Metric** - cpu, heap memory, thread, web server, dbcp (database connection pool)
 
 <img width="1440" alt="스크린샷 2024-12-12 오후 10 52 04" src="https://github.com/user-attachments/assets/18866da9-8b64-4ea8-a703-18e23b61d756" />
 
-- **Transaction Logs** - Transaction logs track application requests in real-time, recording executed methods and related information.
+- **Trace** - Trace track application requests in real-time, recording executed methods and related information. (Support zipkin)
 
-<img width="1421" alt="스크린샷 2024-12-12 오후 10 55 37" src="https://github.com/user-attachments/assets/35b09f7e-caf2-4d58-9912-3efefd56bb28" />
+![log.png](doc/image/trace.jpeg)
+
+- **Logs** - Logs from multiple applications can be centrally managed to enable efficient logging.
+
+![trace.jpeg](doc/image/log.png)
 
 ## Version Compatibility 👏
 
-| Java Version | Agent           | Server         | Notes                                     |
-|--------------|-----------------|----------------|-------------------------------------------|
-| 21           | ✅ Supported     | ✅ Supported   | Includes support for advanced features like virtual threads |
+| Java Version | Agent            | Server         | Notes |
+|--------------|------------------|----------------|-------|
+| 21+          | ✅ Supported      | ✅ Supported    |       |
+
 
 ### Notes
 - Java versions below 21 are **not supported**.
 - For optimal performance and access to the latest features, use Java 21.
 - Ensure both the agent and the server are running compatible Java versions.
+
+## Supported Instrumentation Plugin
+
+| Instrumentation Plugin | Version | Note                                                 |
+|------------------------|---------|------------------------------------------------------|
+| Servlet                | 6.0.0   | Jakarta servlet <br/> Not Supported javax            |
+| Spring web-mvc         | 6.2.0   |                                                      |
+| Spring boot            | 3.2.0   | Supported RestClient,<br/>Not Supported RestTemplate |
+| JDBC                   | Java 21 |                                                      |
+| HttpClient             | Java 21 |                                                      |
+| HttpUrlConnection      | Java 21 |                                                      |
+| Hibernate              | 6.0.0   | LinkageError Issue, <br/>Not Support                 |
+| Logger                 | Java 21 | java.util.Logging                                    |
+| LogBack                | 1.5.0   | ch.qos.logback                                       |
 
 ## License
 
