@@ -34,19 +34,30 @@ import java.util.Map;
  * @version 1.1.0
  */
 public class LogRecord {
+
     private final Map<String, String> resource;
+
     private final Map<String, String> instrumentationScopeInfo;
+
     private final Map<String, String> attributes;
+
+    private final String body;
+
     private final int totalAttributeCount;
+
     private final Severity severity;
+
     private final String severityText;
+
     private final long observedTimestampEpochNanos;
+
     private final long timestampEpochNanos;
 
     private LogRecord(Builder builder) {
         this.resource = builder.resource;
         this.instrumentationScopeInfo = builder.instrumentationScopeInfo;
         this.attributes = builder.attributes;
+        this.body = builder.body;
         this.totalAttributeCount = builder.totalAttributeCount;
         this.severity = builder.severity;
         this.severityText = builder.severityText;
@@ -59,13 +70,23 @@ public class LogRecord {
     }
 
     public static class Builder {
+
         private Map<String, String> resource;
+
         private Map<String, String> instrumentationScopeInfo;
+
         private Map<String, String> attributes;
+
+        private String body;
+
         private int totalAttributeCount;
+
         private Severity severity;
+
         private String severityText;
+
         private long observedTimestampEpochNanos;
+
         private long timestampEpochNanos;
 
         public Builder resource(Resource resource) {
@@ -80,6 +101,11 @@ public class LogRecord {
 
         public Builder attributes(Attributes attributes) {
             this.attributes = OpenTelemetryParser.doParse(attributes);
+            return this;
+        }
+
+        public Builder body(String body) {
+            this.body = body;
             return this;
         }
 
@@ -118,6 +144,8 @@ public class LogRecord {
     public Map<String, String> getInstrumentationScopeInfo() { return instrumentationScopeInfo; }
 
     public Map<String, String> getAttributes() { return attributes; }
+
+    public String getBody() { return body; }
 
     public int getTotalAttributeCount() { return totalAttributeCount; }
 

@@ -23,10 +23,12 @@
  */
 package org.traffichunter.javaagent.extension.exporter.thunter;
 
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import org.traffichunter.javaagent.bootstrap.Configurations;
@@ -96,9 +98,15 @@ public final class TrafficHunterLogExporter implements LogRecordExporter {
     }
 
     private static LogRecord mapToLogRecord(final LogRecordData data) {
+
+        String body = Optional.ofNullable(data.getBodyValue())
+                .map(Value::asString)
+                .orElse("");
+
         return LogRecord.builder()
                 .severity(data.getSeverity())
                 .attributes(data.getAttributes())
+                .body(body)
                 .instrumentationScopeInfo(data.getInstrumentationScopeInfo())
                 .resource(data.getResource())
                 .observedTimestampEpochNanos(data.getObservedTimestampEpochNanos())

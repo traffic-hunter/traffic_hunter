@@ -38,6 +38,8 @@ public record LogRecord(
 
         Map<String, String> attributes,
 
+        String body,
+
         int totalAttributeCount,
 
         Severity severity,

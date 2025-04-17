@@ -45,9 +45,7 @@ public final class ZipkinSpanExportDelegator implements SpanExporter {
 
     private final ZipkinSpanExporter delegate;
 
-    public ZipkinSpanExportDelegator() {
-
-        String endpoint = Configurations.export(ConfigProperty.ZIPKIN_EXPORTER_ENDPOINT);
+    public ZipkinSpanExportDelegator(final String endpoint) {
 
         ZipkinSpanExporterBuilder builder = ZipkinSpanExporter.builder();
 

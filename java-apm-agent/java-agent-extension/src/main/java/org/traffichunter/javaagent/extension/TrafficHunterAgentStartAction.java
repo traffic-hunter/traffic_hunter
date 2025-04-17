@@ -169,14 +169,11 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
     }
 
     /**
+     * <p>
      * The {@code AgentRunner} class implements {@link Runnable} to execute the core logic
      * of the TrafficHunter Agent in a separate thread. It initializes the session manager
      * and orchestrates agent operations after the target application is loaded.
-     *
-     * <p>Features:</p>
-     * <ul>
-     *     <li>Introduces a delay to ensure the target application is fully loaded before execution.</li>
-     * </ul>
+     *</p>
      */
     private static final class AgentRunner implements Runnable, Closeable {
 
@@ -213,13 +210,20 @@ public final class TrafficHunterAgentStartAction implements TrafficHunterAgentSt
          */
         @Override
         public void run() {
-            log.info("start agent sender!!");
+            log.info("Start agent sender. but metric is waiting...");
             context.setStatus(AgentStatus.RUNNING);
 
             if(!shouldStart()) {
                 throw new IllegalStateException("Agent has not been started yet");
             }
 
+            try {
+                Thread.sleep(10_000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            log.info("Success send metric!! ");
             schedule.scheduleWithFixedDelay(() -> {
                         SystemInfo systemInfo = jmxMetricSender.collect();
                         MetadataWrapper<SystemInfo> metadataWrapper = MetadataWrapper.create(metadata, systemInfo);

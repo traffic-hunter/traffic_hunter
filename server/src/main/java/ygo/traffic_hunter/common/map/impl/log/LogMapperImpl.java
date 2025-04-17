@@ -54,9 +54,17 @@ public class LogMapperImpl implements LogMapper {
         Agent agent = agentRepository.findByAgentId(metadata.agentId());
 
         return new LogMeasurement(
-                Instant.ofEpochMilli(data.timestampEpochNanos() / 1000),
+                toInstant(data.observedTimestampEpochNanos()),
                 agent.id(),
                 data
         );
+    }
+
+    private static Instant toInstant(final long timestamp) {
+
+        long second = timestamp / 1_000_000_000L;
+        long atNano = timestamp % 1_000_000_000L;
+
+        return Instant.ofEpochSecond(second, atNano);
     }
 }
