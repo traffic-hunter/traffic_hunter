@@ -70,17 +70,17 @@ we’ll soon introduce [**traffic‑hunter‑visualization**](https://github.com
 
 ## Supported Instrumentation Plugin
 
-| Instrumentation Plugin | Version | Note                                                 |
-|------------------------|---------|------------------------------------------------------|
-| Servlet                | 6.0.0   | Jakarta servlet <br/> Not Supported javax            |
-| Spring web-mvc         | 6.2.0   |                                                      |
-| Spring boot            | 3.2.0   | Supported RestClient,<br/>Not Supported RestTemplate |
-| JDBC                   | Java 21 |                                                      |
-| HttpClient             | Java 21 |                                                      |
-| HttpUrlConnection      | Java 21 |                                                      |
-| Hibernate              | 6.0.0   | LinkageError Issue, <br/>Not Support                 |
-| Logger                 | Java 21 | java.util.Logging                                    |
-| LogBack                | 1.5.0   | ch.qos.logback                                       |
+| Instrumentation Plugin | Version  | Note                                                 |
+|------------------------|----------|------------------------------------------------------|
+| Servlet                | 6.0.0+   | Jakarta servlet                                      |
+| Spring web-mvc         | 6.2.0+   |                                                      |
+| Spring boot            | 3.2.0+   | Supported RestClient,<br/>Not Supported RestTemplate |
+| JDBC                   | Java 21+ |                                                      |
+| HttpClient             | Java 21+ |                                                      |
+| HttpUrlConnection      | Java 21+ |                                                      |
+| Hibernate              | 6.0.0+   | LinkageError Issue, <br/>Not Support                 |
+| Logger                 | Java 21+ | java.util.Logging                                    |
+| LogBack                | 1.5.0+   | ch.qos.logback                                       |
 
 ## License
 
