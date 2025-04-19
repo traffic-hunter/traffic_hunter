@@ -7,6 +7,14 @@ The release version is v1.1.0.
 - 2025/04/25 - 1.1.0 version
 - 2024/12/30 - 1.0.0 version
 
+## Note
+
+About traffic-hunter v1.1.0
+
+- Not supported distributed trace
+- We were unable to integrate observability due to the absence of Traffic Hunter Visualization. We will complete and provide the visualization shortly.
+- For the time being, **Zipkin** should be used in an in-memory environment. If a **Zipkin** environment is already set up, feel free to use it. Otherwise, use the **in-memory** setup for simple performance testing. We will improve the convenience in the next version—stay tuned!
+
 ## Intro. Traffic-Hunter
 
 **Traffic-Hunter** is APM (Application Performance Management) 
