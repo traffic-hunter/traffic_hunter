@@ -1,4 +1,7 @@
 ![Traffic Hunter_Logo_2_배경](https://github.com/user-attachments/assets/43779ef6-f4f8-40f5-98b5-447754bfd2a4)
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Latest Release 🚀
 
@@ -111,3 +114,25 @@ THE SOFTWARE.
 
 
 
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/JuSeong1130"><img src="https://avatars.githubusercontent.com/u/53209324?v=4?s=100" width="100px;" alt="JuSeong1130"/><br /><sub><b>JuSeong1130</b></sub></a><br /><a href="https://github.com/traffic-hunter/traffic_hunter/commits?author=JuSeong1130" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
