@@ -25,9 +25,7 @@ package ygo.traffic_hunter.core.alarm;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ygo.traffic_hunter.core.alarm.message.Message;
 import ygo.traffic_hunter.core.repository.AlarmRepository;
 import ygo.traffic_hunter.core.send.AlarmSender;
@@ -53,8 +51,8 @@ public class AlarmManager {
     }
 
     // 30 minutes interval
-    @Transactional
-    @Scheduled(cron = "0 */30 * * * *")
+    //@Transactional
+    //@Scheduled(cron = "0 */30 * * * *")
     public void afterProcessingDeadLetter() {
 
         if(!alarmRepository.existDeadLetter()) {
