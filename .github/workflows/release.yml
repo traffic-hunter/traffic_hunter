@@ -66,31 +66,6 @@ jobs:
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body: |
-            ## 🚀 Traffic-Hunter Release: ${{ github.ref_name }}
-
-            ### 📝 Overview
-            Traffic-Hunter is an Application Performance Monitoring (APM) tool designed to provide lightweight and efficient performance monitoring for small-scale projects.
-
-            ### 🔑 Key Features
-            - `Real-Time Monitoring`: Capture and visualize application metrics and transaction logs in real-time.
-            - `Easy Configuration`: Easily configure the agent using a simple YAML file, making setup straightforward and user-friendly.
-            - `Efficient Data Storage`: Leverages [**TimescaleDB**](https://www.timescale.com/) for efficient storage and querying of time-series data, enabling high-performance analytics on metrics and traces.
-            - `Visualization`: This APM leverages [**Grafana**](https://grafana.com/docs/grafana/latest/) for powerful and customizable visualization of metrics and transaction logs, enabling real-time insights and easy integration into your observability stack.
-            - `Zero-Code`: Traffic Hunter Agent uses **Java Instrumentation** to modify bytecode at runtime, requiring no code changes from users. Simply attach the agent, and it automatically tracks metrics and traces with zero configuration.
-
-            ### 📦 Installation
-            - [**Quick-start**](https://github.com/yungwangoh/traffic_hunter/wiki/Quick%E2%80%90Start)
-
-            ### 🐛 Known Issues
-            - Java versions below 21 are not supported.
-
-            ### 🔮 Future Plans
-            - Distributed tracing support.
-            - We plan to provide various agent plugins.
-            - We plan to transition from WebSocket to gRPC.
-            - Additional language support for Python and Node.js agents.
-
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
