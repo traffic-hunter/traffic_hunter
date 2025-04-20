@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: write
 
@@ -46,7 +46,7 @@ jobs:
             server/build/libs/*.jar
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
     permissions:
       contents: write
