@@ -72,7 +72,7 @@ asciidoctor {
 }
 
 bootJar {
-    archiveFileName = 'traffic-hunter-server-v1.0.0.jar'
+    archiveFileName = 'traffichunter-server.jar'
     dependsOn asciidoctor
     from ("${asciidoctor.outputDir}/html5") {
         into 'static/docs'

@@ -66,7 +66,7 @@ tasks {
 
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-        archiveFileName.set("javaagent-bootstrap.jar")
+        archiveFileName.set("traffichunter-javaagent-bootstrap.jar")
     }
 
     val relocateJavaagentDepsTempTask by registering(ShadowJar::class) {
@@ -85,7 +85,7 @@ tasks {
         relocate("org/java_websocket", "extension/org/java_websocket")
 
         duplicatesStrategy = DuplicatesStrategy.FAIL
-        archiveFileName.set("javaagent-extension-tmp.jar")
+        archiveFileName.set("traffichunter-javaagent-extension-tmp.jar")
     }
 
     val relocateJavaagentDepsTask by registering(Jar::class) {
@@ -94,7 +94,7 @@ tasks {
         from(zipTree(relocateJavaagentDepsTempTask.get().archiveFile))
 
         duplicatesStrategy = DuplicatesStrategy.FAIL
-        archiveFileName.set("javaagent-extension.jar")
+        archiveFileName.set("traffichunter-javaagent-extension.jar")
     }
 
     named<ShadowJar>("shadowJar") {

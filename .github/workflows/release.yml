@@ -82,7 +82,7 @@ jobs:
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
-            **/traffic-hunter-*.jar
+            **/traffichunter-*.jar
 
   release-drafter:
     runs-on: ubuntu-latest
