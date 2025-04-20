@@ -32,7 +32,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4.0.0
 
       - name: Build java-agent
-        run: ./gradlew :java-agent:shadowJar
+        run: ./gradlew :java-apm-agent:java-agent:shadowJar
 
       - name: Build server
         run: ./gradlew :server:build
