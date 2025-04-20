@@ -1,6 +1,6 @@
 ![Traffic Hunter_Logo_2_배경](https://github.com/user-attachments/assets/43779ef6-f4f8-40f5-98b5-447754bfd2a4)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Latest Release 🚀
@@ -126,6 +126,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/JuSeong1130"><img src="https://avatars.githubusercontent.com/u/53209324?v=4?s=100" width="100px;" alt="JuSeong1130"/><br /><sub><b>JuSeong1130</b></sub></a><br /><a href="https://github.com/traffic-hunter/traffic_hunter/commits?author=JuSeong1130" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://velog.io/@swager253"><img src="https://avatars.githubusercontent.com/u/37898720?v=4?s=100" width="100px;" alt="윤광오"/><br /><sub><b>윤광오</b></sub></a><br /><a href="https://github.com/traffic-hunter/traffic_hunter/commits?author=yungwangoh" title="Code">💻</a> <a href="#infra-yungwangoh" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/traffic-hunter/traffic_hunter/commits?author=yungwangoh" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
