@@ -31,6 +31,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.0.0
 
+      - name: Set environment for jOOQ generation
+        run: |
+            echo "DB_URL=${{ secrets.DB_URL }}" >> $GITHUB_ENV
+            echo "USER_NAME=${{ secrets.USER_NAME }}" >> $GITHUB_ENV
+            echo "PASSWORD=${{ secrets.PASSWORD }}" >> $GITHUB_ENV
+
       - name: Build java-agent
         run: ./gradlew :java-apm-agent:java-agent:shadowJar
 

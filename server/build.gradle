@@ -88,9 +88,9 @@ tasks.withType(Test).configureEach {
 }
 
 ext {
-    dbUrl = project.findProperty("DB_URL")
-    dbUser = project.findProperty("USER_NAME")
-    dbPassword = project.findProperty("PASSWORD")
+    dbUrl = System.getenv("DB_URL") ?: project.findProperty("DB_URL")
+    dbUser = System.getenv("USER_NAME") ?: project.findProperty("USER_NAME")
+    dbPassword = System.getenv("PASSWORD") ?: project.findProperty("PASSWORD")
 }
 
 jooq {
