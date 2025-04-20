@@ -15,6 +15,17 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "yungwangoh",
+      "name": "윤광오",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37898720?v=4",
+      "profile": "https://velog.io/@swager253",
+      "contributions": [
+        "code",
+        "infra",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
