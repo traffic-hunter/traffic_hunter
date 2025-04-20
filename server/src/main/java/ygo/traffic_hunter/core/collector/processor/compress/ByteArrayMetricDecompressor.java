@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import org.springframework.stereotype.Component;
+import ygo.traffic_hunter.core.collector.processor.MetricProcessor.ChannelProcessException;
 
 /**
  * unzip metric binary data.
@@ -46,7 +47,7 @@ public class ByteArrayMetricDecompressor {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try (GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(copy))) {
-            byte[] result = new byte[2048];
+            byte[] result = new byte[data.length - 1];
 
             int len;
             while ((len = gzipInputStream.read(result)) != -1) {
@@ -55,7 +56,7 @@ public class ByteArrayMetricDecompressor {
 
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ChannelProcessException(e.getMessage(), e);
         }
     }
 }

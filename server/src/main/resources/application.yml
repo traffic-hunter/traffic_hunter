@@ -12,7 +12,12 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+      separator: ;;
 
   jooq:
     sql-dialect: postgres
+
+webhook:
+  discord-url: ${DISCORD_WEB_HOOK_URL:}
+  slack-url: ${SLACK_WEB_HOOK_URL:}
 

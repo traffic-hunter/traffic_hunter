@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 package ygo.traffic_hunter.domain.metric;
 
 import java.time.Instant;
+import java.util.Map;
 import lombok.Builder;
 
 /**
@@ -31,7 +32,7 @@ import lombok.Builder;
  * @version 1.0.0
  */
 @Builder
-public record TransactionData(
+public record TransactionData (
 
         String name,
 
@@ -40,6 +41,10 @@ public record TransactionData(
         String parentSpanId,
 
         String spanId,
+
+        Map<String, String> attributes,
+
+        int attributesCount,
 
         Instant startTime,
 
@@ -58,6 +63,8 @@ public record TransactionData(
                 .traceId(traceInfo.traceId())
                 .parentSpanId(traceInfo.parentSpanId())
                 .spanId(traceInfo.spanId())
+                .attributes(traceInfo.attributes())
+                .attributesCount(traceInfo.attributesCount())
                 .startTime(traceInfo.startTime())
                 .endTime(traceInfo.endTime())
                 .duration(traceInfo.duration())

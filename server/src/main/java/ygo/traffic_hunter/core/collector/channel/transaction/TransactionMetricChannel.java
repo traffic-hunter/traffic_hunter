@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel;
 import ygo.traffic_hunter.core.collector.processor.MetricProcessor;
+import ygo.traffic_hunter.core.collector.validator.MetricValidator;
+import ygo.traffic_hunter.core.collector.validator.MetricValidator.ChannelValidatedException;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.event.channel.ChannelEventHandler;
 import ygo.traffic_hunter.core.event.channel.TransactionMetricEvent;
@@ -53,6 +55,8 @@ public class TransactionMetricChannel implements MetricChannel {
 
     private final MetricProcessor processor;
 
+    private final MetricValidator validator;
+
     private final ApplicationEventPublisher publisher;
 
     @Override
@@ -63,9 +67,13 @@ public class TransactionMetricChannel implements MetricChannel {
     @Override
     public void open(final byte[] payload) {
 
-        MetadataWrapper<TraceInfo> object = processor.processTransactionInfo(payload);
+        MetadataWrapper<TraceInfo> object = processor.process(payload, TraceInfo.class);
 
         log.info("Transaction metric data: {}", object);
+
+        if(validator.validate(object)) {
+            throw new ChannelValidatedException("The input does not meet the required validation criteria.");
+        }
 
         publisher.publishEvent(new TransactionMetricEvent(object));
     }

@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,5 +37,5 @@ import ygo.traffic_hunter.common.aop.lock.method.LockMode;
 @Target(ElementType.METHOD)
 public @interface Lock {
 
-    LockMode mode();
+    LockMode mode() default LockMode.NORMAL;
 }

@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,29 +27,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
+import ygo.traffic_hunter.core.assembler.Assembler;
+import ygo.traffic_hunter.core.assembler.span.SpanAssembler;
+import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
+import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
 import ygo.traffic_hunter.domain.metric.TransactionData;
 
 /**
- * @author yungwang-o
- * @version 1.0.0
+ * @author yungwang-o, JuSeong
+ * @version 1.1.0
  */
+@Slf4j
 @Component
-public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionData> implements RowMapper<TransactionMeasurement> {
+public class TransactionMeasurementRowMapper extends RowMapSupport<TransactionData> implements
+        RowMapper<TransactionMetricResponse> {
 
     public TransactionMeasurementRowMapper(final ObjectMapper objectMapper) {
         super(objectMapper);
     }
 
     @Override
-    public TransactionMeasurement mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-        return new TransactionMeasurement(
-                rs.getTimestamp("time").toInstant(),
-                rs.getInt("agent_id"),
-                deserialize(rs.getString("transaction_data"), TransactionData.class)
+    public TransactionMetricResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+        return TransactionMetricResponse.create(
+                rs.getString("agent_name"),
+                rs.getTimestamp("agent_boot_time").toInstant(),
+                rs.getString("agent_version"),
+                getSpanTreeNode(rs)
         );
+    }
+
+    private SpanTreeNode getSpanTreeNode(final ResultSet rs) throws SQLException {
+
+        String transactionDataJson = rs.getString("transaction_datas");
+
+        List<TransactionData> transactionData = deserializeList(transactionDataJson, TransactionData.class);
+
+        Assembler<List<TransactionData>, SpanTreeNode> assembler = new SpanAssembler();
+
+        return assembler.assemble(transactionData);
     }
 
     public String serialize(final List<TransactionData> txData) {

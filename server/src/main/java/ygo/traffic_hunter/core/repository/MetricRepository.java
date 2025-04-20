@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,15 +24,24 @@
 package ygo.traffic_hunter.core.repository;
 
 import java.util.List;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import ygo.traffic_hunter.core.dto.response.RealTimeMonitoringResponse;
 import ygo.traffic_hunter.core.dto.response.TransactionMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricAvgResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.metric.StatisticsMetricMaxResponse;
+import ygo.traffic_hunter.core.dto.response.statistics.transaction.ServiceTransactionResponse;
+import ygo.traffic_hunter.core.statistics.StatisticsMetricTimeRange;
+import ygo.traffic_hunter.domain.entity.LogMeasurement;
 import ygo.traffic_hunter.domain.entity.MetricMeasurement;
 import ygo.traffic_hunter.domain.entity.TransactionMeasurement;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
+import ygo.traffic_hunter.domain.metric.TransactionData;
 
 /**
- * @author yungwang-o
- * @version 1.0.0
+ * @author yungwang-o, JuSeong
+ * @version 1.1.0
  */
 public interface MetricRepository extends AgentRepository {
 
@@ -40,7 +49,22 @@ public interface MetricRepository extends AgentRepository {
 
     void save(TransactionMeasurement metric);
 
-    List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(final TimeInterval interval, final String agentName);
+    void save(LogMeasurement metric);
 
-    List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(final TimeInterval interval, final String agentName);
+    List<SystemMetricResponse> findMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
+                                                                   Integer limit);
+
+    List<TransactionMetricResponse> findTxMetricsByRecentTimeAndAgentName(TimeInterval interval, String agentName,
+                                                                          Integer limit);
+
+    List<TransactionData> findTxDataByRequestUri(String traceId);
+
+    Slice<ServiceTransactionResponse> findServiceTransaction(Pageable pageable);
+
+    StatisticsMetricMaxResponse findMaxMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
+
+    StatisticsMetricAvgResponse findAvgMetricByTimeInterval(StatisticsMetricTimeRange timeRange);
+
+    List<RealTimeMonitoringResponse> findRealtimeMonitoringByTimeInterval(TimeInterval timeInterval, String agentName,
+                                                                          Integer limit);
 }

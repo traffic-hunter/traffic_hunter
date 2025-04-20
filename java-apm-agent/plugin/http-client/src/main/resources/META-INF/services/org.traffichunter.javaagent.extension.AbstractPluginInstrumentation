@@ -1,0 +1,2 @@
+org.traffichunter.javaagent.plugin.http.HttpClientPluginInstrumentation
+org.traffichunter.javaagent.plugin.http.HttpHeadersPluginInstrumentation

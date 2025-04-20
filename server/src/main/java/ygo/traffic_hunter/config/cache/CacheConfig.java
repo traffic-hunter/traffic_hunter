@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,11 @@
 package ygo.traffic_hunter.config.cache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Scheduler;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -63,21 +65,30 @@ public class CacheConfig {
                 cacheType.cacheName,
                 Caffeine.newBuilder()
                         .maximumSize(cacheType.maximumSize)
+                        .scheduler(Scheduler.systemScheduler())
                         .expireAfterWrite(cacheType.expireAfterWrite, TimeUnit.SECONDS)
                         .build()
         );
     }
 
+    @Getter
     public enum CacheType {
 
-        AGENT_CACHE("agent_cache", Integer.MAX_VALUE, 100),
-        ;
+        AGENT_CACHE("agent_cache", 3600, 100),
+        STATISTIC_TRANSACTION_PAGE_CACHE("statistic_transaction_page_cache", 600, 50),
+        ALARM_CACHE("alarm_cache", 600, 50),
+        THRESHOLD_CACHE("threshold_cache", 3600, 50),
+        MEMBER_CACHE("member_cache", 3600, 50);
 
         private final String cacheName;
         private final int expireAfterWrite;
         private final int maximumSize;
 
         public static final String AGENT_CACHE_NAME = "agent_cache";
+        public static final String STATISTIC_TRANSACTION_PAGE_CACHE_NAME = "statistic_transaction_page_cache";
+        public static final String ALARM_CACHE_NAME = "alarm_cache";
+        public static final String MEMBER_CACHE_NAME = "member_cache";
+        public static final String THRESHOLD_CACHE_NAME = "threshold_cache";
 
         CacheType(final String cacheName, final int expireAfterWrite, final int maximumSize) {
             this.cacheName = cacheName;

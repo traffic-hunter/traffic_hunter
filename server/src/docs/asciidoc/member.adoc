@@ -1,0 +1,45 @@
+[[Member-API]]
+= Member API
+
+[[success]]
+== Success
+
+=== POST /members
+
+operation::members/sign-up[snippets='curl-request,http-request,http-response,request-body,request-fields']
+
+=== GET /members
+
+operation::members/get-member[snippets='curl-request,http-request,path-parameters,request-body,response-body,response-fields']
+
+=== GET /members/\{id}
+
+operation::members/get-members[snippets='']
+
+=== POST /members/sign-in
+
+operation::members/sign-in[snippets='']
+
+=== POST /members/sign-out
+
+operation::members/sign-out[snippets='curl-request,http-request,http-response']
+
+=== PUT /members
+
+operation::members/update[snippets='curl-request,http-request,http-response,request-body,request-fields,request-headers']
+
+=== DELETE /members
+
+operation::members/delete[snippets='curl-request,http-request,http-response,request-headers']
+
+[[Failed]]
+
+== Failed
+
+=== GET /members/\{id}
+
+operation::members/failed-get-member[snippets='curl-request,http-request,http-response,response-body']
+
+=== POST /members
+
+operation::members/failed-sign-up[snippets='curl-request,http-request,http-response,request-body,response-body']
