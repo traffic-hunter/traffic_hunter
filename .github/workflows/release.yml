@@ -8,6 +8,12 @@
 name: Java CI/CD with Gradle
 
 on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
   push:
     branches:
       - 'v*'
