@@ -80,11 +80,11 @@ bootJar {
 }
 
 tasks.withType(Test).configureEach {
-    environment("DB_IP", project.findProperty("DB_IP"))
-    environment("DB_NAME", project.findProperty("DB_NAME"))
-    environment("USER_NAME", project.findProperty("USER_NAME"))
-    environment("PASSWORD", project.findProperty("PASSWORD"))
-    environment("DB_URL", project.findProperty("DB_URL"))
+    environment("DB_IP", System.getenv("DB_IP") ?: project.findProperty("DB_IP"))
+    environment("DB_NAME", System.getenv("DB_NAME") ?: project.findProperty("DB_NAME"))
+    environment("USER_NAME", System.getenv("USER_NAME") ?: project.findProperty("USER_NAME"))
+    environment("PASSWORD", System.getenv("PASSWORD") ?: project.findProperty("PASSWORD"))
+    environment("DB_URL", System.getenv("DB_URL") ?: project.findProperty("DB_URL"))
 }
 
 ext {
