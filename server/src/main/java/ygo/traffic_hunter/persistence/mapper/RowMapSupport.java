@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,44 +29,57 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author yungwang-o
  * @version 1.0.0
  */
+@Slf4j
 @RequiredArgsConstructor
 public class RowMapSupport<T> {
 
     private final ObjectMapper objectMapper;
 
     protected final String serialize0(final T object) {
+
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to serialize object to JSON = {}", e.getMessage());
         }
+
+        return "";
     }
 
     protected final String serialize0(final List<T> object) {
+
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to serialize object to JSON = {}", e.getMessage());
         }
+
+        return "";
     }
 
-    protected <C> C deserialize(final String json, final Class<C> clazz) {
+    protected final <C> C deserialize(final String json, final Class<C> clazz) {
+
         try {
             return objectMapper.readValue(json, clazz);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to deserialize JSON = {}", e.getMessage());
         }
+
+        return null;
     }
 
-    protected <C> List<C> deserializeList(final String json, Class<C> clazz) {
+    protected final <C> List<C> deserializeList(final String json, final Class<C> clazz) {
+
         try {
 
             if(json == null || json.isEmpty()) {
+                log.warn("json is null or empty");
                 return Collections.emptyList();
             }
 
@@ -74,7 +87,9 @@ public class RowMapSupport<T> {
 
             return objectMapper.readValue(json, javaType);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to deserialize JSON = {}", e.getMessage());
         }
+
+        return Collections.emptyList();
     }
 }

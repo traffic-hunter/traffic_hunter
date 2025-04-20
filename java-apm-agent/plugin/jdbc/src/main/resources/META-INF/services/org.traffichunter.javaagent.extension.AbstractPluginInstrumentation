@@ -1,0 +1,4 @@
+org.traffichunter.javaagent.plugin.jdbc.StatementPluginInstrumentation
+org.traffichunter.javaagent.plugin.jdbc.ConnectionPluginInstrumentation
+org.traffichunter.javaagent.plugin.jdbc.PrepareStatementPluginInstrumentation
+org.traffichunter.javaagent.plugin.jdbc.DriverPluginInstrumentation

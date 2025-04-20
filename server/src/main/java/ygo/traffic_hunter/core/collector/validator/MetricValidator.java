@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,10 @@ package ygo.traffic_hunter.core.collector.validator;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import ygo.traffic_hunter.core.annotation.Validator;
+import ygo.traffic_hunter.core.collector.channel.MetricChannel.ChannelException;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
-import ygo.traffic_hunter.core.repository.AgentRepository;
 
 /**
  * The {@code MetricValidator} class is responsible for validating the metadata
@@ -41,8 +41,6 @@ import ygo.traffic_hunter.core.repository.AgentRepository;
 @Validator
 @RequiredArgsConstructor
 public class MetricValidator {
-
-    private final AgentRepository agentRepository;
 
     public boolean validate(final MetadataWrapper<?> metric) {
         final AgentMetadata metadata = metric.metadata();
@@ -58,7 +56,29 @@ public class MetricValidator {
         return Objects.equals(metadata.status(), AgentStatus.RUNNING)
                 && !metadata.agentId().isEmpty()
                 && !metadata.agentName().isEmpty()
-                && !metadata.agentVersion().isEmpty()
-                && agentRepository.existsByAgentId(metadata.agentId());
+                && !metadata.agentVersion().isEmpty();
+    }
+
+    public static final class ChannelValidatedException extends ChannelException {
+
+        public ChannelValidatedException() {
+        }
+
+        public ChannelValidatedException(final String message) {
+            super(message);
+        }
+
+        public ChannelValidatedException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        public ChannelValidatedException(final Throwable cause) {
+            super(cause);
+        }
+
+        public ChannelValidatedException(final String message, final Throwable cause, final boolean enableSuppression,
+                                         final boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
     }
 }

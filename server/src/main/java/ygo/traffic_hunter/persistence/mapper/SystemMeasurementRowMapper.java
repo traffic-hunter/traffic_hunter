@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.CpuMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.HikariCPMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MemoryMetricUsageResponse;
+import ygo.traffic_hunter.core.dto.response.metric.MetricDataResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.ThreadMetricMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerRequestMeasurementResponse;
+import ygo.traffic_hunter.core.dto.response.metric.TomcatWebServerThreadPoolMeasurementResponse;
 import ygo.traffic_hunter.domain.metric.MetricData;
 
 /**
@@ -44,12 +53,71 @@ public class SystemMeasurementRowMapper extends RowMapSupport<MetricData> implem
 
     @Override
     public SystemMetricResponse mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
         return SystemMetricResponse.create(
                 rs.getTimestamp("time").toInstant(),
                 rs.getString("agent_name"),
                 rs.getTimestamp("agent_boot_time").toInstant(),
                 rs.getString("agent_version"),
-                deserialize(rs.getString("metric_data"), MetricData.class)
+                getMetricData(rs)
+        );
+    }
+
+    private MetricDataResponse getMetricData(final ResultSet rs) throws SQLException {
+        // CPU Metric
+        CpuMetricMeasurementResponse cpuMetric = new CpuMetricMeasurementResponse(
+                rs.getDouble("system_cpu_load"),
+                rs.getDouble("process_cpu_load"),
+                rs.getInt("available_processors")
+        );
+
+        // Memory Metric
+        MemoryMetricMeasurementResponse memoryMetric = new MemoryMetricMeasurementResponse(
+                new MemoryMetricUsageResponse(
+                        rs.getLong("heap_init"),
+                        rs.getLong("heap_used"),
+                        rs.getLong("heap_committed"),
+                        rs.getLong("heap_max")
+                )
+        );
+
+        // Thread Metric
+        ThreadMetricMeasurementResponse threadMetric = new ThreadMetricMeasurementResponse(
+                rs.getInt("thread_count"),
+                rs.getInt("peak_thread_count"),
+                rs.getInt("total_started_thread_count")
+        );
+
+        // Web Server Metric
+        TomcatWebServerMeasurementResponse webServerMetric = new TomcatWebServerMeasurementResponse(
+                new TomcatWebServerRequestMeasurementResponse(
+                        rs.getLong("request_count"),
+                        rs.getLong("bytes_received"),
+                        rs.getLong("bytes_sent"),
+                        rs.getLong("processing_time"),
+                        rs.getLong("error_count")
+                ),
+                new TomcatWebServerThreadPoolMeasurementResponse(
+                        rs.getInt("max_threads"),
+                        rs.getInt("current_threads"),
+                        rs.getInt("current_threads_busy")
+                )
+        );
+
+        // DBCP Metric
+        HikariCPMeasurementResponse dbcpMetric = new HikariCPMeasurementResponse(
+                rs.getInt("active_connections"),
+                rs.getInt("idle_connections"),
+                rs.getInt("total_connections"),
+                rs.getInt("threads_awaiting_connection")
+        );
+
+        return new MetricDataResponse(
+                cpuMetric,
+                memoryMetric,
+                threadMetric,
+                webServerMetric,
+                dbcpMetric
         );
     }
 

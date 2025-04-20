@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,22 +29,23 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import ygo.traffic_hunter.core.collector.channel.MetricChannel;
 import ygo.traffic_hunter.core.collector.processor.MetricProcessor;
+import ygo.traffic_hunter.core.collector.validator.MetricValidator;
+import ygo.traffic_hunter.core.collector.validator.MetricValidator.ChannelValidatedException;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
 import ygo.traffic_hunter.core.dto.request.systeminfo.SystemInfo;
 import ygo.traffic_hunter.core.event.channel.ChannelEventHandler;
 import ygo.traffic_hunter.core.event.channel.SystemInfoMetricEvent;
 
 /**
- * The {@code SysteminfoMetricChannel} class processes system metric payloads and publishes
- * events for further handling in the application.
+ * The {@code SysteminfoMetricChannel} class processes system metric payloads and publishes events for further handling
+ * in the application.
  *
+ * @author yungwang-o
+ * @version 1.0.0
  * @see MetricProcessor
  * @see ChannelEventHandler
  * @see SystemInfoMetricEvent
  * @see MetricChannel
- *
- * @author yungwang-o
- * @version 1.0.0
  */
 @Slf4j
 @Component
@@ -52,6 +53,8 @@ import ygo.traffic_hunter.core.event.channel.SystemInfoMetricEvent;
 public class SysteminfoMetricChannel implements MetricChannel {
 
     private final MetricProcessor processor;
+
+    private final MetricValidator validator;
 
     private final ApplicationEventPublisher publisher;
 
@@ -63,10 +66,15 @@ public class SysteminfoMetricChannel implements MetricChannel {
     @Override
     public void open(final byte[] payload) {
 
-        MetadataWrapper<SystemInfo> object = processor.processSystemInfo(payload);
+        MetadataWrapper<SystemInfo> object = processor.process(payload, SystemInfo.class);
 
         log.info("process system info: {}", object);
 
+        if (validator.validate(object)) {
+            throw new ChannelValidatedException("The input does not meet the required validation criteria.");
+        }
+
         publisher.publishEvent(new SystemInfoMetricEvent(object));
+        //publisher.publishEvent(new AlarmEvent(object));
     }
 }

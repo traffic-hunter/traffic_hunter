@@ -23,22 +23,22 @@
  */
 package org.traffichunter.javaagent.plugin.jdbc;
 
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.returns;
+import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
-import io.opentelemetry.context.Context;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
+import java.sql.PreparedStatement;
 import net.bytebuddy.asm.Advice.Argument;
-import net.bytebuddy.asm.Advice.Enter;
-import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
-import net.bytebuddy.asm.Advice.Thrown;
+import net.bytebuddy.asm.Advice.Return;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.traffichunter.javaagent.plugin.jdbc.helper.JdbcInstrumentationHelper;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
+import org.traffichunter.javaagent.plugin.jdbc.library.JdbcData;
 
 /**
  * @author yungwang-o
@@ -47,38 +47,39 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 public class ConnectionPluginInstrumentation extends AbstractPluginInstrumentation {
 
     public ConnectionPluginInstrumentation() {
-        super("jdbc", ConnectionPluginInstrumentation.class.getSimpleName(), "");
+        super("jdbc", ConnectionPluginInstrumentation.class.getName(), "");
     }
 
     @Override
-    public Transformer transform() {
-        return (builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(ConnectionAdvice.class));
+    public void transform(final Transformer transformer) {
+
+        transformer.processAdvice(
+                Advices.create(
+                        isMethod(),
+                        ConnectionAdvice.class
+                )
+        );
     }
 
     @Override
     public ElementMatcher<TypeDescription> typeMatcher() {
-        return named("java.sql.Connection");
+        return hasSuperType(named("java.sql.Connection"));
     }
 
     @Override
     protected ElementMatcher<? super MethodDescription> isMethod() {
-        return named("prepareStatement");
+        return nameStartsWith("prepare")
+                .and(takesArgument(0, String.class))
+                .and(returns(hasSuperType(named("java.sql.PreparedStatement"))));
     }
 
     @SuppressWarnings("unused")
     public static class ConnectionAdvice {
 
-        @OnMethodEnter
-        public static SpanScope start(@Argument(0) final String sql) {
-            Context parentContext = Context.current();
+        @OnMethodExit(suppress = Throwable.class)
+        public static void dbInfo(@Argument(0) String sql, @Return PreparedStatement preparedStatement) {
 
-            return JdbcInstrumentationHelper.ConnectionInstrumentation.start(sql, parentContext);
-        }
-
-        @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
-        public static void exit(@Enter final SpanScope spanScope, @Thrown final Throwable throwable) {
-            JdbcInstrumentationHelper.end(spanScope, throwable);
+            JdbcData.prepareStatementInfo.set(preparedStatement, sql);
         }
     }
 }

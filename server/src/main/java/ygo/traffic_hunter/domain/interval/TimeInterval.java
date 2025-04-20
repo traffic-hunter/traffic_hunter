@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,24 +32,25 @@ import lombok.Getter;
 @Getter
 public enum TimeInterval {
 
-    REAL_TIME("3 seconds", 5_000),
-    FIVE_MINUTES("5 minutes", 5_000),
-    TEN_MINUTES("10 minutes", 5_000),
-    THIRTY_MINUTES("30 minutes", 8_000),
-    ONE_HOUR("1 hours", 10_000),
-    THREE_HOURS("3 hours", 10_000),
-    SIX_HOURS("6 hours", 30_000),
-    TWELVE_HOURS("12 hours", 30_000),
-    ONE_DAYS("1 days", 60_000),
-    TWO_DAYS("2 days", 60_000),
-    THREE_DAYS("3 days", 60_000),
+    REAL_TIME("5 seconds", 20),
+    FIVE_MINUTES("5 minutes", 50),
+    TEN_MINUTES("10 minutes", 80),
+    THIRTY_MINUTES("30 minutes", 130),
+    ONE_HOUR("1 hours", 200),
+    THREE_HOURS("3 hours", 250),
+    SIX_HOURS("6 hours", 300),
+    TWELVE_HOURS("12 hours", 350),
+    ONE_DAYS("1 days", 400),
+    TWO_DAYS("2 days", 450),
+    THREE_DAYS("3 days", 500),
     ;
 
     private final String interval;
-    private final long delayMillis;
 
-    TimeInterval(final String interval, final long delayMillis) {
+    private final int limit;
+
+    TimeInterval(final String interval, final int limit) {
         this.interval = interval;
-        this.delayMillis = delayMillis;
+        this.limit = limit;
     }
 }

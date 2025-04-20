@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 
 import java.time.Instant;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ygo.traffic_hunter.common.map.impl.transaction.TransactionMapperImpl;
+import ygo.traffic_hunter.core.assembler.span.SpanTreeNode;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentMetadata;
 import ygo.traffic_hunter.core.dto.request.metadata.AgentStatus;
 import ygo.traffic_hunter.core.dto.request.metadata.MetadataWrapper;
@@ -46,6 +48,8 @@ class TransactionMapperTest {
                 "test-trace-id",
                 "test-parent-span-id",
                 "test-span-id",
+                Map.of(),
+                0,
                 Instant.now(),
                 Instant.now().plusMillis(50),
                 50,
@@ -90,6 +94,8 @@ class TransactionMapperTest {
                 "test-trace-id",
                 "test-parent-span-id",
                 "test-span-id",
+                Map.of(),
+                0,
                 Instant.now(),
                 Instant.now().plusMillis(50),
                 50,
@@ -113,6 +119,6 @@ class TransactionMapperTest {
         assertEquals(mockAgent.agentName(), response.agentName());
         assertEquals(mockAgent.agentBootTime(), response.agentBootTime());
         assertEquals(mockAgent.agentVersion(), response.agentVersion());
-        assertEquals(transactionData, response.transactionData());
+        assertEquals(SpanTreeNode.NO_OP, response.spanTreeNode());
     }
 }

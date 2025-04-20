@@ -1,0 +1,26 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: 'Features'
+    label: 'enhancement'
+  - title: 'Fixes'
+    label: 'bug'
+  - title: 'Etcetera'
+    label: 'documentation'
+change-template: '- $TITLE #$NUMBER @$AUTHOR '
+template: |
+  ## The changes in this version are as follows.
+  ---
+  $CHANGES
+no-changes-template: 'No changes'
+version-resolver:
+  major:
+    labels:
+      - '✨ major'
+  minor:
+    labels:
+      - '✨ minor'
+  patch:
+    labels:
+      - '- '✨ patch'
+  default: patch

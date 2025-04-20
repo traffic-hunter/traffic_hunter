@@ -28,14 +28,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.traffichunter.javaagent.commons.type.MetricType;
 import org.traffichunter.javaagent.websocket.converter.SerializationByteArrayConverter;
-import org.traffichunter.javaagent.websocket.converter.SerializationByteArrayConverter.MetricType;
 import org.traffichunter.javaagent.websocket.metadata.Metadata;
 
 /**
@@ -57,9 +57,9 @@ import org.traffichunter.javaagent.websocket.metadata.Metadata;
  * @author yungwang-o
  * @version 1.0.0
  */
-public class MetricWebSocketClient extends WebSocketClient {
+final class MetricWebSocketClient extends WebSocketClient {
 
-    private static final Logger log = LoggerFactory.getLogger(MetricWebSocketClient.class);
+    private static final Logger log = Logger.getLogger(MetricWebSocketClient.class.getName());
 
     private final SerializationByteArrayConverter converter;
 
@@ -67,7 +67,8 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     private final Metadata metadata;
 
-    public MetricWebSocketClient(final URI serverUri, final Metadata metadata) {
+    public MetricWebSocketClient(final URI serverUri,
+                                 final Metadata metadata) {
         super(serverUri);
         this.metadata = metadata;
         this.objectMapper
@@ -84,7 +85,7 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(final String s) {
-        log.info("websocket client received = {}", s);
+        log.info("websocket client received = " + s);
     }
 
 
@@ -95,7 +96,7 @@ public class MetricWebSocketClient extends WebSocketClient {
 
     @Override
     public void onError(final Exception e) {
-        log.error("websocket client error = {}", e.getMessage());
+        log.severe("websocket client error = " + e.getMessage());
     }
 
     public boolean isConnected() {
@@ -127,20 +128,21 @@ public class MetricWebSocketClient extends WebSocketClient {
     }
 
     public <M> void toSend(final M metric) {
-        if(!isOpen()) {
+
+        if (!isOpen()) {
             throw new IllegalStateException("WebSocket client is closed");
         }
 
         try {
-            String s = objectMapper.writeValueAsString(metric);
-            this.send(s);
+            this.send(objectMapper.writeValueAsString(metric));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
     public <M> void compressToSend(final M metric, final MetricType metricType) {
-        if(!isOpen()) {
+
+        if (!isOpen()) {
             throw new IllegalStateException("WebSocket client is closed");
         }
 
@@ -149,8 +151,20 @@ public class MetricWebSocketClient extends WebSocketClient {
         this.send(transform);
     }
 
+    public <M> void compressToSend(final Collection<M> metrics, final MetricType metricType) {
+
+        if (!isOpen()) {
+            throw new IllegalStateException("WebSocket client is closed");
+        }
+
+        byte[] transform = converter.transform(metrics, metricType);
+
+        this.send(transform);
+    }
+
     public <M> void toSend(final List<M> metrics) {
-        if(!isOpen()) {
+
+        if (!isOpen()) {
             throw new IllegalStateException("WebSocket client is closed");
         }
 
@@ -160,4 +174,5 @@ public class MetricWebSocketClient extends WebSocketClient {
             throw new RuntimeException(e);
         }
     }
+
 }

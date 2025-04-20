@@ -1,7 +1,16 @@
+import nu.studer.gradle.jooq.*
+import org.jooq.meta.jaxb.Logging
+
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.4'
-    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id "org.asciidoctor.jvm.convert" version "3.3.2"
+    id 'nu.studer.jooq' version '9.0'
+}
+
+configurations {
+    asciidoctorExt
 }
 
 group = 'ygo'
@@ -11,10 +20,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-}
-
-bootJar {
-    archiveFileName = 'traffic-hunter-server-v1.0.0.jar'
 }
 
 repositories {
@@ -31,6 +36,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.data:spring-data-commons'
+    implementation 'com.slack.api:slack-api-client:1.45.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.assertj:assertj-core'
     compileOnly 'org.projectlombok:lombok'
@@ -38,9 +46,100 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
+    jooqGenerator 'org.postgresql:postgresql:42.7.2'
+
+    // otel
+    implementation "io.opentelemetry:opentelemetry-api:1.45.0"
+    implementation "io.opentelemetry:opentelemetry-sdk:1.45.0"
 }
 
-tasks.named('test') {
+ext {
+    snippetsDir = file('build/generated-snippets')
+}
+
+test {
+    outputs.dir snippetsDir
     useJUnitPlatform()
+}
+
+asciidoctor {
+    inputs.dir snippetsDir
+    configurations 'asciidoctorExt'
+    dependsOn test
+}
+
+bootJar {
+    archiveFileName = 'traffic-hunter-server-v1.0.0.jar'
+    dependsOn asciidoctor
+    from ("${asciidoctor.outputDir}/html5") {
+        into 'static/docs'
+    }
+}
+
+tasks.withType(Test).configureEach {
+    environment("DB_IP", project.findProperty("DB_IP"))
+    environment("DB_NAME", project.findProperty("DB_NAME"))
+    environment("USER_NAME", project.findProperty("USER_NAME"))
+    environment("PASSWORD", project.findProperty("PASSWORD"))
+    environment("DB_URL", project.findProperty("DB_URL"))
+}
+
+ext {
+    dbUrl = project.findProperty("DB_URL")
+    dbUser = project.findProperty("USER_NAME")
+    dbPassword = project.findProperty("PASSWORD")
+}
+
+jooq {
+    version = '3.19.15'  // default (can be omitted)
+    edition = JooqEdition.OSS  // default (can be omitted)
+
+    configurations {
+        main {  // name of the jOOQ configuration
+            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+
+            generationTool {
+                logging = Logging.WARN
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = dbUrl
+                    user = dbUser
+                    password = dbPassword
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = 'public'
+                        forcedTypes {
+                            forcedType {
+                                name = 'JSONB'
+                                includeExpression = '.*'
+                                includeTypes = 'JSONB'
+                            }
+                            forcedType {
+                                name = 'varchar'
+                                includeExpression = '.*'
+                                includeTypes = 'INET'
+                            }
+                        }
+                    }
+                    generate {
+                        deprecated = false
+                        records = true
+                        immutablePojos = true
+                        fluentSetters = true
+                    }
+                    target {
+                        packageName = 'org.traffichunter.query.jooq'
+                        directory = 'build/generated-src/jooq/main'  // default (can be omitted)
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
 }

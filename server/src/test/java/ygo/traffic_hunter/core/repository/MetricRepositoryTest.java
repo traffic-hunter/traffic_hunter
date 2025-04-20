@@ -27,7 +27,7 @@ import ygo.traffic_hunter.core.dto.request.systeminfo.thread.ThreadStatusInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.TomcatWebServerInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.request.TomcatRequestInfo;
 import ygo.traffic_hunter.core.dto.request.systeminfo.web.tomcat.thread.TomcatThreadPoolInfo;
-import ygo.traffic_hunter.core.dto.response.SystemMetricResponse;
+import ygo.traffic_hunter.core.dto.response.metric.SystemMetricResponse;
 import ygo.traffic_hunter.domain.interval.TimeInterval;
 import ygo.traffic_hunter.persistence.impl.TimeSeriesRepository;
 
@@ -51,11 +51,11 @@ class MetricRepositoryTest extends AbstractTestConfiguration {
     void DB에_저장이_되는지_확인한다() {
         // given
         AgentMetadata metadata = new AgentMetadata(
-          "test",
-          "test",
-          "test",
-          Instant.now(),
-          AgentStatus.RUNNING
+                "test",
+                "test",
+                "test",
+                Instant.now(),
+                AgentStatus.RUNNING
         );
 
         SystemInfo systemInfo = new SystemInfo(
@@ -72,9 +72,9 @@ class MetricRepositoryTest extends AbstractTestConfiguration {
                 new RuntimeStatusInfo(1000L, 5000L, "TestVM", "1.0"),
                 new TomcatWebServerInfo(
                         new TomcatThreadPoolInfo(1, 1, 1),
-                        new TomcatRequestInfo(1,1, 1, 1, 1)
+                        new TomcatRequestInfo(1, 1, 1, 1, 1)
                 ),
-                new HikariDbcpInfo(1,1, 1, 1)
+                new HikariDbcpInfo(1, 1, 1, 1)
         );
 
         MetadataWrapper<SystemInfo> metadataWrapper = new MetadataWrapper<>(metadata, systemInfo);
@@ -83,7 +83,7 @@ class MetricRepositoryTest extends AbstractTestConfiguration {
 
         // when
         List<SystemMetricResponse> metrics = timeSeriesRepository.findMetricsByRecentTimeAndAgentName(
-                TimeInterval.TEN_MINUTES, "test");
+                TimeInterval.TEN_MINUTES, "test", 20);
 
         // then
         System.out.println(metrics);

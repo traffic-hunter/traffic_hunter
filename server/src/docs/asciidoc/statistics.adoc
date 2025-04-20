@@ -1,0 +1,36 @@
+[[Statstics-API]]
+= Statistics-API
+
+[[success]]
+== Success
+
+=== GET /statistics/transaction
+
+operation::service-transaction[snippets='curl-request,http-request,query-parameters,request-fields,http-response,response-fields']
+
+=== GET /statistics/transaction/{traceId}
+
+operation::service-transaction-detail[]
+
+=== GET /statistics/metric/max
+
+operation::retrieve-max-metric[snippets='curl-request,http-request,path-parameters,request-body,http-response,response-fields,response-body']
+
+=== GET /statistics/metric/avg
+
+operation::retrieve-avg-metric[snippets='curl-request,http-request,path-parameters,request-body,http-response,response-fields,response-body']
+
+[[failed]]
+== Failed
+
+=== GET /statistics/transaction
+
+operation::400-error-service-transaction[snippets='curl-request,http-request,http-response']
+
+=== GET /statistics/metric/max
+
+operation::400-error-retrieve-max-metric[snippets='curl-request,http-request,http-response']
+
+=== GET /statistics/metric/avg
+
+operation::400-error-retrieve-avg-metric[snippets='curl-request,http-request,http-response']

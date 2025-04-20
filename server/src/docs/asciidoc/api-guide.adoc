@@ -1,0 +1,20 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+:operation-http-request-title: Request
+:operation-http-response-title: Response
+
+[[Traffic-hunter-API]]
+= Traffic-hunter-API docs
+
+include::statistics.adoc[]
+include::sse.adoc[]
+include::member.adoc[]
+include::alarm.adoc[]
+

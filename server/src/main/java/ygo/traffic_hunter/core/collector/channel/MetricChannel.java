@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2024 yungwang-o
+ * Copyright (c) 2024 traffic-hunter.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,6 +68,7 @@ public interface MetricChannel {
     enum MetricHeaderSpec {
         SYSTEM((byte) 1),
         TRANSACTION((byte) 2),
+        LOG((byte) 3)
         ;
 
         private final byte header;
@@ -78,6 +79,29 @@ public interface MetricChannel {
 
         public boolean equals(final byte header) {
             return this.header == header;
+        }
+    }
+
+    class ChannelException extends RuntimeException {
+
+        public ChannelException() {
+        }
+
+        public ChannelException(final String message) {
+            super(message);
+        }
+
+        public ChannelException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        public ChannelException(final Throwable cause) {
+            super(cause);
+        }
+
+        public ChannelException(final String message, final Throwable cause, final boolean enableSuppression,
+                                final boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
         }
     }
 }

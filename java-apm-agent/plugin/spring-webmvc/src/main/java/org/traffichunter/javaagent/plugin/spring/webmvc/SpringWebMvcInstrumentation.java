@@ -25,11 +25,10 @@ package org.traffichunter.javaagent.plugin.spring.webmvc;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
+import io.opentelemetry.context.Context;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.Argument;
 import net.bytebuddy.asm.Advice.Enter;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
@@ -39,9 +38,9 @@ import net.bytebuddy.asm.Advice.Thrown;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.traffichunter.javaagent.plugin.sdk.instrumentation.AbstractPluginInstrumentation;
-import org.traffichunter.javaagent.plugin.spring.webmvc.helper.SpringWebMvcInstrumentationHelper;
-import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
+import org.traffichunter.javaagent.extension.AbstractPluginInstrumentation;
+import org.traffichunter.javaagent.extension.Transformer;
+import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
 
 /**
  * @author yungwang-o
@@ -50,13 +49,18 @@ import org.traffichunter.javaagent.trace.manager.TraceManager.SpanScope;
 public class SpringWebMvcInstrumentation extends AbstractPluginInstrumentation {
 
     public SpringWebMvcInstrumentation() {
-        super("spring-webmvc", SpringWebMvcInstrumentation.class.getSimpleName(),"spring-webmvc-6.2.0");
+        super("spring-webmvc", SpringWebMvcInstrumentation.class.getName(),"spring-webmvc-6.2.0");
     }
 
     @Override
-    public Transformer transform() {
-        return ((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
-                builder.method(this.isMethod()).intercept(Advice.to(SpringWebMvcDispatcherServletAdvice.class)));
+    public void transform(final Transformer transformer) {
+
+        transformer.processAdvice(
+                Advices.create(
+                        isMethod(),
+                        SpringWebMvcDispatcherServletAdvice.class
+                )
+        );
     }
 
     @Override
@@ -72,12 +76,14 @@ public class SpringWebMvcInstrumentation extends AbstractPluginInstrumentation {
     @SuppressWarnings("unused")
     public static class SpringWebMvcDispatcherServletAdvice {
 
-        @OnMethodEnter
+        @OnMethodEnter(suppress = Throwable.class)
         public static SpanScope enter(@Origin final Method method,
                                       @Argument(0) final HttpServletRequest request,
                                       @Argument(1) final HttpServletResponse response) {
 
-            return SpringWebMvcInstrumentationHelper.start(method, request);
+            Context current = Context.current();
+
+            return SpringWebMvcInstrumentationHelper.start(method, current, request, response);
         }
 
         @OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
