@@ -1,13 +1,14 @@
 package org.traffichunter.plugin.spring.autoconfigure.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author yungwang-o
@@ -17,8 +18,8 @@ import org.springframework.web.client.RestClient;
 class SpringWebInstrumentationAutoConfigurationTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
-                    .withBean(RestClient.class, RestClient::create)
-                    .withConfiguration(AutoConfigurations.of(SpringWebInstrumentationAutoConfiguration.class));
+            .withBean(RestClient.class, RestClient::create)
+            .withConfiguration(AutoConfigurations.of(SpringWebInstrumentationAutoConfiguration.class));
 
     @Test
     void rest_client_instrumentation_enabled() {
@@ -39,4 +40,20 @@ class SpringWebInstrumentationAutoConfigurationTest {
                     });
         });
     }
+
+    @Test
+    void rest_template_instrumentation_enabled() {
+        runner.run(context -> {
+            assertThat(context.getBean("thunterRestTemplateBeanPostProcessor", RestTemplateBeanPostProcessor.class))
+                    .isNotNull();
+
+            boolean exists = context.getBean(RestTemplate.class)
+                    .getInterceptors().stream()
+                    .anyMatch(interceptor ->
+                            interceptor.getClass().getName().startsWith("org.traffichunter.plugin")
+                    );
+            assertThat(exists).isEqualTo(true);
+        });
+    }
+
 }

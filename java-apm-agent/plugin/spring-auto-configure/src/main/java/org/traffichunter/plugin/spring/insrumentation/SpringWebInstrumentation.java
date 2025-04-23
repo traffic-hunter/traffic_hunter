@@ -25,7 +25,6 @@ package org.traffichunter.plugin.spring.insrumentation;
 
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import java.io.IOException;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -33,6 +32,10 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.Instrumentor;
 import org.traffichunter.javaagent.plugin.sdk.instumentation.SpanScope;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * @author yungwang-o
@@ -43,6 +46,11 @@ public class SpringWebInstrumentation {
     public static ClientHttpRequestInterceptor instance() {
         return new ThunterClientHttpRequestInterceptor();
     }
+
+    public static ClientHttpRequestInterceptor restTemplateInstance() {
+        return new RestTemplateClientHttpRequestInterceptor();
+    }
+
 
     private static final class ThunterClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
@@ -86,9 +94,61 @@ public class SpringWebInstrumentation {
                         try {
                             String statusText = response1.getStatusText();
                             span.setAttribute("http.statusCode", statusText);
-                        } catch (IOException ignore) {}
+                        } catch (IOException ignore) {
+                        }
                     })
                     .end();
         }
     }
+
+    private static final class RestTemplateClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+
+            Context parentContext = Context.current();
+
+            SpanScope spanScope = Instrumentor.startBuilder(request)
+                    .instrumentationName("spring-rest-template-inst")
+                    .context(parentContext)
+                    .spanAttribute((span, httpRequest) -> {
+                        span.setAttribute("http.method", request.getMethod().toString());
+                        span.setAttribute("http.uri", request.getURI().toString());
+                    })
+                    .start();
+
+            ClientHttpResponse response = null;
+            Instant start = Instant.now();
+            Throwable error = null;
+            try (Scope ignored = spanScope.scope()) {
+                response = execution.execute(request, body);
+                return response;
+            } catch (Throwable t) {
+                error = t;
+                throw t;
+            } finally {
+                Instant end = Instant.now();
+                long durationMillis = Duration.between(start, end).toMillis();
+                instEnd(response, spanScope, error, durationMillis);
+            }
+        }
+
+        private void instEnd(final ClientHttpResponse response, final SpanScope spanScope, @Nullable Throwable throwable, long durationMillis) {
+
+            Instrumentor.endBuilder(response)
+                    .throwable(throwable)
+                    .spanScope(spanScope)
+                    .spanAttribute((span, response1) -> {
+
+                        try {
+                            String statusText = response1.getStatusText();
+                            span.setAttribute("http.request_duration_ms", durationMillis);
+                            span.setAttribute("http.statusCode", statusText);
+                        } catch (IOException ignore) {
+                        }
+                    })
+                    .end();
+        }
+
+    }
+
 }
