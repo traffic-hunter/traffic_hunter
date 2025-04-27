@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author yungwang-o
@@ -40,4 +41,11 @@ public class SpringWebInstrumentationAutoConfiguration {
     static RestClientBeanPostProcessor thunterRestClientBeanPostProcessor() {
         return new RestClientBeanPostProcessor();
     }
+
+    @ConditionalOnClass(RestTemplate.class)
+    @Bean
+    static RestTemplateBeanPostProcessor thunterRestTemplateBeanPostProcessor() {
+        return new RestTemplateBeanPostProcessor();
+    }
+    
 }
